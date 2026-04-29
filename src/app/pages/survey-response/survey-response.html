@@ -1,0 +1,138 @@
+<div class="response-page">
+  @if (notFound()) {
+    <!-- Not Found -->
+    <div class="response-center">
+      <div class="not-found vp-glass-strong">
+        <span class="nf-icon">◆</span>
+        <h2>Encuesta no encontrada</h2>
+        <p>Esta encuesta no existe o ya no está activa.</p>
+        <a href="/" class="vp-btn vp-btn-primary">Ir al inicio</a>
+      </div>
+    </div>
+  } @else if (completed()) {
+    <!-- Thank You Screen -->
+    <div class="response-center">
+      <div class="thank-you">
+        <div class="confetti-container">
+          @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; track i) {
+            <div class="confetti" [style.--delay]="(i * 0.15) + 's'" [style.--x]="(i * 37 % 100) + '%'" [style.--color]="i % 3 === 0 ? '#00C4CC' : (i % 3 === 1 ? '#8B5FC7' : '#FBBF24')"></div>
+          }
+        </div>
+        <div class="ty-content vp-glass-strong">
+          <span class="ty-icon">✦</span>
+          <h1>¡Gracias!</h1>
+          <p>Tu respuesta ha sido registrada exitosamente.</p>
+          <div class="ty-brand">
+            <span class="ty-powered">Powered by</span>
+            <span class="ty-logo">Violet<span class="brand-accent">Prism</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else if (currentQuestion(); as question) {
+    <!-- Survey Response -->
+    <div class="response-wrapper">
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width]="progress() + '%'"></div>
+      </div>
+
+      <!-- Brand -->
+      <div class="response-brand">
+        <span>Violet<span class="brand-accent">Prism</span></span>
+      </div>
+
+      <!-- Question -->
+      <div class="question-container">
+        <div class="question-counter">
+          <span class="counter-current">{{ currentIndex() + 1 }}</span>
+          <span class="counter-sep">/</span>
+          <span class="counter-total">{{ totalQuestions() }}</span>
+        </div>
+
+        <h2 class="question-text">{{ question.text }}</h2>
+
+        @if (question.required) {
+          <span class="required-tag">* Requerida</span>
+        }
+
+        <!-- Rating Input -->
+        @if (question.type === 'rating') {
+          <div class="response-rating">
+            @for (n of generateRange(question.min || 1, question.max || 10); track n) {
+              <button
+                class="rating-btn"
+                [class.selected]="currentAnswer() === n"
+                (click)="selectRating(n)">
+                {{ n }}
+              </button>
+            }
+          </div>
+          <div class="rating-labels">
+            <span>Nada satisfecho</span>
+            <span>Muy satisfecho</span>
+          </div>
+        }
+
+        <!-- Scale Input -->
+        @if (question.type === 'scale') {
+          <div class="response-scale">
+            @for (n of generateRange(question.min || 1, question.max || 5); track n) {
+              <button
+                class="scale-btn"
+                [class.selected]="currentAnswer() === n"
+                (click)="selectRating(n)">
+                {{ n }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Multiple Choice -->
+        @if (question.type === 'multiple-choice') {
+          <div class="response-options">
+            @for (opt of question.options; track opt.id) {
+              <button
+                class="option-card"
+                [class.selected]="currentAnswer() === opt.texto"
+                (click)="selectOption(opt.texto)">
+                <span class="option-radio" [class.checked]="currentAnswer() === opt.texto"></span>
+                {{ opt.texto }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Text Input -->
+        @if (question.type === 'text') {
+          <div class="response-text">
+            <textarea
+              class="vp-input vp-textarea resp-textarea"
+              placeholder="Escribe tu respuesta aquí..."
+              [ngModel]="currentAnswer() ?? ''"
+              (ngModelChange)="updateText($event)"
+              rows="4"
+            ></textarea>
+            <span class="char-count">{{ (currentAnswer()?.toString()?.length || 0) }} caracteres</span>
+          </div>
+        }
+      </div>
+
+      <!-- Navigation -->
+      <div class="response-nav">
+        <button
+          class="vp-btn vp-btn-ghost nav-btn"
+          (click)="goPrev()"
+          [disabled]="isFirst()">
+          ← Anterior
+        </button>
+        <button
+          class="vp-btn vp-btn-primary nav-btn"
+          (click)="goNext()"
+          [disabled]="!canProceed()">
+          {{ isLast() ? 'Enviar ✓' : 'Siguiente →' }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

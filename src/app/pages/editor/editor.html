@@ -1,0 +1,197 @@
+<app-navbar />
+
+<main class="editor-page">
+  <div class="vp-container">
+    @if (survey(); as survey) {
+      <!-- Editor Header -->
+      <header class="editor-header vp-animate-fade-in">
+        <div class="editor-title-group">
+          <a routerLink="/dashboard" class="back-link">← Dashboard</a>
+          <div class="editor-status">
+            <span class="vp-badge"
+              [class.vp-badge-live]="survey.status === 'activo'"
+              [class.vp-badge-draft]="survey.status === 'borrador'">
+              {{ survey.status | titlecase }}
+            </span>
+            @if (saved()) {
+              <span class="save-indicator">✓ Guardado</span>
+            }
+          </div>
+        </div>
+        <div class="editor-actions">
+          <button class="vp-btn vp-btn-ghost" (click)="preview.set(!preview())">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            {{ preview() ? 'Editar' : 'Preview' }}
+          </button>
+          <button class="vp-btn vp-btn-ghost" (click)="copyShareLink()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            Copiar enlace</button>
+          <button class="vp-btn vp-btn-primary" (click)="save()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Guardar</button>
+          @if (survey.status === 'borrador') {
+            <button class="vp-btn vp-btn-secondary" (click)="publish()">Publicar</button>
+          }
+        </div>
+      </header>
+
+      <!-- Survey Title & Description -->
+      <section class="editor-meta vp-glass vp-animate-fade-in-delay-1">
+        <input
+          type="text"
+          class="title-input"
+          [ngModel]="survey.title"
+          (ngModelChange)="updateTitle($event)"
+          placeholder="Título de tu encuesta"
+        />
+        <textarea
+          class="desc-input"
+          [ngModel]="survey.description"
+          (ngModelChange)="updateDescription($event)"
+          placeholder="Describe el propósito de esta encuesta..."
+          rows="2"
+        ></textarea>
+      </section>
+
+      @if (!preview()) {
+        <!-- Questions Editor -->
+        <section class="questions-section vp-animate-fade-in-delay-2">
+          @for (question of survey.questions; track question.id; let qi = $index) {
+            <div class="question-card vp-glass">
+              <div class="question-header">
+                <div class="question-number">
+                  <span class="q-num">{{ qi + 1 }}</span>
+                  <span class="q-type-badge">{{ getTypeIcon(question.type) }} {{ getTypeLabel(question.type) }}</span>
+                </div>
+                <div class="question-controls">
+                  <button class="ctrl-btn" (click)="moveQuestion(qi, -1)" [disabled]="qi === 0" title="Mover arriba">↑</button>
+                  <button class="ctrl-btn" (click)="moveQuestion(qi, 1)" [disabled]="qi === survey.questions.length - 1" title="Mover abajo">↓</button>
+                  <button class="ctrl-btn" (click)="toggleRequired(qi)" [class.active]="question.required" title="Requerida">
+                    {{ question.required ? '★' : '☆' }}
+                  </button>
+                  <button class="ctrl-btn danger" (click)="removeQuestion(qi)" title="Eliminar">✕</button>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                class="question-input"
+                [ngModel]="question.text"
+                (ngModelChange)="updateQuestionText(qi, $event)"
+                placeholder="Escribe tu pregunta aquí..."
+              />
+
+              <!-- Options for multiple choice -->
+              @if (question.type === 'multiple-choice') {
+                <div class="options-list">
+                  @for (option of question.options; track option.id; let oi = $index) {
+                    <div class="option-row">
+                      <span class="option-bullet">○</span>
+                      <input
+                        type="text"
+                        class="option-input"
+                        [ngModel]="option.texto"
+                        (ngModelChange)="updateOption(qi, oi, $event)"
+                      />
+                      <button class="option-remove" (click)="removeOption(qi, oi)">✕</button>
+                    </div>
+                  }
+                  <button class="add-option-btn" (click)="addOption(qi)">+ Agregar opción</button>
+                </div>
+              }
+
+              <!-- Rating preview -->
+              @if (question.type === 'rating') {
+                <div class="rating-preview">
+                  @for (n of [1,2,3,4,5,6,7,8,9,10]; track n) {
+                    <span class="rating-dot">{{ n }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Scale preview -->
+              @if (question.type === 'scale') {
+                <div class="scale-preview">
+                  @for (n of [1,2,3,4,5]; track n) {
+                    <span class="scale-dot">{{ n }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Text preview -->
+              @if (question.type === 'text') {
+                <div class="text-preview">
+                  <div class="fake-textarea">Respuesta del encuestado...</div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Add Question -->
+          <div class="add-question">
+            <h3>Agregar pregunta</h3>
+            <div class="question-type-grid">
+              @for (qt of questionTypes; track qt.type) {
+                <button class="type-card vp-glass" (click)="addQuestion(qt.type)">
+                  <span class="type-icon">{{ qt.icon }}</span>
+                  <span class="type-label">{{ qt.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+      } @else {
+        <!-- Preview Mode -->
+        <section class="preview-section vp-animate-fade-in">
+          <div class="preview-banner">
+            <span>Modo Preview — Así verán tu encuesta los encuestados</span>
+          </div>
+          <div class="preview-container">
+            @for (question of survey.questions; track question.id; let qi = $index) {
+              <div class="preview-question">
+                <div class="preview-progress">
+                  <span>{{ qi + 1 }}/{{ survey.questions.length }}</span>
+                </div>
+                <h3>{{ question.text || 'Pregunta sin texto' }}</h3>
+                @if (question.required) {
+                  <span class="preview-required">* Requerida</span>
+                }
+
+                @if (question.type === 'rating') {
+                  <div class="preview-rating">
+                    @for (n of [1,2,3,4,5,6,7,8,9,10]; track n) {
+                      <button class="preview-rating-btn">{{ n }}</button>
+                    }
+                  </div>
+                }
+
+                @if (question.type === 'scale') {
+                  <div class="preview-rating">
+                    @for (n of [1,2,3,4,5]; track n) {
+                      <button class="preview-rating-btn scale">{{ n }}</button>
+                    }
+                  </div>
+                }
+
+                @if (question.type === 'multiple-choice') {
+                  <div class="preview-options">
+                    @for (opt of question.options; track opt.id) {
+                      <div class="preview-option">
+                        <span class="preview-radio"></span>
+                        {{ opt.texto }}
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (question.type === 'text') {
+                  <textarea class="vp-input vp-textarea" placeholder="Escribe tu respuesta..." readonly></textarea>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+</main>

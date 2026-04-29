@@ -1,0 +1,11 @@
+.typing-container {
+  display: inline;
+  padding: 0 0.15em; /* Increased padding to prevent clipping on curved chars like 'S' */
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+  min-height: 1.2em; /* Prevent layout shift */
+  overflow: visible;
+}
