@@ -1,0 +1,36 @@
+.lustre-text {
+  position: relative;
+  display: inline;
+  padding: 0 0.15em; /* Prevent clipping */
+  background-image: linear-gradient(
+    90deg,
+    var(--text-color, #1F2937) 0%,
+    var(--text-color, #1F2937) 35%,
+    rgba(255, 255, 255, 0.9) 50%,
+    var(--text-color, #1F2937) 65%,
+    var(--text-color, #1F2937) 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: lustre-shine var(--speed, 4s) linear infinite;
+  font-weight: inherit;
+}
+
+.lustre-text.disabled {
+  background: none;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+  color: inherit;
+  animation: none;
+}
+
+@keyframes lustre-shine {
+  0% {
+    background-position: 125% 0;
+  }
+  100% {
+    background-position: -125% 0;
+  }
+}

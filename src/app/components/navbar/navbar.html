@@ -1,0 +1,156 @@
+<nav class="fixed w-full bg-white z-50 border-b border-gray-100 transition-all duration-300" id="navbar" [class.bg-transparent]="transparent()" [class.border-transparent]="transparent()">
+  <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="flex justify-between items-center h-20">
+          <!-- Logo -->
+          <a routerLink="/" class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-[#7F00FF] rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-purple-200">
+                  D
+              </div>
+              <span class="font-bold text-3xl tracking-tight text-[#1d1b20]">Datafyra</span>
+          </a>
+          
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center space-x-1">
+              <!-- Soluciones Dropdown -->
+              <div class="group relative px-3 py-4">
+                  <button class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
+                      Soluciones
+                      <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  
+                  <!-- Dropdown Content -->
+                  <div class="absolute top-full left-0 mt-1 w-72 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
+                      <div class="p-2 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
+                          <div class="flex flex-col gap-1">
+                              <a routerLink="/components/button" class="group/item flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
+                                  <div class="w-10 h-10 rounded-xl bg-purple-50 group-hover/item:bg-purple-600 flex items-center justify-center text-purple-600 group-hover/item:text-white transition-colors duration-300">
+                                      <i class="ph-bold ph-square text-lg"></i>
+                                  </div>
+                                  <div>
+                                      <div class="text-sm font-bold text-[#1d1b20]">Componentes</div>
+                                      <div class="text-[11px] text-gray-500 font-medium">Botones y UI kits</div>
+                                  </div>
+                              </a>
+                              <a routerLink="/components/hero" class="group/item flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
+                                  <div class="w-10 h-10 rounded-xl bg-blue-50 group-hover/item:bg-blue-600 flex items-center justify-center text-blue-600 group-hover/item:text-white transition-colors duration-300">
+                                      <i class="ph-bold ph-layout text-lg"></i>
+                                  </div>
+                                  <div>
+                                      <div class="text-sm font-bold text-[#1d1b20]">Layouts</div>
+                                      <div class="text-[11px] text-gray-500 font-medium">Secciones impactantes</div>
+                                  </div>
+                              </a>
+                              <a routerLink="/components/forms" class="group/item flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
+                                  <div class="w-10 h-10 rounded-xl bg-orange-50 group-hover/item:bg-orange-600 flex items-center justify-center text-orange-600 group-hover/item:text-white transition-colors duration-300">
+                                      <i class="ph-bold ph-article text-lg"></i>
+                                  </div>
+                                  <div>
+                                      <div class="text-sm font-bold text-[#1d1b20]">Captura</div>
+                                      <div class="text-[11px] text-gray-500 font-medium">Formularios inteligentes</div>
+                                  </div>
+                              </a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Plantillas Dropdown -->
+              <div class="group relative px-3 py-4">
+                  <button routerLink="/templates" class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
+                      Plantillas
+                      <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <!-- Refined alignment: left-[-150px] to move it more to the left and balance it -->
+                  <div class="absolute top-full left-[-150px] mt-1 w-[560px] opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
+                      <div class="bg-white rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
+                          <div class="p-6 grid grid-cols-2 gap-4">
+                              <a routerLink="/templates/portfolio" class="group/card block p-5 rounded-2xl hover:bg-gray-50 transition-all duration-300 border border-transparent hover:border-purple-100 no-underline">
+                                  <div class="flex items-center gap-3 mb-2">
+                                      <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-[#7F00FF]"><i class="ph-bold ph-sketch-logo text-lg"></i></div>
+                                      <h4 class="text-sm font-bold text-[#1d1b20] group-hover/card:text-[#7F00FF] no-underline">Portfolio</h4>
+                                  </div>
+                                  <p class="text-[11px] text-gray-500 leading-relaxed font-medium no-underline">Diseño minimalista para creativos y profesionales.</p>
+                              </a>
+                              <a routerLink="/templates/business" class="group/card block p-5 rounded-2xl hover:bg-gray-50 transition-all duration-300 border border-transparent hover:border-blue-100 no-underline">
+                                  <div class="flex items-center gap-3 mb-2">
+                                      <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600"><i class="ph-bold ph-chart-line-up text-lg"></i></div>
+                                      <h4 class="text-sm font-bold text-[#1d1b20] group-hover/card:text-blue-600 no-underline">Business</h4>
+                                  </div>
+                                  <p class="text-[11px] text-gray-500 leading-relaxed font-medium no-underline">Soluciones robustas para startups y empresas.</p>
+                              </a>
+                              <a routerLink="/templates/satisfaccion-cliente" class="group/card block p-5 rounded-2xl hover:bg-gray-50 transition-all duration-300 border border-transparent hover:border-pink-100 no-underline">
+                                  <div class="flex items-center gap-3 mb-2">
+                                      <div class="w-9 h-9 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600"><i class="ph-bold ph-heart text-lg"></i></div>
+                                      <h4 class="text-sm font-bold text-[#1d1b20] group-hover/card:text-pink-600 no-underline">Feedback</h4>
+                                  </div>
+                                  <p class="text-[11px] text-gray-500 leading-relaxed font-medium no-underline">Entiende lo que tus clientes realmente sienten.</p>
+                              </a>
+                              <a routerLink="/templates/satisfaccion-cliente" class="group/card block p-5 rounded-2xl hover:bg-gray-50 transition-all duration-300 border border-transparent hover:border-orange-100 no-underline">
+                                  <div class="flex items-center gap-3 mb-2">
+                                      <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600"><i class="ph-bold ph-rocket-launch text-lg"></i></div>
+                                      <h4 class="text-sm font-bold text-[#1d1b20] group-hover/card:text-orange-600 no-underline">Landing</h4>
+                                  </div>
+                                  <p class="text-[11px] text-gray-500 leading-relaxed font-medium no-underline">Optimiza tus conversiones con este layout.</p>
+                              </a>
+                          </div>
+                          <div class="bg-gray-50/50 p-4 border-t border-gray-100 flex justify-center">
+                              <a routerLink="/templates" class="text-xs font-bold text-[#7F00FF] flex items-center gap-2 hover:gap-3 transition-all no-underline">Explorar todas las plantillas <i class="ph-bold ph-arrow-right"></i></a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Recursos Dropdown -->
+              <div class="group relative px-3 py-4">
+                  <button class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
+                      Recursos
+                      <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div class="absolute top-full right-[-50px] mt-1 w-72 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
+                      <div class="p-2 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
+                          <div class="px-4 py-3 border-b border-gray-100 mb-1">
+                              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Documentación</span>
+                          </div>
+                          <div class="flex flex-col gap-1">
+                              <a routerLink="/tour" class="px-4 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-bold text-[#625b71] hover:text-[#7F00FF] transition-all no-underline">Guías de inicio</a>
+                              <a routerLink="/tour" class="px-4 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-bold text-[#625b71] hover:text-[#7F00FF] transition-all no-underline">Showcase</a>
+                              <a routerLink="/tour" class="px-4 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-bold text-[#625b71] hover:text-[#7F00FF] transition-all no-underline">API Docs</a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <a routerLink="/tour" class="px-4 py-2 text-[#625b71] hover:text-[#7F00FF] text-sm font-bold transition-colors duration-300 no-underline">Tour</a>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex items-center gap-8">
+              @if (!isOverlayOpen()) {
+                  @if (auth.isLoggedIn()) {
+                      <a routerLink="/dashboard" class="text-[#1d1b20] font-bold hover:text-[#7F00FF] transition-colors text-lg no-underline">Ir al Panel</a>
+                      <button (click)="logout()" class="text-gray-500 hover:text-red-500 transition-colors" title="Cerrar sesión">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                              <polyline points="16 17 21 12 16 7"></polyline>
+                              <line x1="21" y1="12" x2="9" y2="12"></line>
+                          </svg>
+                      </button>
+                  } @else {
+                      <div class="flex items-center gap-6">
+                        <app-wavy-button 
+                          (click)="triggerAuth(false, $event)"
+                          className="px-8 py-3.5 editorial-gradient text-white font-bold rounded-full shadow-lg hover:shadow-primary/30 transition-all text-base" 
+                          text="Crear cuenta">
+                        </app-wavy-button>
+                        <a 
+                          (click)="triggerAuth(true, $event)"
+                          class="text-[#1d1b20] font-bold hover:text-[#7F00FF] transition-colors text-base cursor-pointer no-underline">
+                          Acceder
+                        </a>
+                      </div>
+                  }
+              }
+          </div>
+      </div>
+  </div>
+</nav>
