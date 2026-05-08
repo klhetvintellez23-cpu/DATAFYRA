@@ -9,11 +9,10 @@ import { TypingTextComponent } from '../../components/ui/typing-text/typing-text
 import { AuthService } from '../../services/auth.service';
 import { AuthValidationService } from '../../services/auth-validation.service';
 import { AuthModalService } from '../../services/auth-modal.service';
-import { AuthModalComponent } from '../../components/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-landing',
-  imports: [NavbarComponent, LustreTextComponent, WavyButtonComponent, TypingTextComponent, AuthModalComponent],
+  imports: [NavbarComponent, LustreTextComponent, WavyButtonComponent, TypingTextComponent],
   templateUrl: './landing.html',
   styleUrl: './landing.css',
   changeDetection: ChangeDetectionStrategy.OnPush

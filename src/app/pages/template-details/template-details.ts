@@ -27,7 +27,7 @@ interface TemplateData {
 @Component({
   selector: 'app-template-details',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AuthModalComponent, RouterLink, WavyButtonComponent],
+  imports: [CommonModule, NavbarComponent, RouterLink, WavyButtonComponent],
   templateUrl: './template-details.html',
   styleUrl: './template-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush

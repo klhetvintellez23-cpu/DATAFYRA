@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
-import { AuthModalComponent } from '../../components/auth-modal/auth-modal.component';
 
 interface TemplateCard {
   id: string;
@@ -15,7 +14,7 @@ interface TemplateCard {
 @Component({
   selector: 'app-templates',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AuthModalComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink],
   templateUrl: './templates.html',
   styleUrl: './templates.css',
   changeDetection: ChangeDetectionStrategy.OnPush
