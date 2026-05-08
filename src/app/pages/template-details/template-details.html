@@ -1,0 +1,183 @@
+<div class="min-h-screen bg-[#FDFCFE] selection:bg-[#7F00FF]/10">
+    <app-navbar />
+
+    <main class="max-w-[1440px] mx-auto px-6 lg:px-12 py-12 lg:py-16">
+        @if (template) {
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-10 animate-fade-in">
+            <a routerLink="/" class="hover:text-[#7F00FF] transition-colors">Datafyra</a>
+            <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+            <a routerLink="/templates" class="hover:text-[#7F00FF] transition-colors">Plantillas</a>
+            <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+            <span class="text-[#7F00FF]">{{ template.category }}</span>
+        </nav>
+
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20">
+            <!-- Left Content: Sidebar info -->
+            <div class="w-full lg:w-[380px] space-y-10 animate-slide-in-left">
+                <div class="space-y-6">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-50 border border-purple-100">
+                        <div class="w-1 h-1 rounded-full bg-[#7F00FF] animate-pulse"></div>
+                        <span class="text-[9px] font-black text-[#7F00FF] uppercase tracking-widest">Plantilla Verificada</span>
+                    </div>
+                    <h1 class="text-4xl lg:text-5xl font-black text-[#1d1b20] leading-[1.1] tracking-tight">
+                        {{ template.title }}
+                    </h1>
+                    <p class="text-base text-gray-500 leading-relaxed font-medium">
+                        {{ template.fullDescription }}
+                    </p>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-5 rounded-[24px] bg-white border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                        <div class="text-2xl font-black text-[#1d1b20] mb-0.5">+{{ template.popularity }}</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Uso mensual</div>
+                    </div>
+                    <div class="p-5 rounded-[24px] bg-white border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                        <div class="text-2xl font-black text-[#1d1b20] mb-0.5">4.9/5</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Valoración</div>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="space-y-3">
+                        <h3 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Ideal para:</h3>
+                        <div class="flex flex-wrap gap-2">
+                            @for (tag of template.idealFor; track tag) {
+                                <span class="px-3.5 py-2 rounded-xl bg-white text-gray-600 text-xs font-bold border border-gray-100 transition-all hover:border-[#7F00FF]/30 hover:text-[#7F00FF]">
+                                    {{ tag }}
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="pt-8 border-t border-gray-100 flex flex-col gap-4">
+                        <app-wavy-button 
+                            (click)="openAuth('register', $event)" 
+                            className="w-full h-14 bg-[#7F00FF] hover:bg-[#6a00d6] text-white rounded-[20px] font-black text-lg shadow-[0_15px_30px_-8px_rgba(127,0,255,0.25)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" 
+                            text="Usar esta plantilla">
+                        </app-wavy-button>
+                        <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">Empieza gratis • Sin compromiso</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content: Survey Preview -->
+            <div class="flex-1 w-full animate-slide-in-bottom">
+                <div class="bg-white rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden sticky top-12">
+                    <!-- Minimal Device Header -->
+                    <div class="h-14 bg-white border-b border-gray-50 flex items-center justify-between px-8">
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-red-100"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-amber-100"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-100"></div>
+                            </div>
+                            <div class="h-6 w-px bg-gray-100 mx-2"></div>
+                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Live Preview</div>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <button class="material-symbols-outlined text-gray-300 hover:text-[#7F00FF] transition-colors text-xl">smartphone</button>
+                            <button class="material-symbols-outlined text-[#7F00FF] transition-colors text-xl">desktop_windows</button>
+                        </div>
+                    </div>
+
+                    <!-- Survey Canvas -->
+                    <div class="p-12 lg:p-20 max-h-[720px] overflow-y-auto custom-preview-scrollbar bg-white">
+                        <div class="max-w-[580px] mx-auto">
+                            <div class="mb-20">
+                                <h2 class="text-3xl font-black text-[#1d1b20] tracking-tight mb-6">
+                                    {{ template.title }}
+                                </h2>
+                                <p class="text-base text-gray-400 font-medium leading-relaxed">
+                                    Tu opinión es la base de nuestra evolución. Dedica unos minutos a este breve cuestionario interactivo.
+                                </p>
+                            </div>
+
+                            <div class="space-y-16">
+                                @for (q of template.questions; track q.text; let i = $index) {
+                                    <div class="space-y-8 group/question">
+                                        <div class="space-y-3">
+                                            <div class="text-[9px] font-black text-[#7F00FF] uppercase tracking-[0.2em] opacity-0 group-hover/question:opacity-100 transition-all duration-500">Bloque {{ i + 1 }}</div>
+                                            <h3 class="text-xl font-bold text-[#1d1b20] leading-tight group-hover/question:translate-x-2 transition-transform duration-500">
+                                                {{ q.text }}
+                                            </h3>
+                                        </div>
+                                        
+                                        @if (q.type === 'choice') {
+                                            <div class="grid grid-cols-1 gap-2.5">
+                                                @for (opt of q.options; track opt) {
+                                                    <button class="w-full text-left px-7 py-4 rounded-2xl border-2 border-gray-50 hover:border-[#7F00FF]/20 hover:bg-[#FDFBFF] transition-all duration-300 group/opt flex items-center justify-between shadow-sm hover:shadow-md">
+                                                        <span class="text-gray-600 font-bold group-hover/opt:text-[#1d1b20] transition-colors text-sm">{{ opt }}</span>
+                                                        <div class="w-5 h-5 rounded-full border-2 border-gray-200 group-hover/opt:border-[#7F00FF] flex items-center justify-center transition-colors">
+                                                            <div class="w-2.5 h-2.5 rounded-full bg-[#7F00FF] scale-0 group-hover/opt:scale-100 transition-all duration-300"></div>
+                                                        </div>
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+
+                                        @if (q.type === 'rating') {
+                                            <div class="flex items-center gap-2">
+                                                @for (star of [1,2,3,4,5]; track star) {
+                                                    <button class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-300 hover:text-[#7F00FF] hover:bg-purple-50 hover:border-purple-200 transition-all">
+                                                        <i class="ph-bold ph-star text-2xl"></i>
+                                                    </button>
+                                                }
+                                                <span class="ml-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Satisfacción</span>
+                                            </div>
+                                        }
+
+                                        @if (q.type === 'text') {
+                                            <div class="relative">
+                                                <textarea [placeholder]="q.placeholder || 'Escribe aquí...'" class="w-full h-32 px-6 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/30 focus:bg-white focus:border-[#7F00FF]/30 outline-none transition-all resize-none text-sm font-medium text-gray-600"></textarea>
+                                                <div class="absolute bottom-4 right-6 text-[10px] font-bold text-gray-300 uppercase tracking-widest">Feedback abierto</div>
+                                            </div>
+                                        }
+
+                                        @if (q.type === 'dropdown') {
+                                            <div class="relative group/select">
+                                                <select class="w-full px-7 py-4 rounded-2xl border-2 border-gray-50 bg-white appearance-none cursor-pointer outline-none focus:border-[#7F00FF]/30 transition-all text-sm font-bold text-gray-600">
+                                                    <option value="" disabled selected>Selecciona una opción...</option>
+                                                    @for (opt of q.options; track opt) {
+                                                        <option [value]="opt">{{ opt }}</option>
+                                                    }
+                                                </select>
+                                                <div class="absolute right-7 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-focus-within/select:text-[#7F00FF] transition-colors">
+                                                    <i class="ph-bold ph-caret-down"></i>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="mt-32 py-12 border-t border-gray-50 flex flex-col items-center gap-8">
+                                <button class="px-12 py-4 bg-[#1d1b20] text-white text-base font-black rounded-2xl hover:scale-[1.05] shadow-xl transition-all active:scale-95">
+                                    Finalizar encuesta
+                                </button>
+                                <div class="flex items-center gap-3 opacity-20 hover:opacity-50 transition-opacity">
+                                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Tecnología</span>
+                                    <div class="text-xs font-black text-gray-900 tracking-tighter">DATAFYRA</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        } @else {
+            <div class="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+                <div class="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-5xl text-gray-200">sentiment_very_dissatisfied</span>
+                </div>
+                <h2 class="text-3xl font-black text-[#1d1b20]">Vaya, no encontramos esa plantilla</h2>
+                <p class="text-gray-500 max-w-md">Es posible que el enlace esté roto o que la plantilla haya sido movida a otra categoría.</p>
+                <a routerLink="/" class="px-8 py-3 bg-[#7F00FF] text-white font-bold rounded-2xl hover:scale-105 transition-transform">Volver a explorar</a>
+            </div>
+        }
+    </main>
+
+    <app-auth-modal />
+</div>

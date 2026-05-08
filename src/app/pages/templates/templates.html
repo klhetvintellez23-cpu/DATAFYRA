@@ -1,0 +1,97 @@
+<div class="min-h-screen bg-white">
+    <app-navbar />
+
+    <main class="max-w-[1440px] mx-auto px-6 lg:px-12 pt-32 pb-20">
+        <!-- Header Section -->
+        <div class="text-center space-y-6 mb-20 animate-fade-in">
+            <h1 class="text-6xl font-black text-[#1d1b20] tracking-tight">
+                Plantillas de Encuestas Gratis
+            </h1>
+            <p class="text-gray-500 font-medium">
+                Elige entre las plantillas de encuestas o <a routerLink="/editor/new" class="text-[#7F00FF] font-bold hover:underline">crea tu propia encuesta</a>.
+            </p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-16">
+            <!-- Sidebar -->
+            <aside class="w-full lg:w-[280px] space-y-10 animate-slide-in-left">
+                <div class="space-y-4">
+                    <div class="relative group">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#7F00FF] transition-colors">search</span>
+                        <input type="text" placeholder="Buscar..." class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-[#7F00FF]/30 outline-none transition-all text-sm font-medium">
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Selecciona una categoría</h3>
+                    <div class="flex flex-col gap-1">
+                        @for (cat of categories; track cat) {
+                            <button 
+                                (click)="selectCategory(cat)"
+                                [class.bg-purple-50]="selectedCategory() === cat"
+                                [class.text-[#7F00FF]]="selectedCategory() === cat"
+                                class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:bg-gray-50 hover:text-[#7F00FF]"
+                            >
+                                {{ cat }}
+                            </button>
+                        }
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Grid -->
+            <div class="flex-1 animate-slide-in-bottom">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-2xl font-black text-[#1d1b20]">{{ selectedCategory() }} <span class="text-gray-300 font-medium ml-2">({{ filteredTemplates().length }})</span></h2>
+                    <div class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        Ordenar por: <span class="text-[#1d1b20] cursor-pointer hover:text-[#7F00FF]">Popularidad</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    @for (item of filteredTemplates(); track item.title) {
+                        <a [routerLink]="['/templates', item.id]" class="group block space-y-5 animate-fade-in-up no-underline">
+                            <div class="aspect-[4/3] rounded-[32px] overflow-hidden bg-gray-100 border border-gray-100 relative shadow-sm group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <!-- Template Image Placeholder -->
+                                <div class="w-full h-full flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
+                                    @if (item.image) {
+                                        <div class="w-full h-full bg-cover bg-center rounded-2xl shadow-inner" [style.background-image]="'url(' + item.image + ')'"></div>
+                                    } @else {
+                                        <span class="material-symbols-outlined text-5xl text-gray-200">dashboard_customize</span>
+                                    }
+                                </div>
+                                <div class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-[#7F00FF] uppercase tracking-widest shadow-sm">
+                                    Gratis
+                                </div>
+                            </div>
+                            <div class="space-y-1 px-2">
+                                <h4 class="text-lg font-black text-[#1d1b20] group-hover:text-[#7F00FF] transition-colors leading-tight">
+                                    {{ item.title }}
+                                </h4>
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                    Popularidad: {{ item.popularity }} ×
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+
+                @if (filteredTemplates().length === 0) {
+                    <div class="py-32 flex flex-col items-center justify-center text-center gap-6">
+                        <div class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-4xl text-gray-200">search_off</span>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-black text-[#1d1b20]">No encontramos plantillas</h3>
+                            <p class="text-gray-500 max-w-xs">Prueba con otra categoría o términos de búsqueda.</p>
+                        </div>
+                        <button (click)="selectCategory('Todas las plantillas')" class="text-[#7F00FF] font-bold hover:underline">Ver todas las plantillas</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </main>
+
+    <app-auth-modal />
+</div>

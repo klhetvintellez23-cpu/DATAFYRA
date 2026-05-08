@@ -1,0 +1,532 @@
+<div class="editor-root">
+  <nav class="editor-topbar">
+    <div class="editor-topbar-left">
+      <a routerLink="/dashboard" class="editor-logo" title="Volver al Dashboard">
+        <div class="editor-logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </div>
+        <span class="editor-logo-text">Datafyra</span>
+      </a>
+    </div>
+    <div class="editor-topbar-tabs">
+      <button class="editor-tab" [class.active]="currentTab === 'design'" (click)="setCurrentTab('design')">Disenar encuesta</button>
+      <button class="editor-tab" [class.active]="currentTab === 'preview'" (click)="setCurrentTab('preview')">Vista previa</button>
+      <button class="editor-tab" [class.active]="currentTab === 'collect'" (click)="setCurrentTab('collect')">Recopilar</button>
+      <button class="editor-tab" [class.active]="currentTab === 'analyze'" (click)="setCurrentTab('analyze')">Analizar</button>
+    </div>
+    <div class="editor-topbar-right">
+      <span class="editor-autosave">
+        <span class="autosave-dot" [class.saved]="saved()"></span>
+        {{ isSaving() ? 'Guardando...' : saved() ? 'Guardado' : 'Auto guardado' }}
+      </span>
+    </div>
+  </nav>
+
+  @if (survey(); as s) {
+    <div class="editor-subheader">
+      <div class="editor-subheader-left">
+        <input
+          class="editor-survey-title-input"
+          type="text"
+          [ngModel]="s.title"
+          (ngModelChange)="updateTitle($event)"
+          placeholder="Nombre de tu encuesta..."
+        />
+      </div>
+      <div class="editor-subheader-actions">
+        <button class="editor-action-btn" (click)="saveNow()" [disabled]="isSaving()">Guardar</button>
+        <button class="editor-action-btn" (click)="copyShareLink()">{{ copied() ? 'Copiado' : 'Compartir' }}</button>
+        <button class="editor-publish-btn" (click)="publish()" [disabled]="isSaving()">
+          {{ s.status === 'activo' ? 'Actualizar publicada' : 'Publicar' }}
+        </button>
+      </div>
+    </div>
+
+    @if (saveError() || infoMessage()) {
+      <div class="editor-notice-wrap">
+        @if (saveError()) {
+          <div class="editor-notice editor-notice-error">{{ saveError() }}</div>
+        }
+        @if (infoMessage()) {
+          <div class="editor-notice editor-notice-info">{{ infoMessage() }}</div>
+        }
+      </div>
+    }
+
+    @if (currentTab === 'design') {
+      <div class="editor-body">
+        <aside class="editor-sidebar-left">
+          <div class="sidebar-section-label">ESTRUCTURA</div>
+          <ul class="structure-list">
+            <li class="structure-item" [class.active]="activeSection === 'welcome'" (click)="activeSection = 'welcome'">
+              <span class="structure-item-label">Bienvenida</span>
+            </li>
+            @for (q of s.questions; track q.id; let qi = $index) {
+              <li class="structure-item" [class.active]="activeSection === 'questions' && activeQuestionIndex === qi" (click)="activeQuestionIndex = qi; activeSection = 'questions'">
+                <span class="structure-item-label">{{ q.text || 'Pregunta ' + (qi + 1) }}</span>
+                <span class="struct-badge">Q{{ qi + 1 }}</span>
+              </li>
+            }
+            <li class="structure-item" [class.active]="activeSection === 'end'" (click)="activeSection = 'end'">
+              <span class="structure-item-label">Finalizacion</span>
+            </li>
+          </ul>
+
+          <div class="sidebar-add-actions">
+            <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="addQuestionPanel = !addQuestionPanel">Agregar pregunta</button>
+          </div>
+        </aside>
+
+        <main class="editor-canvas">
+          <div class="canvas-scroll">
+            @if (activeSection === 'welcome') {
+              <section class="welcome-stage" [ngStyle]="welcomeCardStyle()">
+                <div class="welcome-card">
+                  @if (brand().logoUrl) {
+                    <div
+                      class="welcome-logo"
+                      [style.left.px]="brandLogoConfig().x"
+                      [style.top.px]="brandLogoConfig().y"
+                      [style.width.px]="brandLogoConfig().width"
+                      [style.height.px]="brandLogoConfig().height"
+                      (mousedown)="startLogoTransform('move', $event)">
+                      <img [src]="brand().logoUrl" alt="Logo" />
+                      <button class="asset-handle asset-delete" type="button" (click)="removeLogo(); $event.stopPropagation()">×</button>
+                      <button class="asset-handle asset-resize" type="button" (mousedown)="startLogoTransform('resize', $event)"></button>
+                    </div>
+                  }
+
+                  @for (image of welcomeImages(); track image.id; let wi = $index) {
+                    <div
+                      class="welcome-deco"
+                      [style.left.px]="image.config.x"
+                      [style.top.px]="image.config.y"
+                      [style.width.px]="image.config.width"
+                      [style.height.px]="image.config.height"
+                      [style.transform]="'rotate(' + image.config.rotation + 'deg)'"
+                      [style.zIndex]="image.config.zIndex"
+                      (mousedown)="startWelcomeImageTransform(wi, 'move', $event)">
+                      <img [src]="image.imageUrl" alt="Decoracion" />
+                      <button class="asset-handle asset-delete" type="button" (click)="removeWelcomeImage(wi); $event.stopPropagation()">×</button>
+                      <button class="asset-handle asset-resize" type="button" (mousedown)="startWelcomeImageTransform(wi, 'resize', $event)"></button>
+                    </div>
+                  }
+
+                  <div class="welcome-copy">
+                    <span class="welcome-kicker">Pantalla de bienvenida</span>
+                    <input
+                      class="survey-cover-title-input"
+                      type="text"
+                      [ngModel]="s.title"
+                      (ngModelChange)="updateTitle($event)"
+                      placeholder="Titulo de tu encuesta..."
+                    />
+                    <textarea
+                      class="survey-cover-desc-input"
+                      [ngModel]="s.description"
+                      (ngModelChange)="updateDescription($event)"
+                      placeholder="Escribe una descripcion aqui..."
+                      rows="3"
+                    ></textarea>
+                    <div class="welcome-actions">
+                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'">
+                        Comenzar encuesta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            }
+
+            @if (activeSection === 'questions' && currentQuestion(); as q) {
+              <section class="question-stage" [ngStyle]="welcomeCardStyle()">
+                <div class="canvas-question-card canvas-q-active">
+                  @if (q.imageUrl && q.imageConfig) {
+                    <div
+                      class="question-deco"
+                      [style.left.px]="q.imageConfig.x"
+                      [style.top.px]="q.imageConfig.y"
+                      [style.width.px]="q.imageConfig.width"
+                      [style.height.px]="q.imageConfig.height"
+                      [style.transform]="'rotate(' + q.imageConfig.rotation + 'deg)'"
+                      [style.zIndex]="q.imageConfig.zIndex"
+                      (mousedown)="startQuestionImageTransform(activeQuestionIndex, 'move', $event)">
+                      <img [src]="q.imageUrl" alt="Imagen de pregunta" />
+                      <button class="asset-handle asset-delete" type="button" (click)="removeQuestionImage(activeQuestionIndex); $event.stopPropagation()">×</button>
+                      <button class="asset-handle asset-resize" type="button" (mousedown)="startQuestionImageTransform(activeQuestionIndex, 'resize', $event)"></button>
+                    </div>
+                  }
+
+                  <div class="canvas-q-content">
+                    <div class="canvas-q-number-bubble">{{ activeQuestionIndex + 1 }}</div>
+                    <div class="canvas-q-body">
+                      <div class="canvas-q-type-selector">
+                        <select class="q-type-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
+                          @for (qt of questionTypes; track qt.type) {
+                            <option [value]="qt.type">{{ qt.label }}</option>
+                          }
+                        </select>
+                      </div>
+                      <input
+                        class="canvas-q-text-input"
+                        type="text"
+                        [ngModel]="q.text"
+                        (ngModelChange)="updateQuestionText(activeQuestionIndex, $event)"
+                        placeholder="Escribe tu pregunta aqui..."
+                      />
+                      @if (q.required) {
+                        <span class="required-badge">* Obligatoria</span>
+                      }
+
+                      @if (q.type === 'text') {
+                        <div class="text-area-fake">El encuestado escribira aqui su respuesta...</div>
+                      }
+
+                      @if (q.type === 'multiple-choice') {
+                        <div class="canvas-q-options">
+                          @for (opt of q.options; track opt.id; let oi = $index) {
+                            <div class="canvas-option-row">
+                              <div class="canvas-option-radio"></div>
+                              <input
+                                class="canvas-option-input"
+                                type="text"
+                                [ngModel]="opt.texto"
+                                (ngModelChange)="updateOption(activeQuestionIndex, oi, $event)"
+                                placeholder="Opcion {{ oi + 1 }}"
+                              />
+                              @if (q.options.length > 2) {
+                                <button class="canvas-option-remove" type="button" (click)="removeOption(activeQuestionIndex, oi)">×</button>
+                              }
+                            </div>
+                          }
+                          <button class="canvas-add-option" type="button" (click)="addOption(activeQuestionIndex)">Agregar opcion</button>
+                        </div>
+                      }
+
+                      @if (q.type === 'scale' || q.type === 'rating') {
+                        <div class="preview-scale-row">
+                          @for (n of q.type === 'rating' ? [1,2,3,4,5,6,7,8,9,10] : [1,2,3,4,5]; track n) {
+                            <span class="preview-scale-pill">{{ n }}</span>
+                          }
+                        </div>
+                      }
+
+                      <div class="question-toolbar">
+                        <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
+                          {{ q.required ? 'Quitar obligatoria' : 'Hacer obligatoria' }}
+                        </button>
+                        <button class="editor-action-btn" type="button" (click)="duplicateQuestion(activeQuestionIndex)">Duplicar</button>
+                        <button class="editor-action-btn" type="button" (click)="moveQuestion(activeQuestionIndex, -1)" [disabled]="activeQuestionIndex === 0">Subir</button>
+                        <button class="editor-action-btn" type="button" (click)="moveQuestion(activeQuestionIndex, 1)" [disabled]="activeQuestionIndex === s.questions.length - 1">Bajar</button>
+                        <button class="editor-action-btn danger-btn" type="button" (click)="removeQuestion(activeQuestionIndex)">Eliminar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            }
+
+            @if (activeSection === 'end') {
+              <section class="end-stage" [ngStyle]="welcomeCardStyle()">
+                <div class="thanks-card">
+                  @for (image of endImages(); track image.id; let ei = $index) {
+                    <div
+                      class="welcome-deco"
+                      [style.left.px]="image.config.x"
+                      [style.top.px]="image.config.y"
+                      [style.width.px]="image.config.width"
+                      [style.height.px]="image.config.height"
+                      [style.transform]="'rotate(' + image.config.rotation + 'deg)'"
+                      [style.zIndex]="image.config.zIndex"
+                      (mousedown)="startEndImageTransform(ei, 'move', $event)">
+                      <img [src]="image.imageUrl" alt="Decoracion final" />
+                      <button class="asset-handle asset-delete" type="button" (click)="removeEndImage(ei); $event.stopPropagation()">×</button>
+                      <button class="asset-handle asset-resize" type="button" (mousedown)="startEndImageTransform(ei, 'resize', $event)"></button>
+                    </div>
+                  }
+                  <h2>{{ endTitle() }}</h2>
+                  <p>{{ endDescription() }}</p>
+                </div>
+              </section>
+            }
+
+            @if (addQuestionPanel) {
+              <div class="add-question-panel">
+                <p class="add-q-label">Que tipo de pregunta quieres agregar?</p>
+                <div class="add-q-grid">
+                  @for (qt of questionTypes; track qt.type) {
+                    <button class="add-q-type-btn" type="button" (click)="addQuestion(qt.type)">
+                      <span class="add-q-type-name">{{ qt.label }}</span>
+                      <span class="add-q-type-desc">{{ qt.description }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </main>
+
+        <aside class="editor-sidebar-right">
+          <div class="right-sidebar-header">
+            <h3>Personalizacion</h3>
+          </div>
+          <div class="right-sidebar-tabs">
+            <button class="right-tab" [class.right-tab-active]="rightTab === 'content'" (click)="rightTab = 'content'">Contenido</button>
+            <button class="right-tab" [class.right-tab-active]="rightTab === 'design'" (click)="rightTab = 'design'">Diseno</button>
+          </div>
+
+          @if (rightTab === 'design') {
+            <div class="right-sidebar-content">
+              <div class="right-section">
+                <div class="right-section-label">PALETAS</div>
+                <div class="palette-grid">
+                  @for (palette of palettePresets; track palette.name) {
+                    <button class="palette-card" [class.active]="isPaletteActive(palette)" type="button" (click)="applyPalette(palette)">
+                      <span class="palette-swatch" [style.background]="palette.primaryColor"></span>
+                      <span class="palette-swatch" [style.background]="palette.secondaryColor"></span>
+                      <span class="palette-swatch" [style.background]="palette.backgroundColor"></span>
+                      <span class="palette-name">{{ palette.name }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="right-section">
+                <div class="right-section-label">COLORES</div>
+                <div class="color-grid">
+                  <label class="color-control">
+                    <span>Principal</span>
+                    <input type="color" [ngModel]="brand().primaryColor" (ngModelChange)="updateBrandColor('primaryColor', $event)" />
+                  </label>
+                  <label class="color-control">
+                    <span>Secundario</span>
+                    <input type="color" [ngModel]="brand().secondaryColor" (ngModelChange)="updateBrandColor('secondaryColor', $event)" />
+                  </label>
+                  <label class="color-control">
+                    <span>Fondo</span>
+                    <input type="color" [ngModel]="brand().backgroundColor" (ngModelChange)="updateBrandColor('backgroundColor', $event)" />
+                  </label>
+                  <label class="color-control">
+                    <span>Tarjetas</span>
+                    <input type="color" [ngModel]="brand().surfaceColor" (ngModelChange)="updateBrandColor('surfaceColor', $event)" />
+                  </label>
+                  <label class="color-control">
+                    <span>Texto</span>
+                    <input type="color" [ngModel]="brand().textColor" (ngModelChange)="updateBrandColor('textColor', $event)" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="right-section">
+                <div class="right-section-label">BOTONES</div>
+                <div class="button-style-grid">
+                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'square'" type="button" (click)="setButtonStyle('square')">Cuadrado</button>
+                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'rounded'" type="button" (click)="setButtonStyle('rounded')">Redondeado</button>
+                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'pill'" type="button" (click)="setButtonStyle('pill')">Profesional</button>
+                </div>
+                <label class="slider-control">
+                  <span>Radio boton: {{ buttonRadius() }}px</span>
+                  <input type="range" min="0" max="40" [ngModel]="buttonRadius()" (ngModelChange)="updateButtonRadius($event)" />
+                </label>
+                <label class="slider-control">
+                  <span>Radio tarjetas: {{ cardRadius() }}px</span>
+                  <input type="range" min="8" max="40" [ngModel]="cardRadius()" (ngModelChange)="updateCardRadius($event)" />
+                </label>
+              </div>
+
+              <div class="right-section">
+                <div class="right-section-label">LOGO Y BIENVENIDA</div>
+                <label class="upload-control">
+                  <span>Subir logo</span>
+                  <input type="file" accept="image/*" (change)="onLogoSelected($event)" />
+                </label>
+                <label class="upload-control">
+                  <span>Pegar o subir decoracion</span>
+                  <input type="file" accept="image/*" (change)="onWelcomeImageSelected($event)" />
+                </label>
+                @if (brand().logoUrl) {
+                  <label class="slider-control">
+                    <span>Tamano logo: {{ brandLogoConfig().width }}px</span>
+                    <input type="range" min="60" max="220" [ngModel]="brandLogoConfig().width" (ngModelChange)="updateLogoSize($event)" />
+                  </label>
+                  <button class="editor-action-btn" type="button" (click)="removeLogo()">Quitar logo</button>
+                }
+                <p class="helper-copy">Puedes arrastrar el logo y las imagenes dentro de Bienvenida para colocarlos donde quieras.</p>
+              </div>
+
+              @if (activeSection === 'questions') {
+                <div class="right-section">
+                  <div class="right-section-label">IMAGEN DE PREGUNTA</div>
+                  <label class="upload-control">
+                    <span>Subir imagen</span>
+                    <input type="file" accept="image/*" (change)="onQuestionImageSelected($event)" />
+                  </label>
+                  @if (currentQuestion()?.imageUrl) {
+                    <button class="editor-action-btn" type="button" (click)="removeQuestionImage(activeQuestionIndex)">Quitar imagen</button>
+                  }
+                </div>
+              }
+
+              @if (activeSection === 'end') {
+                <div class="right-section">
+                  <div class="right-section-label">DECORACION FINAL</div>
+                  <label class="upload-control">
+                    <span>Subir decoracion final</span>
+                    <input type="file" accept="image/*" (change)="onEndImageSelected($event)" />
+                  </label>
+                  <p class="helper-copy">Tambien puedes pegar imagenes cuando tengas abierta la seccion Finalizacion.</p>
+                </div>
+              }
+            </div>
+          }
+
+          @if (rightTab === 'content') {
+            <div class="right-sidebar-content">
+              <div class="right-section">
+                <div class="right-section-label">DESCRIPCION</div>
+                <textarea
+                  class="right-textarea"
+                  [ngModel]="s.description"
+                  (ngModelChange)="updateDescription($event)"
+                  rows="4"
+                  placeholder="Describe el proposito de la encuesta..."
+                ></textarea>
+              </div>
+              @if (activeSection === 'questions' && currentQuestion(); as q) {
+                <div class="right-section">
+                  <div class="right-section-label">PREGUNTA ACTIVA</div>
+                  <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
+                    @for (qt of questionTypes; track qt.type) {
+                      <option [value]="qt.type">{{ qt.label }}</option>
+                    }
+                  </select>
+                  <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
+                    {{ q.required ? 'Marcar opcional' : 'Marcar obligatoria' }}
+                  </button>
+                </div>
+              }
+              @if (activeSection === 'end') {
+                <div class="right-section">
+                  <div class="right-section-label">MENSAJE FINAL</div>
+                  <input
+                    class="right-select"
+                    type="text"
+                    [ngModel]="endTitle()"
+                    (ngModelChange)="updateEndTitle($event)"
+                    placeholder="Titulo de cierre..."
+                  />
+                  <textarea
+                    class="right-textarea"
+                    [ngModel]="endDescription()"
+                    (ngModelChange)="updateEndDescription($event)"
+                    rows="4"
+                    placeholder="Mensaje final para el encuestado..."
+                  ></textarea>
+                </div>
+              }
+            </div>
+          }
+        </aside>
+      </div>
+    }
+
+    @if (currentTab === 'preview') {
+      <div class="editor-stage">
+        <div class="preview-shell" [ngStyle]="responseThemeStyle()">
+          <div class="preview-head">
+            @if (brand().logoUrl) {
+              <img [src]="brand().logoUrl" class="preview-brand-logo" alt="Logo" />
+            }
+            <span class="preview-kicker">Vista previa publica</span>
+            <h2>{{ s.title || 'Nueva Encuesta' }}</h2>
+            <p>{{ s.description || 'Agrega una descripcion para contextualizar la encuesta.' }}</p>
+          </div>
+
+          @for (image of welcomeImages(); track image.id) {
+            <div class="preview-floating-image" [style.left.px]="image.config.x" [style.top.px]="image.config.y" [style.width.px]="image.config.width" [style.height.px]="image.config.height">
+              <img [src]="image.imageUrl" alt="Decoracion" />
+            </div>
+          }
+
+          @for (q of s.questions; track q.id; let qi = $index) {
+            <div class="preview-question-card">
+              <span class="preview-question-index">Pregunta {{ qi + 1 }}</span>
+              <h3>{{ q.text || 'Pregunta sin titulo' }}</h3>
+              @if (q.imageUrl) {
+                <img [src]="q.imageUrl" class="preview-question-image" alt="Imagen" />
+              }
+              @if (q.type === 'text') {
+                <textarea class="preview-textarea" rows="4" placeholder="Respuesta abierta"></textarea>
+              }
+              @if (q.type === 'multiple-choice') {
+                <div class="preview-options">
+                  @for (opt of q.options; track opt.id) {
+                    <label class="preview-option">
+                      <input type="radio" disabled />
+                      <span>{{ opt.texto }}</span>
+                    </label>
+                  }
+                </div>
+              }
+              @if (q.type === 'scale' || q.type === 'rating') {
+                <div class="preview-scale-row">
+                  @for (n of q.type === 'rating' ? [1,2,3,4,5,6,7,8,9,10] : [1,2,3,4,5]; track n) {
+                    <span class="preview-scale-pill">{{ n }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <div class="preview-question-card thanks-card">
+            <h2>{{ endTitle() }}</h2>
+            <p>{{ endDescription() }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'collect') {
+      <div class="editor-stage">
+        <div class="collect-grid">
+          <div class="collect-card collect-card-primary">
+            <span class="collect-label">Estado</span>
+            <h2>{{ s.status === 'activo' ? 'Encuesta activa' : 'Borrador' }}</h2>
+            <p>Comparte el enlace cuando termines de personalizar la bienvenida, colores, logo y botones.</p>
+            <div class="collect-actions">
+              <button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">Publicar</button>
+              <button class="editor-action-btn" type="button" (click)="copyShareLink()">Copiar enlace</button>
+            </div>
+          </div>
+          <div class="collect-card">
+            <span class="collect-label">Enlace publico</span>
+            <div class="share-link-box">{{ getShareLink() }}</div>
+          </div>
+          <div class="collect-card">
+            <span class="collect-label">Resumen</span>
+            <ul class="collect-list">
+              <li>{{ getQuestionCountLabel() }}</li>
+              <li>{{ s.responses_count || 0 }} respuestas registradas</li>
+              <li>Ultima actualizacion: {{ s.updatedAt | date:'short' }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'analyze') {
+      <div class="editor-stage">
+        <div class="collect-grid">
+          <div class="collect-card collect-card-primary">
+            <span class="collect-label">Analiticas</span>
+            <h2>{{ s.responses.length || s.responses_count || 0 }} respuestas</h2>
+            <p>Revisa el comportamiento de la encuesta en el panel detallado.</p>
+            <div class="collect-actions">
+              <button class="editor-publish-btn" type="button" (click)="goToAnalytics()">Abrir analiticas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

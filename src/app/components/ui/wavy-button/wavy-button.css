@@ -1,0 +1,96 @@
+/* ===== BASE BUTTON ===== */
+.wavy-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  border: 2px solid #7C3AED;
+  cursor: pointer;
+  overflow: hidden;
+  text-decoration: none;
+  background-color: rgba(167, 139, 250, 0.15);
+  color: #7C3AED;
+  white-space: nowrap;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== LARGE OVERRIDE ===== */
+.wavy-btn-lg {
+  padding: 0.85rem 2.5rem;
+  font-size: 1.15rem;
+}
+
+/* ===== OUTLINE VARIANT ===== */
+.wavy-btn-outline {
+  background: transparent !important;
+  border: 2px solid #6b7280; /* gray-500 */
+  color: #000;
+}
+
+.wavy-btn-outline:hover {
+  background: transparent !important;
+}
+
+/* ===== SVG WAVE LAYER (z:10) ===== */
+.wavy-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* The wavy path: draws itself on hover via stroke-dashoffset */
+.wavy-path {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wavy-path-active {
+  stroke-dashoffset: 0;
+}
+
+/* ===== TEXT LAYER (z:20, always on top) ===== */
+.wavy-text {
+  position: relative;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+/* Reverse Trial: text turns white on hover because background is purple */
+.wavy-btn:not(.wavy-btn-outline) .wavy-text-hovered,
+.wavy-btn:not(.wavy-btn-outline) .wavy-text-hovered .wavy-char {
+  color: white !important;
+}
+
+/* Outline variant: text turns white on hover */
+.wavy-btn-outline .wavy-text {
+  color: #000;
+}
+.wavy-btn-outline .wavy-text-hovered {
+  color: #000; /* stays dark for outline since bg is transparent */
+}
+
+/* ===== CHARACTER JUMP ANIMATION ===== */
+.wavy-char {
+  display: inline-block;
+}
+
+.wavy-char-active {
+  animation: wavy-jump 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes wavy-jump {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
