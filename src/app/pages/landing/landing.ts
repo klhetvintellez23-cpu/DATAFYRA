@@ -132,12 +132,6 @@ export class LandingPage implements OnInit, OnDestroy {
     return this.authValidation.isPasswordSecure(password);
   }
 
-  private redirectIfLoggedIn(): void {
-    if (this.auth.isLoggedIn() && !this.isVerifying()) {
-      this.router.navigate(['/dashboard']);
-    }
-  }
-
   async submit(): Promise<void> {
     this.error.set('');
     this.successMessage.set('');
@@ -204,8 +198,6 @@ export class LandingPage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.redirectIfLoggedIn();
-
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const authParam = params['auth'];
       if (authParam) {

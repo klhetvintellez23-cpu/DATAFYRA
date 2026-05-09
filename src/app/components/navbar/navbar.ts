@@ -20,7 +20,12 @@ export class NavbarComponent {
 
   authAction = output<boolean>();
 
-  constructor(public auth: AuthService, private router: Router) {}
+  constructor(public auth: AuthService, public router: Router) {}
+
+  get isInternalRoute(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/dashboard') || url.startsWith('/editor') || url.startsWith('/analytics');
+  }
 
   triggerAuth(isLogin: boolean, event?: Event) {
     if (event) event.preventDefault();
@@ -31,8 +36,8 @@ export class NavbarComponent {
     }
   }
 
-  logout(): void {
-    this.auth.logout();
+  async logout(): Promise<void> {
+    await this.auth.logout();
     this.router.navigate(['/']);
   }
 }

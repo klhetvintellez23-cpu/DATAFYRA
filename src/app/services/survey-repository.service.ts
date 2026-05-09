@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
-export type QuestionType = 'rating' | 'multiple-choice' | 'text' | 'scale';
+export type QuestionType = 'rating' | 'multiple-choice' | 'text' | 'long-text' | 'scale';
 export type SurveyStatus = 'borrador' | 'activo' | 'cerrado';
 export type AnswerValue = string | number | boolean | Record<string, unknown> | null;
-type SurveyQuestionDbType = 'calificacion' | 'seleccion_multiple' | 'texto' | 'escala';
+type SurveyQuestionDbType = 'calificacion' | 'seleccion_multiple' | 'texto' | 'texto_largo' | 'escala';
 
 export interface SurveyQuestionInput {
   id: string;
@@ -384,6 +384,8 @@ export class SurveyRepositoryService {
     switch (type) {
       case 'text':
         return 'texto';
+      case 'long-text':
+        return 'texto_largo';
       case 'multiple-choice':
         return 'seleccion_multiple';
       case 'rating':

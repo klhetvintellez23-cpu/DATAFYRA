@@ -31,7 +31,21 @@ export interface SurveyBrand {
   textColor?: string;
   buttonStyle?: 'rounded' | 'square' | 'pill';
   buttonRadius?: number;
+  buttonColor?: string;
+  buttonTextColor?: string;
   cardRadius?: number;
+  fontTitle?: string;
+  fontBody?: string;
+  fontButton?: string;
+  glassEffect?: boolean;
+  shadowPreset?: 'none' | 'soft' | 'medium' | 'strong' | 'float';
+  borderGlow?: boolean;
+  entryAnimation?: 'none' | 'fadeUp' | 'scaleIn' | 'slideLeft';
+  progressBar?: {
+    enabled: boolean;
+    style: 'line' | 'dots' | 'percentage';
+    color?: string;
+  };
 }
 
 export interface DecoratedImage {
@@ -42,10 +56,12 @@ export interface DecoratedImage {
 
 export interface SurveyMetadata {
   brand?: SurveyBrand;
+  theme?: Record<string, any>;
   welcomeImages?: DecoratedImage[];
   endTitle?: string;
   endDescription?: string;
   endImages?: DecoratedImage[];
+  ctaText?: string;
 }
 
 export interface Answer {

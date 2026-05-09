@@ -60,8 +60,178 @@ export class EditorPage implements OnInit, OnDestroy {
   activeSection: 'welcome' | 'questions' | 'end' = 'welcome';
   activeQuestionIndex = 0;
   addQuestionPanel = false;
-  rightTab: RightTab = 'design';
+  
+  // Customization Tabs (Canva Style)
+  customTab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' = 'palettes';
   currentTab: EditorTab = 'design';
+
+  sidebarClass = () => this.currentTab === 'design' ? 'editor-sidebar-right custom-nav-active' : 'editor-sidebar-right';
+
+  setPreviewDevice(device: 'desktop' | 'tablet' | 'mobile'): void {
+    this.previewDevice = device;
+  }
+
+  showTemplateModal = false;
+
+  readonly templatePresets: {
+    name: string;
+    description: string;
+    icon: string;
+    category: string;
+    brand: Partial<import('../../services/survey.service').SurveyBrand>;
+    questions: { text: string; type: string }[];
+    welcomeTitle: string;
+    endTitle: string;
+  }[] = [
+    {
+      name: 'Satisfacción del Cliente',
+      description: 'Mide la experiencia de tus clientes con tu producto o servicio.',
+      icon: '⭐',
+      category: 'Negocio',
+      brand: { primaryColor: '#2563eb', secondaryColor: '#0ea5e9', backgroundColor: '#eff6ff', surfaceColor: '#ffffff', textColor: '#1e3a5f', buttonStyle: 'pill', fontTitle: 'Poppins', fontBody: 'Inter', shadowPreset: 'soft' },
+      questions: [
+        { text: '¿Qué tan satisfecho estás con nuestro servicio?', type: 'rating' },
+        { text: '¿Recomendarías nuestro producto a un amigo?', type: 'scale' },
+        { text: '¿Qué podemos mejorar?', type: 'text' }
+      ],
+      welcomeTitle: 'Tu opinión nos importa',
+      endTitle: '¡Gracias por tu feedback!'
+    },
+    {
+      name: 'Clima Laboral',
+      description: 'Evalúa el ambiente de trabajo y satisfacción del equipo.',
+      icon: '👥',
+      category: 'RRHH',
+      brand: { primaryColor: '#059669', secondaryColor: '#10b981', backgroundColor: '#ecfdf5', surfaceColor: '#ffffff', textColor: '#064e3b', buttonStyle: 'rounded', fontTitle: 'Outfit', fontBody: 'Inter', shadowPreset: 'medium' },
+      questions: [
+        { text: '¿Cómo calificarías tu ambiente de trabajo?', type: 'scale' },
+        { text: '¿Te sientes valorado en tu equipo?', type: 'multiple-choice' },
+        { text: '¿Qué sugerencias tienes para mejorar?', type: 'text' }
+      ],
+      welcomeTitle: 'Encuesta de Clima Laboral',
+      endTitle: '¡Tu voz hace la diferencia!'
+    },
+    {
+      name: 'Registro de Evento',
+      description: 'Formulario de inscripción para eventos y conferencias.',
+      icon: '🎪',
+      category: 'Eventos',
+      brand: { primaryColor: '#7c3aed', secondaryColor: '#a78bfa', backgroundColor: '#f5f3ff', surfaceColor: '#ffffff', textColor: '#3b0764', buttonStyle: 'pill', fontTitle: 'Space Grotesk', fontBody: 'Inter', shadowPreset: 'float', glassEffect: true },
+      questions: [
+        { text: '¿Cuál es tu nombre completo?', type: 'text' },
+        { text: '¿A qué sesión deseas asistir?', type: 'multiple-choice' },
+        { text: '¿Necesitas algún requerimiento especial?', type: 'text' }
+      ],
+      welcomeTitle: '¡Regístrate al Evento!',
+      endTitle: '¡Registro exitoso!'
+    },
+    {
+      name: 'Evaluación Educativa',
+      description: 'Evalúa el desempeño docente y cursos académicos.',
+      icon: '📚',
+      category: 'Educación',
+      brand: { primaryColor: '#1d4ed8', secondaryColor: '#3b82f6', backgroundColor: '#eef2ff', surfaceColor: '#ffffff', textColor: '#1e293b', buttonStyle: 'rounded', fontTitle: 'Merriweather', fontBody: 'Source Sans 3', shadowPreset: 'soft' },
+      questions: [
+        { text: '¿Cómo calificarías la calidad del curso?', type: 'rating' },
+        { text: '¿El material fue útil y actualizado?', type: 'scale' },
+        { text: '¿Qué tema te gustaría que se agregara?', type: 'text' }
+      ],
+      welcomeTitle: 'Evaluación del Curso',
+      endTitle: '¡Gracias por evaluar!'
+    },
+    {
+      name: 'Consulta Médica',
+      description: 'Pre-consulta y seguimiento de pacientes.',
+      icon: '🏥',
+      category: 'Salud',
+      brand: { primaryColor: '#0d9488', secondaryColor: '#14b8a6', backgroundColor: '#f0fdfa', surfaceColor: '#ffffff', textColor: '#134e4a', buttonStyle: 'rounded', fontTitle: 'DM Sans', fontBody: 'Inter', shadowPreset: 'soft' },
+      questions: [
+        { text: '¿Cuál es el motivo de su consulta?', type: 'text' },
+        { text: '¿Tiene alguna alergia conocida?', type: 'multiple-choice' },
+        { text: '¿Cómo califica la atención recibida?', type: 'rating' }
+      ],
+      welcomeTitle: 'Formulario de Paciente',
+      endTitle: 'Información registrada correctamente'
+    },
+    {
+      name: 'Feedback de Producto',
+      description: 'Recopila opiniones sobre tu producto digital.',
+      icon: '🚀',
+      category: 'Producto',
+      brand: { primaryColor: '#e11d48', secondaryColor: '#f43f5e', backgroundColor: '#fff1f2', surfaceColor: '#ffffff', textColor: '#4c0519', buttonStyle: 'pill', fontTitle: 'Plus Jakarta Sans', fontBody: 'Inter', shadowPreset: 'medium', borderGlow: true },
+      questions: [
+        { text: '¿Qué funcionalidad usas más?', type: 'multiple-choice' },
+        { text: '¿Qué tan fácil es usar el producto?', type: 'scale' },
+        { text: '¿Qué funcionalidad te gustaría que agregáramos?', type: 'text' }
+      ],
+      welcomeTitle: 'Ayúdanos a mejorar',
+      endTitle: '¡Tu opinión impulsa nuestro producto!'
+    },
+    {
+      name: 'Encuesta Gastronómica',
+      description: 'Evalúa la experiencia en tu restaurante.',
+      icon: '🍽️',
+      category: 'Restaurante',
+      brand: { primaryColor: '#b45309', secondaryColor: '#d97706', backgroundColor: '#fffbeb', surfaceColor: '#ffffff', textColor: '#451a03', buttonStyle: 'rounded', fontTitle: 'Playfair Display', fontBody: 'Lato', shadowPreset: 'soft' },
+      questions: [
+        { text: '¿Cómo calificarías la calidad de la comida?', type: 'rating' },
+        { text: '¿El tiempo de espera fue razonable?', type: 'scale' },
+        { text: '¿Algún comentario adicional?', type: 'text' }
+      ],
+      welcomeTitle: '¿Cómo fue tu experiencia?',
+      endTitle: '¡Gracias por visitarnos!'
+    },
+    {
+      name: 'Encuesta Inmobiliaria',
+      description: 'Captura preferencias para búsqueda de propiedades.',
+      icon: '🏠',
+      category: 'Inmobiliaria',
+      brand: { primaryColor: '#374151', secondaryColor: '#6b7280', backgroundColor: '#f9fafb', surfaceColor: '#ffffff', textColor: '#111827', buttonStyle: 'square', fontTitle: 'Outfit', fontBody: 'Inter', shadowPreset: 'strong' },
+      questions: [
+        { text: '¿Qué tipo de propiedad buscas?', type: 'multiple-choice' },
+        { text: '¿Cuál es tu presupuesto aproximado?', type: 'multiple-choice' },
+        { text: '¿Qué zona prefieres?', type: 'text' }
+      ],
+      welcomeTitle: 'Encuentra tu hogar ideal',
+      endTitle: '¡Te contactaremos pronto!'
+    }
+  ];
+
+  applyTemplate(index: number): void {
+    const tpl = this.templatePresets[index];
+    if (!tpl) return;
+
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const currentBrand = this.ensureBrand(survey.metadata?.brand);
+      const brand = this.ensureBrand({ ...currentBrand, ...tpl.brand });
+      const questions = tpl.questions.map((q, i) => ({
+        id: crypto.randomUUID(),
+        text: q.text,
+        type: q.type as 'text' | 'multiple-choice' | 'scale' | 'rating',
+        required: i === 0,
+        options: q.type === 'multiple-choice'
+          ? [
+              { id: crypto.randomUUID(), texto: 'Opción 1' },
+              { id: crypto.randomUUID(), texto: 'Opción 2' },
+              { id: crypto.randomUUID(), texto: 'Opción 3' }
+            ]
+          : []
+      }));
+      const metadata = this.ensureMetadata(survey.metadata);
+      return {
+        ...survey,
+        title: survey.title || tpl.name,
+        questions,
+        metadata: { ...metadata, brand, endTitle: tpl.endTitle, endDescription: 'Tus respuestas han sido registradas.' }
+      };
+    });
+
+    this.activeSection = 'welcome';
+    this.activeQuestionIndex = 0;
+    this.showTemplateModal = false;
+    this.queueSave();
+  }
 
   private readonly saveSubject = new Subject<void>();
   private pendingSave = false;
@@ -115,6 +285,78 @@ export class EditorPage implements OnInit, OnDestroy {
       backgroundColor: '#fdf4ff',
       surfaceColor: '#ffffff',
       textColor: '#581c87'
+    },
+    {
+      name: 'Médico',
+      primaryColor: '#0891b2',
+      secondaryColor: '#14b8a6',
+      backgroundColor: '#ecfeff',
+      surfaceColor: '#ffffff',
+      textColor: '#164e63'
+    },
+    {
+      name: 'Tecnología',
+      primaryColor: '#0284c7',
+      secondaryColor: '#06b6d4',
+      backgroundColor: '#f0f9ff',
+      surfaceColor: '#ffffff',
+      textColor: '#0c4a6e'
+    },
+    {
+      name: 'Gamer',
+      primaryColor: '#a855f7',
+      secondaryColor: '#22d3ee',
+      backgroundColor: '#0f0a1e',
+      surfaceColor: '#1a1333',
+      textColor: '#f0e6ff'
+    },
+    {
+      name: 'Elegante',
+      primaryColor: '#1f2937',
+      secondaryColor: '#d4af37',
+      backgroundColor: '#fafaf9',
+      surfaceColor: '#ffffff',
+      textColor: '#111827'
+    },
+    {
+      name: 'Nutrición',
+      primaryColor: '#16a34a',
+      secondaryColor: '#84cc16',
+      backgroundColor: '#f0fdf4',
+      surfaceColor: '#ffffff',
+      textColor: '#14532d'
+    },
+    {
+      name: 'Agropecuario',
+      primaryColor: '#854d0e',
+      secondaryColor: '#65a30d',
+      backgroundColor: '#fefce8',
+      surfaceColor: '#fffbeb',
+      textColor: '#422006'
+    },
+    {
+      name: 'Académico',
+      primaryColor: '#1e40af',
+      secondaryColor: '#64748b',
+      backgroundColor: '#f1f5f9',
+      surfaceColor: '#ffffff',
+      textColor: '#1e293b'
+    },
+    {
+      name: 'Minimalista',
+      primaryColor: '#18181b',
+      secondaryColor: '#71717a',
+      backgroundColor: '#ffffff',
+      surfaceColor: '#fafafa',
+      textColor: '#09090b'
+    },
+    {
+      name: 'Pastel',
+      primaryColor: '#ec4899',
+      secondaryColor: '#a78bfa',
+      backgroundColor: '#fdf2f8',
+      surfaceColor: '#ffffff',
+      textColor: '#831843'
     }
   ];
 
@@ -124,6 +366,31 @@ export class EditorPage implements OnInit, OnDestroy {
     { type: 'text', label: 'Texto libre', description: 'Respuesta abierta' },
     { type: 'scale', label: 'Escala (1-5)', description: 'Nivel de satisfaccion' }
   ];
+
+  readonly fontPresets: { family: string; category: string }[] = [
+    { family: 'Inter', category: 'Sans-serif' },
+    { family: 'Poppins', category: 'Sans-serif' },
+    { family: 'Montserrat', category: 'Sans-serif' },
+    { family: 'Roboto', category: 'Sans-serif' },
+    { family: 'Lato', category: 'Sans-serif' },
+    { family: 'Open Sans', category: 'Sans-serif' },
+    { family: 'Nunito', category: 'Sans-serif' },
+    { family: 'Raleway', category: 'Sans-serif' },
+    { family: 'Playfair Display', category: 'Serif' },
+    { family: 'Merriweather', category: 'Serif' },
+    { family: 'Oswald', category: 'Sans-serif' },
+    { family: 'Rubik', category: 'Sans-serif' },
+    { family: 'Work Sans', category: 'Sans-serif' },
+    { family: 'Quicksand', category: 'Sans-serif' },
+    { family: 'DM Sans', category: 'Sans-serif' },
+    { family: 'Manrope', category: 'Sans-serif' },
+    { family: 'Urbanist', category: 'Sans-serif' },
+    { family: 'Bebas Neue', category: 'Display' },
+    { family: 'Archivo', category: 'Sans-serif' },
+    { family: 'Space Grotesk', category: 'Sans-serif' }
+  ];
+
+  private loadedFonts = new Set<string>();
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -350,6 +617,7 @@ export class EditorPage implements OnInit, OnDestroy {
       ...survey,
       metadata: this.ensureMetadata(survey.metadata)
     });
+    this.loadCurrentFonts();
   }
 
   updateTitle(value: string): void {
@@ -569,6 +837,183 @@ export class EditorPage implements OnInit, OnDestroy {
 
   updateCardRadius(value: number): void {
     this.patchBrand({ cardRadius: value });
+  }
+
+  updateButtonColor(value: string): void {
+    this.patchBrand({ buttonColor: value });
+  }
+
+  updateButtonTextColor(value: string): void {
+    this.patchBrand({ buttonTextColor: value });
+  }
+
+  updateFont(field: 'fontTitle' | 'fontBody' | 'fontButton', family: string): void {
+    this.loadGoogleFont(family);
+    this.patchBrand({ [field]: family } as Partial<SurveyBrand>);
+  }
+
+  currentFontTitle(): string {
+    return this.brand().fontTitle || 'Inter';
+  }
+
+  currentFontBody(): string {
+    return this.brand().fontBody || 'Inter';
+  }
+
+  currentFontButton(): string {
+    return this.brand().fontButton || 'Inter';
+  }
+
+  currentButtonColor(): string {
+    return this.brand().buttonColor || this.brand().primaryColor || '#7c3aed';
+  }
+
+  currentButtonTextColor(): string {
+    return this.brand().buttonTextColor || '#ffffff';
+  }
+  loadGoogleFont(family: string): void {
+    if (this.loadedFonts.has(family)) return;
+    this.loadedFonts.add(family);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:wght@400;600;700;800&display=swap`;
+    document.head.appendChild(link);
+  }
+
+  loadCurrentFonts(): void {
+    this.loadGoogleFont(this.currentFontTitle());
+    this.loadGoogleFont(this.currentFontBody());
+    this.loadGoogleFont(this.currentFontButton());
+  }
+
+  readonly shadowPresets: { value: string; label: string }[] = [
+    { value: 'none', label: 'Sin sombra' },
+    { value: 'soft', label: 'Suave' },
+    { value: 'medium', label: 'Media' },
+    { value: 'strong', label: 'Fuerte' },
+    { value: 'float', label: 'Flotante' }
+  ];
+
+  readonly animationPresets: { value: string; label: string }[] = [
+    { value: 'none', label: 'Ninguna' },
+    { value: 'fadeUp', label: 'Aparecer ↑' },
+    { value: 'scaleIn', label: 'Escalar' },
+    { value: 'slideLeft', label: 'Deslizar ←' }
+  ];
+
+  toggleGlass(): void {
+    this.patchBrand({ glassEffect: !this.brand().glassEffect });
+  }
+
+  setShadowPreset(preset: SurveyBrand['shadowPreset']): void {
+    this.patchBrand({ shadowPreset: preset });
+  }
+
+  toggleBorderGlow(): void {
+    this.patchBrand({ borderGlow: !this.brand().borderGlow });
+  }
+
+  setEntryAnimation(animation: SurveyBrand['entryAnimation']): void {
+    this.patchBrand({ entryAnimation: animation });
+  }
+
+  isGlassActive(): boolean {
+    return this.brand().glassEffect === true;
+  }
+
+  isGlowActive(): boolean {
+    return this.brand().borderGlow === true;
+  }
+
+  currentShadow(): string {
+    return this.brand().shadowPreset || 'soft';
+  }
+
+  currentAnimation(): string {
+    return this.brand().entryAnimation || 'none';
+  }
+
+  cardEffectClasses(): string {
+    const brand = this.brand();
+    const classes: string[] = [];
+    if (brand.glassEffect) classes.push('effect-glass');
+    if (brand.borderGlow) classes.push('effect-glow');
+    if (brand.shadowPreset && brand.shadowPreset !== 'soft') classes.push(`shadow-${brand.shadowPreset}`);
+    if (brand.entryAnimation && brand.entryAnimation !== 'none') classes.push(`anim-${brand.entryAnimation}`);
+    return classes.join(' ');
+  }
+
+  showContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenuX = event.clientX;
+    this.contextMenuY = event.clientY;
+    this.contextMenuVisible = true;
+  }
+
+  hideContextMenu(): void {
+    this.contextMenuVisible = false;
+  }
+
+  toggleSection(sectionId: string): void {
+    this.collapsedSections[sectionId] = !this.collapsedSections[sectionId];
+  }
+
+  isSectionOpen(sectionId: string): boolean {
+    return !this.collapsedSections[sectionId];
+  }
+
+  triggerFileInput(inputId: string): void {
+    const input = document.getElementById(inputId) as HTMLInputElement;
+    input?.click();
+  }
+
+  updateCtaText(value: string): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      return { ...survey, metadata: { ...metadata, ctaText: value } };
+    });
+    this.queueSave();
+  }
+
+  ctaText(): string {
+    return this.survey()?.metadata?.ctaText || 'Comenzar encuesta';
+  }
+
+  readonly progressStyles: { value: string; label: string }[] = [
+    { value: 'line', label: 'Barra' },
+    { value: 'dots', label: 'Puntos' },
+    { value: 'percentage', label: 'Porcentaje' }
+  ];
+
+  progressBarConfig(): { enabled: boolean; style: string; color: string } {
+    const pb = this.brand().progressBar;
+    return {
+      enabled: pb?.enabled ?? true,
+      style: pb?.style ?? 'line',
+      color: pb?.color || this.brand().primaryColor || '#7c3aed'
+    };
+  }
+
+  toggleProgressBar(): void {
+    const current = this.progressBarConfig();
+    this.patchBrand({ progressBar: { ...current, enabled: !current.enabled, style: current.style as 'line' | 'dots' | 'percentage' } });
+  }
+
+  setProgressStyle(style: string): void {
+    const current = this.progressBarConfig();
+    this.patchBrand({ progressBar: { ...current, style: style as 'line' | 'dots' | 'percentage' } });
+  }
+
+  progressPercent(): number {
+    const total = this.survey()?.questions.length || 1;
+    return Math.round(((this.activeQuestionIndex + 1) / total) * 100);
+  }
+
+  questionNavLabel(): string {
+    const total = this.survey()?.questions.length || 1;
+    return `${this.activeQuestionIndex + 1} de ${total}`;
   }
 
   updateLogoSize(value: number): void {
@@ -991,7 +1436,12 @@ export class EditorPage implements OnInit, OnDestroy {
       '--survey-surface': brand.surfaceColor ?? '#ffffff',
       '--survey-text': brand.textColor ?? '#1f2937',
       '--survey-button-radius': `${brand.buttonRadius ?? 18}px`,
-      '--survey-card-radius': `${brand.cardRadius ?? 24}px`
+      '--survey-card-radius': `${brand.cardRadius ?? 24}px`,
+      '--survey-font-title': `'${brand.fontTitle || 'Inter'}', sans-serif`,
+      '--survey-font-body': `'${brand.fontBody || 'Inter'}', sans-serif`,
+      '--survey-font-button': `'${brand.fontButton || 'Inter'}', sans-serif`,
+      '--survey-button-color': brand.buttonColor || brand.primaryColor || '#7c3aed',
+      '--survey-button-text': brand.buttonTextColor || '#ffffff'
     };
   }
 
@@ -1171,6 +1621,14 @@ export class EditorPage implements OnInit, OnDestroy {
       buttonStyle: 'rounded',
       buttonRadius: 18,
       cardRadius: 24,
+      fontTitle: 'Inter',
+      fontBody: 'Inter',
+      fontButton: 'Inter',
+      glassEffect: false,
+      shadowPreset: 'soft',
+      borderGlow: false,
+      entryAnimation: 'none',
+      progressBar: { enabled: true, style: 'line' },
       ...brand,
       logoConfig
     };

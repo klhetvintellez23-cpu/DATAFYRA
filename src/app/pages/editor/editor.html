@@ -1,4 +1,4 @@
-<div class="editor-root">
+<div class="editor-root" (click)="hideContextMenu()">
   <nav class="editor-topbar">
     <div class="editor-topbar-left">
       <a routerLink="/dashboard" class="editor-logo" title="Volver al Dashboard">
@@ -9,12 +9,23 @@
       </a>
     </div>
     <div class="editor-topbar-tabs">
-      <button class="editor-tab" [class.active]="currentTab === 'design'" (click)="setCurrentTab('design')">Disenar encuesta</button>
+      <button class="editor-tab" [class.active]="currentTab === 'design'" (click)="setCurrentTab('design')">Diseñar encuesta</button>
       <button class="editor-tab" [class.active]="currentTab === 'preview'" (click)="setCurrentTab('preview')">Vista previa</button>
       <button class="editor-tab" [class.active]="currentTab === 'collect'" (click)="setCurrentTab('collect')">Recopilar</button>
       <button class="editor-tab" [class.active]="currentTab === 'analyze'" (click)="setCurrentTab('analyze')">Analizar</button>
     </div>
     <div class="editor-topbar-right">
+      <div class="device-preview-toggles">
+        <button class="device-btn" [class.active]="previewDevice === 'desktop'" type="button" (click)="setPreviewDevice('desktop')" title="Escritorio">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+        <button class="device-btn" [class.active]="previewDevice === 'tablet'" type="button" (click)="setPreviewDevice('tablet')" title="Tablet">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </button>
+        <button class="device-btn" [class.active]="previewDevice === 'mobile'" type="button" (click)="setPreviewDevice('mobile')" title="Móvil">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </button>
+      </div>
       <span class="editor-autosave">
         <span class="autosave-dot" [class.saved]="saved()"></span>
         {{ isSaving() ? 'Guardando...' : saved() ? 'Guardado' : 'Auto guardado' }}
@@ -68,20 +79,24 @@
               </li>
             }
             <li class="structure-item" [class.active]="activeSection === 'end'" (click)="activeSection = 'end'">
-              <span class="structure-item-label">Finalizacion</span>
+              <span class="structure-item-label">Finalización</span>
             </li>
           </ul>
 
           <div class="sidebar-add-actions">
             <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="addQuestionPanel = !addQuestionPanel">Agregar pregunta</button>
+            <button class="sidebar-add-btn sidebar-template-btn" (click)="showTemplateModal = true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Usar plantilla
+            </button>
           </div>
         </aside>
 
-        <main class="editor-canvas">
+        <main class="editor-canvas" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
           <div class="canvas-scroll">
             @if (activeSection === 'welcome') {
               <section class="welcome-stage" [ngStyle]="welcomeCardStyle()">
-                <div class="welcome-card">
+                <div class="welcome-card" [ngClass]="cardEffectClasses()">
                   @if (brand().logoUrl) {
                     <div
                       class="welcome-logo"
@@ -120,6 +135,7 @@
                       [ngModel]="s.title"
                       (ngModelChange)="updateTitle($event)"
                       placeholder="Titulo de tu encuesta..."
+                      [style.font-family]="currentFontTitle()"
                     />
                     <textarea
                       class="survey-cover-desc-input"
@@ -127,10 +143,11 @@
                       (ngModelChange)="updateDescription($event)"
                       placeholder="Escribe una descripcion aqui..."
                       rows="3"
+                      [style.font-family]="currentFontBody()"
                     ></textarea>
                     <div class="welcome-actions">
-                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'">
-                        Comenzar encuesta
+                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'" [style.font-family]="currentFontButton()" [style.background]="'var(--survey-button-color)'" [style.color]="'var(--survey-button-text)'">
+                        {{ ctaText() || 'Comenzar encuesta' }}
                       </button>
                     </div>
                   </div>
@@ -140,7 +157,30 @@
 
             @if (activeSection === 'questions' && currentQuestion(); as q) {
               <section class="question-stage" [ngStyle]="welcomeCardStyle()">
-                <div class="canvas-question-card canvas-q-active">
+                @if (progressBarConfig().enabled) {
+                  <div class="progress-bar-wrap">
+                    @if (progressBarConfig().style === 'line') {
+                      <div class="progress-bar-track">
+                        <div class="progress-bar-fill" [style.width.%]="progressPercent()" [style.background]="progressBarConfig().color"></div>
+                      </div>
+                      <span class="progress-label">{{ questionNavLabel() }}</span>
+                    }
+                    @if (progressBarConfig().style === 'dots') {
+                      <div class="progress-dots">
+                        @for (q of survey()!.questions; track q.id; let qi = $index) {
+                          <span class="progress-dot" [class.active]="qi <= activeQuestionIndex" [style.background]="qi <= activeQuestionIndex ? progressBarConfig().color : ''"></span>
+                        }
+                      </div>
+                      <span class="progress-label">{{ questionNavLabel() }}</span>
+                    }
+                    @if (progressBarConfig().style === 'percentage') {
+                      <div class="progress-percentage" [style.color]="progressBarConfig().color">{{ progressPercent() }}%</div>
+                      <span class="progress-label">{{ questionNavLabel() }}</span>
+                    }
+                  </div>
+                }
+
+                <div class="canvas-question-card canvas-q-active" [ngClass]="cardEffectClasses()" (contextmenu)="showContextMenu($event)">
                   @if (q.imageUrl && q.imageConfig) {
                     <div
                       class="question-deco"
@@ -210,25 +250,27 @@
                           }
                         </div>
                       }
-
-                      <div class="question-toolbar">
-                        <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
-                          {{ q.required ? 'Quitar obligatoria' : 'Hacer obligatoria' }}
-                        </button>
-                        <button class="editor-action-btn" type="button" (click)="duplicateQuestion(activeQuestionIndex)">Duplicar</button>
-                        <button class="editor-action-btn" type="button" (click)="moveQuestion(activeQuestionIndex, -1)" [disabled]="activeQuestionIndex === 0">Subir</button>
-                        <button class="editor-action-btn" type="button" (click)="moveQuestion(activeQuestionIndex, 1)" [disabled]="activeQuestionIndex === s.questions.length - 1">Bajar</button>
-                        <button class="editor-action-btn danger-btn" type="button" (click)="removeQuestion(activeQuestionIndex)">Eliminar</button>
-                      </div>
+                      <p class="canvas-q-hint">Click derecho para más opciones</p>
                     </div>
                   </div>
+                </div>
+
+                <div class="question-nav-bar">
+                  <button class="question-nav-btn" type="button" (click)="moveQuestion(activeQuestionIndex, -1)" [disabled]="activeQuestionIndex === 0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                    Anterior
+                  </button>
+                  <button class="question-nav-btn question-nav-primary" type="button" (click)="moveQuestion(activeQuestionIndex, 1)" [disabled]="activeQuestionIndex === (survey()?.questions?.length || 1) - 1" [style.background]="progressBarConfig().color">
+                    Siguiente
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
                 </div>
               </section>
             }
 
             @if (activeSection === 'end') {
               <section class="end-stage" [ngStyle]="welcomeCardStyle()">
-                <div class="thanks-card">
+                <div class="thanks-card" [ngClass]="cardEffectClasses()">
                   @for (image of endImages(); track image.id; let ei = $index) {
                     <div
                       class="welcome-deco"
@@ -244,15 +286,43 @@
                       <button class="asset-handle asset-resize" type="button" (mousedown)="startEndImageTransform(ei, 'resize', $event)"></button>
                     </div>
                   }
-                  <h2>{{ endTitle() }}</h2>
-                  <p>{{ endDescription() }}</p>
+
+                  <div class="end-card-content">
+                    <div class="end-icon-wrap">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" [attr.stroke]="brand().primaryColor || '#7c3aed'" stroke-width="1.5">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                      </svg>
+                    </div>
+                    <input
+                      class="end-title-input"
+                      type="text"
+                      [ngModel]="endTitle()"
+                      (ngModelChange)="updateEndTitle($event)"
+                      placeholder="Gracias por participar"
+                      [style.font-family]="currentFontTitle()"
+                    />
+                    <textarea
+                      class="end-desc-input"
+                      [ngModel]="endDescription()"
+                      (ngModelChange)="updateEndDescription($event)"
+                      placeholder="Tus respuestas han sido registradas exitosamente."
+                      rows="3"
+                      [style.font-family]="currentFontBody()"
+                    ></textarea>
+                    <div class="end-actions">
+                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'" [style.font-family]="currentFontButton()">
+                        Finalizar
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </section>
             }
 
             @if (addQuestionPanel) {
               <div class="add-question-panel">
-                <p class="add-q-label">Que tipo de pregunta quieres agregar?</p>
+                <p class="add-q-label">¿Qué tipo de pregunta quieres agregar?</p>
                 <div class="add-q-grid">
                   @for (qt of questionTypes; track qt.type) {
                     <button class="add-q-type-btn" type="button" (click)="addQuestion(qt.type)">
@@ -266,166 +336,320 @@
           </div>
         </main>
 
-        <aside class="editor-sidebar-right">
-          <div class="right-sidebar-header">
-            <h3>Personalizacion</h3>
-          </div>
-          <div class="right-sidebar-tabs">
-            <button class="right-tab" [class.right-tab-active]="rightTab === 'content'" (click)="rightTab = 'content'">Contenido</button>
-            <button class="right-tab" [class.right-tab-active]="rightTab === 'design'" (click)="rightTab = 'design'">Diseno</button>
+        <aside [class]="sidebarClass()">
+          <!-- Canva-style Icon Navigation Bar -->
+          <div class="custom-nav-bar">
+            <button class="custom-nav-btn" [class.active]="customTab === 'content'" (click)="customTab = 'content'" title="Contenido">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Contenido</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'palettes'" (click)="customTab = 'palettes'" title="Paletas">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2"/><circle cx="19" cy="13.5" r="2"/><circle cx="7" cy="13" r="2"/><circle cx="12" cy="19" r="2"/><path d="M12 2a10 10 0 0 0-1 19.8c.5.1 1-.2 1-.7v-1a1 1 0 0 1 1-1h1.6a2 2 0 0 0 2-1.6 10 10 0 0 0-4.6-16.5Z"/></svg>
+              <span>Paletas</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'colors'" (click)="customTab = 'colors'" title="Colores">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9"/></svg>
+              <span>Colores</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'buttons'" (click)="customTab = 'buttons'" title="Botón">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="4"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+              <span>Botón</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'typography'" (click)="customTab = 'typography'" title="Tipografía">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              <span>Texto</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'effects'" (click)="customTab = 'effects'" title="Efectos">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Efectos</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'media'" (click)="customTab = 'media'" title="Medios">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Medios</span>
+            </button>
           </div>
 
-          @if (rightTab === 'design') {
-            <div class="right-sidebar-content">
-              <div class="right-section">
-                <div class="right-section-label">PALETAS</div>
-                <div class="palette-grid">
-                  @for (palette of palettePresets; track palette.name) {
-                    <button class="palette-card" [class.active]="isPaletteActive(palette)" type="button" (click)="applyPalette(palette)">
-                      <span class="palette-swatch" [style.background]="palette.primaryColor"></span>
-                      <span class="palette-swatch" [style.background]="palette.secondaryColor"></span>
-                      <span class="palette-swatch" [style.background]="palette.backgroundColor"></span>
-                      <span class="palette-name">{{ palette.name }}</span>
+          <!-- Canva-style Configuration Panel -->
+          <div class="custom-panel">
+            <div class="custom-panel-header">
+              <h3>{{ customTab.toUpperCase() }}</h3>
+            </div>
+            
+            <div class="custom-panel-content">
+              @if (customTab === 'content') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Propiedades de encuesta</h4>
+                  <p class="subtab-desc">Edita el texto principal de tu encuesta.</p>
+                  
+                  <div class="right-section">
+                    <div class="right-section-label">DESCRIPCIÓN GENERAL</div>
+                    <textarea
+                      class="right-textarea"
+                      [ngModel]="s.description"
+                      (ngModelChange)="updateDescription($event)"
+                      rows="4"
+                      placeholder="Describe el propósito de la encuesta..."
+                    ></textarea>
+                  </div>
+
+                  @if (activeSection === 'questions' && currentQuestion(); as q) {
+                    <div class="right-section">
+                      <div class="right-section-label">TIPO DE PREGUNTA</div>
+                      <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
+                        @for (qt of questionTypes; track qt.type) {
+                          <option [value]="qt.type">{{ qt.label }}</option>
+                        }
+                      </select>
+                      <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
+                        {{ q.required ? 'Marcar opcional' : 'Marcar obligatoria' }}
+                      </button>
+                    </div>
+                  }
+
+                  @if (activeSection === 'end') {
+                    <div class="right-section">
+                      <div class="right-section-label">MENSAJE FINAL</div>
+                      <input
+                        class="right-select"
+                        type="text"
+                        [ngModel]="endTitle()"
+                        (ngModelChange)="updateEndTitle($event)"
+                        placeholder="Título de cierre..."
+                      />
+                      <textarea
+                        class="right-textarea"
+                        [ngModel]="endDescription()"
+                        (ngModelChange)="updateEndDescription($event)"
+                        rows="4"
+                        placeholder="Mensaje final para el encuestado..."
+                      ></textarea>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (customTab === 'palettes') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Paletas de color</h4>
+                  <p class="subtab-desc">Elige un esquema visual predefinido.</p>
+                  <div class="palette-grid">
+                    @for (palette of palettePresets; track palette.name) {
+                      <button class="palette-card" [class.active]="isPaletteActive(palette)" type="button" (click)="applyPalette(palette)">
+                        <div class="palette-swatches">
+                          <span class="palette-swatch" [style.background]="palette.primaryColor"></span>
+                          <span class="palette-swatch" [style.background]="palette.secondaryColor"></span>
+                          <span class="palette-swatch" [style.background]="palette.backgroundColor"></span>
+                        </div>
+                        <span class="palette-name">{{ palette.name }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (customTab === 'colors') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Colores personalizados</h4>
+                  <p class="subtab-desc">Ajusta cada color manualmente.</p>
+                  <div class="color-grid-full">
+                    <label class="color-control-row">
+                      <span>Principal</span>
+                      <input type="color" [ngModel]="brand().primaryColor" (ngModelChange)="updateBrandColor('primaryColor', $event)" />
+                    </label>
+                    <label class="color-control-row">
+                      <span>Secundario</span>
+                      <input type="color" [ngModel]="brand().secondaryColor" (ngModelChange)="updateBrandColor('secondaryColor', $event)" />
+                    </label>
+                    <label class="color-control-row">
+                      <span>Fondo</span>
+                      <input type="color" [ngModel]="brand().backgroundColor" (ngModelChange)="updateBrandColor('backgroundColor', $event)" />
+                    </label>
+                    <label class="color-control-row">
+                      <span>Tarjetas</span>
+                      <input type="color" [ngModel]="brand().surfaceColor" (ngModelChange)="updateBrandColor('surfaceColor', $event)" />
+                    </label>
+                    <label class="color-control-row">
+                      <span>Texto</span>
+                      <input type="color" [ngModel]="brand().textColor" (ngModelChange)="updateBrandColor('textColor', $event)" />
+                    </label>
+                  </div>
+                </div>
+              }
+
+              @if (customTab === 'buttons') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Botón de acción</h4>
+                  <p class="subtab-desc">Personaliza el CTA de tu encuesta.</p>
+                  <div class="cta-preview-box">
+                    <button class="cta-preview-button" [style.background]="currentButtonColor()" [style.color]="currentButtonTextColor()" [style.border-radius]="buttonRadius() + 'px'" [style.font-family]="currentFontButton()">
+                      {{ ctaText() || 'Comenzar encuesta' }}
+                    </button>
+                  </div>
+                  <label class="font-control">
+                    <span>Texto del botón</span>
+                    <input class="cta-text-input" type="text" [ngModel]="ctaText()" (ngModelChange)="updateCtaText($event)" placeholder="Comenzar encuesta" />
+                  </label>
+                  <div class="control-row-pair">
+                    <label class="color-control">
+                      <span>Color fondo</span>
+                      <input type="color" [ngModel]="currentButtonColor()" (ngModelChange)="updateButtonColor($event)" />
+                    </label>
+                    <label class="color-control">
+                      <span>Color texto</span>
+                      <input type="color" [ngModel]="currentButtonTextColor()" (ngModelChange)="updateButtonTextColor($event)" />
+                    </label>
+                  </div>
+                  <div class="button-style-grid">
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'square'" type="button" (click)="setButtonStyle('square')">Cuadrado</button>
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'rounded'" type="button" (click)="setButtonStyle('rounded')">Redondeado</button>
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'pill'" type="button" (click)="setButtonStyle('pill')">Píldora</button>
+                  </div>
+                  <label class="slider-control">
+                    <span>Radio botón: {{ buttonRadius() }}px</span>
+                    <input type="range" min="0" max="40" [ngModel]="buttonRadius()" (ngModelChange)="updateButtonRadius($event)" />
+                  </label>
+                  <label class="slider-control">
+                    <span>Radio tarjetas: {{ cardRadius() }}px</span>
+                    <input type="range" min="8" max="40" [ngModel]="cardRadius()" (ngModelChange)="updateCardRadius($event)" />
+                  </label>
+                </div>
+              }
+
+              @if (customTab === 'typography') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Tipografía</h4>
+                  <p class="subtab-desc">Define las fuentes de tu encuesta.</p>
+                  <label class="font-control">
+                    <span>Fuente títulos</span>
+                    <select class="font-select" [ngModel]="currentFontTitle()" (ngModelChange)="updateFont('fontTitle', $event)" [style.font-family]="currentFontTitle()">
+                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
+                    </select>
+                  </label>
+                  <label class="font-control">
+                    <span>Fuente cuerpo</span>
+                    <select class="font-select" [ngModel]="currentFontBody()" (ngModelChange)="updateFont('fontBody', $event)" [style.font-family]="currentFontBody()">
+                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
+                    </select>
+                  </label>
+                  <label class="font-control">
+                    <span>Fuente botones</span>
+                    <select class="font-select" [ngModel]="currentFontButton()" (ngModelChange)="updateFont('fontButton', $event)" [style.font-family]="currentFontButton()">
+                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
+                    </select>
+                  </label>
+                  <div class="font-preview-card">
+                    <span class="font-preview-title" [style.font-family]="currentFontTitle()">Vista previa título</span>
+                    <span class="font-preview-body" [style.font-family]="currentFontBody()">Así se verá el texto del cuerpo.</span>
+                    <span class="font-preview-btn" [style.font-family]="currentFontButton()">Botón</span>
+                  </div>
+                </div>
+              }
+
+              @if (customTab === 'effects') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Efectos visuales</h4>
+                  <p class="subtab-desc">Añade efectos premium a tus tarjetas.</p>
+                  <div class="effects-toggles">
+                    <label class="effect-toggle">
+                      <input type="checkbox" [checked]="isGlassActive()" (change)="toggleGlass()" />
+                      <span class="effect-toggle-label">
+                        <svg class="effect-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4" opacity=".5"/><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        Glassmorphism
+                      </span>
+                    </label>
+                    <label class="effect-toggle">
+                      <input type="checkbox" [checked]="isGlowActive()" (change)="toggleBorderGlow()" />
+                      <span class="effect-toggle-label">
+                        <svg class="effect-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m-8-9H3m18 0h-1m-2.64-6.36-.7.7M6.34 17.66l-.7.7m12.72 0-.7-.7M6.34 6.34l-.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+                        Borde brillante
+                      </span>
+                    </label>
+                  </div>
+                  <label class="font-control">
+                    <span>Sombra</span>
+                    <div class="shadow-grid">
+                      @for (sp of shadowPresets; track sp.value) {
+                        <button class="shadow-btn" [class.active]="currentShadow() === sp.value" type="button" (click)="setShadowPreset($any(sp.value))">{{ sp.label }}</button>
+                      }
+                    </div>
+                  </label>
+                  <label class="font-control">
+                    <span>Animación</span>
+                    <div class="shadow-grid">
+                      @for (ap of animationPresets; track ap.value) {
+                        <button class="shadow-btn" [class.active]="currentAnimation() === ap.value" type="button" (click)="setEntryAnimation($any(ap.value))">{{ ap.label }}</button>
+                      }
+                    </div>
+                  </label>
+                  <div class="effect-divider"></div>
+                  <h4 class="subtab-title">Barra de progreso</h4>
+                  <label class="effect-toggle">
+                    <input type="checkbox" [checked]="progressBarConfig().enabled" (change)="toggleProgressBar()" />
+                    <span class="effect-toggle-label">
+                      <svg class="effect-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="18" height="4" rx="2"/><rect x="3" y="10" width="10" height="4" rx="2" fill="currentColor" opacity=".3"/></svg>
+                      Mostrar progreso
+                    </span>
+                  </label>
+                  @if (progressBarConfig().enabled) {
+                    <label class="font-control">
+                      <span>Estilo</span>
+                      <div class="shadow-grid">
+                        @for (ps of progressStyles; track ps.value) {
+                          <button class="shadow-btn" [class.active]="progressBarConfig().style === ps.value" type="button" (click)="setProgressStyle(ps.value)">{{ ps.label }}</button>
+                        }
+                      </div>
+                    </label>
+                  }
+                </div>
+              }
+
+              @if (customTab === 'media') {
+                <div class="subtab-panel">
+                  <h4 class="subtab-title">Logo y decoración</h4>
+                  <p class="subtab-desc">Sube imágenes para tu encuesta.</p>
+                  <input type="file" id="upload-logo" accept="image/*" (change)="onLogoSelected($event)" style="display:none" />
+                  <button class="upload-btn" type="button" (click)="triggerFileInput('upload-logo')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Subir logo
+                  </button>
+                  <input type="file" id="upload-welcome-deco" accept="image/*" (change)="onWelcomeImageSelected($event)" style="display:none" />
+                  <button class="upload-btn" type="button" (click)="triggerFileInput('upload-welcome-deco')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                    Subir decoración
+                  </button>
+                  @if (brand().logoUrl) {
+                    <label class="slider-control">
+                      <span>Tamaño logo: {{ brandLogoConfig().width }}px</span>
+                      <input type="range" min="60" max="220" [ngModel]="brandLogoConfig().width" (ngModelChange)="updateLogoSize($event)" />
+                    </label>
+                    <button class="upload-btn upload-btn-danger" type="button" (click)="removeLogo()">Quitar logo</button>
+                  }
+                  <p class="helper-copy">Arrastra el logo y las imágenes dentro de Bienvenida para posicionarlos.</p>
+                  @if (activeSection === 'questions') {
+                    <div class="effect-divider"></div>
+                    <h4 class="subtab-title">Imagen de pregunta</h4>
+                    <input type="file" id="upload-question-img" accept="image/*" (change)="onQuestionImageSelected($event)" style="display:none" />
+                    <button class="upload-btn" type="button" (click)="triggerFileInput('upload-question-img')">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                      Subir imagen
+                    </button>
+                    @if (currentQuestion()?.imageUrl) {
+                      <button class="upload-btn upload-btn-danger" type="button" (click)="removeQuestionImage(activeQuestionIndex)">Quitar imagen</button>
+                    }
+                  }
+                  @if (activeSection === 'end') {
+                    <div class="effect-divider"></div>
+                    <h4 class="subtab-title">Decoración final</h4>
+                    <input type="file" id="upload-end-deco" accept="image/*" (change)="onEndImageSelected($event)" style="display:none" />
+                    <button class="upload-btn" type="button" (click)="triggerFileInput('upload-end-deco')">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                      Subir decoración final
                     </button>
                   }
                 </div>
-              </div>
-
-              <div class="right-section">
-                <div class="right-section-label">COLORES</div>
-                <div class="color-grid">
-                  <label class="color-control">
-                    <span>Principal</span>
-                    <input type="color" [ngModel]="brand().primaryColor" (ngModelChange)="updateBrandColor('primaryColor', $event)" />
-                  </label>
-                  <label class="color-control">
-                    <span>Secundario</span>
-                    <input type="color" [ngModel]="brand().secondaryColor" (ngModelChange)="updateBrandColor('secondaryColor', $event)" />
-                  </label>
-                  <label class="color-control">
-                    <span>Fondo</span>
-                    <input type="color" [ngModel]="brand().backgroundColor" (ngModelChange)="updateBrandColor('backgroundColor', $event)" />
-                  </label>
-                  <label class="color-control">
-                    <span>Tarjetas</span>
-                    <input type="color" [ngModel]="brand().surfaceColor" (ngModelChange)="updateBrandColor('surfaceColor', $event)" />
-                  </label>
-                  <label class="color-control">
-                    <span>Texto</span>
-                    <input type="color" [ngModel]="brand().textColor" (ngModelChange)="updateBrandColor('textColor', $event)" />
-                  </label>
-                </div>
-              </div>
-
-              <div class="right-section">
-                <div class="right-section-label">BOTONES</div>
-                <div class="button-style-grid">
-                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'square'" type="button" (click)="setButtonStyle('square')">Cuadrado</button>
-                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'rounded'" type="button" (click)="setButtonStyle('rounded')">Redondeado</button>
-                  <button class="button-style-card" [class.active]="brand().buttonStyle === 'pill'" type="button" (click)="setButtonStyle('pill')">Profesional</button>
-                </div>
-                <label class="slider-control">
-                  <span>Radio boton: {{ buttonRadius() }}px</span>
-                  <input type="range" min="0" max="40" [ngModel]="buttonRadius()" (ngModelChange)="updateButtonRadius($event)" />
-                </label>
-                <label class="slider-control">
-                  <span>Radio tarjetas: {{ cardRadius() }}px</span>
-                  <input type="range" min="8" max="40" [ngModel]="cardRadius()" (ngModelChange)="updateCardRadius($event)" />
-                </label>
-              </div>
-
-              <div class="right-section">
-                <div class="right-section-label">LOGO Y BIENVENIDA</div>
-                <label class="upload-control">
-                  <span>Subir logo</span>
-                  <input type="file" accept="image/*" (change)="onLogoSelected($event)" />
-                </label>
-                <label class="upload-control">
-                  <span>Pegar o subir decoracion</span>
-                  <input type="file" accept="image/*" (change)="onWelcomeImageSelected($event)" />
-                </label>
-                @if (brand().logoUrl) {
-                  <label class="slider-control">
-                    <span>Tamano logo: {{ brandLogoConfig().width }}px</span>
-                    <input type="range" min="60" max="220" [ngModel]="brandLogoConfig().width" (ngModelChange)="updateLogoSize($event)" />
-                  </label>
-                  <button class="editor-action-btn" type="button" (click)="removeLogo()">Quitar logo</button>
-                }
-                <p class="helper-copy">Puedes arrastrar el logo y las imagenes dentro de Bienvenida para colocarlos donde quieras.</p>
-              </div>
-
-              @if (activeSection === 'questions') {
-                <div class="right-section">
-                  <div class="right-section-label">IMAGEN DE PREGUNTA</div>
-                  <label class="upload-control">
-                    <span>Subir imagen</span>
-                    <input type="file" accept="image/*" (change)="onQuestionImageSelected($event)" />
-                  </label>
-                  @if (currentQuestion()?.imageUrl) {
-                    <button class="editor-action-btn" type="button" (click)="removeQuestionImage(activeQuestionIndex)">Quitar imagen</button>
-                  }
-                </div>
-              }
-
-              @if (activeSection === 'end') {
-                <div class="right-section">
-                  <div class="right-section-label">DECORACION FINAL</div>
-                  <label class="upload-control">
-                    <span>Subir decoracion final</span>
-                    <input type="file" accept="image/*" (change)="onEndImageSelected($event)" />
-                  </label>
-                  <p class="helper-copy">Tambien puedes pegar imagenes cuando tengas abierta la seccion Finalizacion.</p>
-                </div>
               }
             </div>
-          }
-
-          @if (rightTab === 'content') {
-            <div class="right-sidebar-content">
-              <div class="right-section">
-                <div class="right-section-label">DESCRIPCION</div>
-                <textarea
-                  class="right-textarea"
-                  [ngModel]="s.description"
-                  (ngModelChange)="updateDescription($event)"
-                  rows="4"
-                  placeholder="Describe el proposito de la encuesta..."
-                ></textarea>
-              </div>
-              @if (activeSection === 'questions' && currentQuestion(); as q) {
-                <div class="right-section">
-                  <div class="right-section-label">PREGUNTA ACTIVA</div>
-                  <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
-                    @for (qt of questionTypes; track qt.type) {
-                      <option [value]="qt.type">{{ qt.label }}</option>
-                    }
-                  </select>
-                  <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
-                    {{ q.required ? 'Marcar opcional' : 'Marcar obligatoria' }}
-                  </button>
-                </div>
-              }
-              @if (activeSection === 'end') {
-                <div class="right-section">
-                  <div class="right-section-label">MENSAJE FINAL</div>
-                  <input
-                    class="right-select"
-                    type="text"
-                    [ngModel]="endTitle()"
-                    (ngModelChange)="updateEndTitle($event)"
-                    placeholder="Titulo de cierre..."
-                  />
-                  <textarea
-                    class="right-textarea"
-                    [ngModel]="endDescription()"
-                    (ngModelChange)="updateEndDescription($event)"
-                    rows="4"
-                    placeholder="Mensaje final para el encuestado..."
-                  ></textarea>
-                </div>
-              }
-            </div>
-          }
+          </div>
         </aside>
       </div>
     }
@@ -437,21 +661,21 @@
             @if (brand().logoUrl) {
               <img [src]="brand().logoUrl" class="preview-brand-logo" alt="Logo" />
             }
-            <span class="preview-kicker">Vista previa publica</span>
+            <span class="preview-kicker">Vista previa pública</span>
             <h2>{{ s.title || 'Nueva Encuesta' }}</h2>
-            <p>{{ s.description || 'Agrega una descripcion para contextualizar la encuesta.' }}</p>
+            <p>{{ s.description || 'Agrega una descripción para contextualizar la encuesta.' }}</p>
           </div>
 
           @for (image of welcomeImages(); track image.id) {
             <div class="preview-floating-image" [style.left.px]="image.config.x" [style.top.px]="image.config.y" [style.width.px]="image.config.width" [style.height.px]="image.config.height">
-              <img [src]="image.imageUrl" alt="Decoracion" />
+              <img [src]="image.imageUrl" alt="Decoración" />
             </div>
           }
 
           @for (q of s.questions; track q.id; let qi = $index) {
             <div class="preview-question-card">
               <span class="preview-question-index">Pregunta {{ qi + 1 }}</span>
-              <h3>{{ q.text || 'Pregunta sin titulo' }}</h3>
+              <h3>{{ q.text || 'Pregunta sin título' }}</h3>
               @if (q.imageUrl) {
                 <img [src]="q.imageUrl" class="preview-question-image" alt="Imagen" />
               }
@@ -499,7 +723,7 @@
             </div>
           </div>
           <div class="collect-card">
-            <span class="collect-label">Enlace publico</span>
+            <span class="collect-label">Enlace público</span>
             <div class="share-link-box">{{ getShareLink() }}</div>
           </div>
           <div class="collect-card">
@@ -507,7 +731,7 @@
             <ul class="collect-list">
               <li>{{ getQuestionCountLabel() }}</li>
               <li>{{ s.responses_count || 0 }} respuestas registradas</li>
-              <li>Ultima actualizacion: {{ s.updatedAt | date:'short' }}</li>
+              <li>Última actualización: {{ s.updatedAt | date:'short' }}</li>
             </ul>
           </div>
         </div>
@@ -518,11 +742,11 @@
       <div class="editor-stage">
         <div class="collect-grid">
           <div class="collect-card collect-card-primary">
-            <span class="collect-label">Analiticas</span>
+            <span class="collect-label">Analíticas</span>
             <h2>{{ s.responses.length || s.responses_count || 0 }} respuestas</h2>
             <p>Revisa el comportamiento de la encuesta en el panel detallado.</p>
             <div class="collect-actions">
-              <button class="editor-publish-btn" type="button" (click)="goToAnalytics()">Abrir analiticas</button>
+              <button class="editor-publish-btn" type="button" (click)="goToAnalytics()">Abrir analíticas</button>
             </div>
           </div>
         </div>
@@ -530,3 +754,59 @@
     }
   }
 </div>
+
+@if (contextMenuVisible) {
+  <div class="context-menu-backdrop" (click)="hideContextMenu()" (contextmenu)="hideContextMenu(); $event.preventDefault()"></div>
+  <div class="context-menu" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY">
+    @if (survey(); as s) {
+      <button class="context-menu-item" (click)="toggleRequired(activeQuestionIndex); hideContextMenu()">
+        <span class="ctx-icon">{{ currentQuestion()?.required ? '☐' : '☑' }}</span>
+        {{ currentQuestion()?.required ? 'Quitar obligatoria' : 'Hacer obligatoria' }}
+      </button>
+      <button class="context-menu-item" (click)="duplicateQuestion(activeQuestionIndex); hideContextMenu()">
+        <span class="ctx-icon">📋</span> Duplicar pregunta
+      </button>
+      <div class="context-menu-divider"></div>
+      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, -1); hideContextMenu()" [disabled]="activeQuestionIndex === 0">
+        <span class="ctx-icon">⬆</span> Mover arriba
+      </button>
+      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, 1); hideContextMenu()" [disabled]="activeQuestionIndex === s.questions.length - 1">
+        <span class="ctx-icon">⬇</span> Mover abajo
+      </button>
+      <div class="context-menu-divider"></div>
+      <button class="context-menu-item context-menu-danger" (click)="removeQuestion(activeQuestionIndex); hideContextMenu()">
+        <span class="ctx-icon">🗑</span> Eliminar pregunta
+      </button>
+    }
+  </div>
+}
+
+@if (showTemplateModal) {
+  <div class="template-modal-backdrop" (click)="showTemplateModal = false"></div>
+  <div class="template-modal">
+    <div class="template-modal-header">
+      <div>
+        <h2 class="template-modal-title">Catálogo de Plantillas</h2>
+        <p class="template-modal-desc">Elige una plantilla para comenzar rápido. Puedes personalizarla después.</p>
+      </div>
+      <button class="template-close-btn" type="button" (click)="showTemplateModal = false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="template-grid">
+      @for (tpl of templatePresets; track tpl.name; let ti = $index) {
+        <div class="template-card">
+          <div class="template-card-preview" [style.background]="tpl.brand.backgroundColor">
+            <div class="template-preview-dot" [style.background]="tpl.brand.primaryColor"></div>
+          </div>
+          <div class="template-card-body">
+            <span class="template-category">{{ tpl.category }}</span>
+            <h3 class="template-name">{{ tpl.name }}</h3>
+            <p class="template-desc">{{ tpl.description }}</p>
+            <button class="template-use-btn" (click)="applyTemplate(ti)">Usar esta plantilla</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

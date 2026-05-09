@@ -14,11 +14,7 @@ export class AuthSessionService {
       return;
     }
 
-    client.auth.getSession().then(({ data: { session } }) => {
-      this.updateUser(session?.user ?? null);
-    });
-
-    client.auth.onAuthStateChange((_event, session) => {
+    client.auth.onAuthStateChange((event, session) => {
       this.updateUser(session?.user ?? null);
     });
   }
