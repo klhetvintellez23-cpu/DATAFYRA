@@ -19,7 +19,10 @@
     "@angular/router": "^21.2.0",
     "@supabase/supabase-js": "^2.104.0",
     "motion": "^12.38.0",
+    "moveable": "^0.53.0",
+    "ngx-moveable": "^0.50.0",
     "rxjs": "~7.8.0",
+    "selecto": "^1.26.3",
     "tslib": "^2.3.0",
     "zone.js": "^0.16.1"
   },

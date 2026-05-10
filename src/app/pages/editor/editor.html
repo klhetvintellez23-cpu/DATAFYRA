@@ -65,7 +65,7 @@
     }
 
     @if (currentTab === 'design') {
-      <div class="editor-body">
+      <div class="editor-body" [style.--sidebar-right-width.px]="rightSidebarWidth">
         <aside class="editor-sidebar-left">
           <div class="sidebar-section-label">ESTRUCTURA</div>
           <ul class="structure-list">
@@ -94,230 +94,17 @@
 
         <main class="editor-canvas" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
           <div class="canvas-scroll">
-            @if (activeSection === 'welcome') {
-              <section class="welcome-stage" [ngStyle]="welcomeCardStyle()">
-                <div class="welcome-card" [ngClass]="cardEffectClasses()">
-                  @if (brand().logoUrl) {
-                    <div
-                      class="welcome-logo"
-                      [style.left.px]="brandLogoConfig().x"
-                      [style.top.px]="brandLogoConfig().y"
-                      [style.width.px]="brandLogoConfig().width"
-                      [style.height.px]="brandLogoConfig().height"
-                      (mousedown)="startLogoTransform('move', $event)">
-                      <img [src]="brand().logoUrl" alt="Logo" />
-                      <button class="asset-handle asset-delete" type="button" (click)="removeLogo(); $event.stopPropagation()">×</button>
-                      <button class="asset-handle asset-resize" type="button" (mousedown)="startLogoTransform('resize', $event)"></button>
-                    </div>
-                  }
-
-                  @for (image of welcomeImages(); track image.id; let wi = $index) {
-                    <div
-                      class="welcome-deco"
-                      [style.left.px]="image.config.x"
-                      [style.top.px]="image.config.y"
-                      [style.width.px]="image.config.width"
-                      [style.height.px]="image.config.height"
-                      [style.transform]="'rotate(' + image.config.rotation + 'deg)'"
-                      [style.zIndex]="image.config.zIndex"
-                      (mousedown)="startWelcomeImageTransform(wi, 'move', $event)">
-                      <img [src]="image.imageUrl" alt="Decoracion" />
-                      <button class="asset-handle asset-delete" type="button" (click)="removeWelcomeImage(wi); $event.stopPropagation()">×</button>
-                      <button class="asset-handle asset-resize" type="button" (mousedown)="startWelcomeImageTransform(wi, 'resize', $event)"></button>
-                    </div>
-                  }
-
-                  <div class="welcome-copy">
-                    <span class="welcome-kicker">Pantalla de bienvenida</span>
-                    <input
-                      class="survey-cover-title-input"
-                      type="text"
-                      [ngModel]="s.title"
-                      (ngModelChange)="updateTitle($event)"
-                      placeholder="Titulo de tu encuesta..."
-                      [style.font-family]="currentFontTitle()"
-                    />
-                    <textarea
-                      class="survey-cover-desc-input"
-                      [ngModel]="s.description"
-                      (ngModelChange)="updateDescription($event)"
-                      placeholder="Escribe una descripcion aqui..."
-                      rows="3"
-                      [style.font-family]="currentFontBody()"
-                    ></textarea>
-                    <div class="welcome-actions">
-                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'" [style.font-family]="currentFontButton()" [style.background]="'var(--survey-button-color)'" [style.color]="'var(--survey-button-text)'">
-                        {{ ctaText() || 'Comenzar encuesta' }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            }
-
-            @if (activeSection === 'questions' && currentQuestion(); as q) {
-              <section class="question-stage" [ngStyle]="welcomeCardStyle()">
-                @if (progressBarConfig().enabled) {
-                  <div class="progress-bar-wrap">
-                    @if (progressBarConfig().style === 'line') {
-                      <div class="progress-bar-track">
-                        <div class="progress-bar-fill" [style.width.%]="progressPercent()" [style.background]="progressBarConfig().color"></div>
-                      </div>
-                      <span class="progress-label">{{ questionNavLabel() }}</span>
-                    }
-                    @if (progressBarConfig().style === 'dots') {
-                      <div class="progress-dots">
-                        @for (q of survey()!.questions; track q.id; let qi = $index) {
-                          <span class="progress-dot" [class.active]="qi <= activeQuestionIndex" [style.background]="qi <= activeQuestionIndex ? progressBarConfig().color : ''"></span>
-                        }
-                      </div>
-                      <span class="progress-label">{{ questionNavLabel() }}</span>
-                    }
-                    @if (progressBarConfig().style === 'percentage') {
-                      <div class="progress-percentage" [style.color]="progressBarConfig().color">{{ progressPercent() }}%</div>
-                      <span class="progress-label">{{ questionNavLabel() }}</span>
-                    }
-                  </div>
-                }
-
-                <div class="canvas-question-card canvas-q-active" [ngClass]="cardEffectClasses()" (contextmenu)="showContextMenu($event)">
-                  @if (q.imageUrl && q.imageConfig) {
-                    <div
-                      class="question-deco"
-                      [style.left.px]="q.imageConfig.x"
-                      [style.top.px]="q.imageConfig.y"
-                      [style.width.px]="q.imageConfig.width"
-                      [style.height.px]="q.imageConfig.height"
-                      [style.transform]="'rotate(' + q.imageConfig.rotation + 'deg)'"
-                      [style.zIndex]="q.imageConfig.zIndex"
-                      (mousedown)="startQuestionImageTransform(activeQuestionIndex, 'move', $event)">
-                      <img [src]="q.imageUrl" alt="Imagen de pregunta" />
-                      <button class="asset-handle asset-delete" type="button" (click)="removeQuestionImage(activeQuestionIndex); $event.stopPropagation()">×</button>
-                      <button class="asset-handle asset-resize" type="button" (mousedown)="startQuestionImageTransform(activeQuestionIndex, 'resize', $event)"></button>
-                    </div>
-                  }
-
-                  <div class="canvas-q-content">
-                    <div class="canvas-q-number-bubble">{{ activeQuestionIndex + 1 }}</div>
-                    <div class="canvas-q-body">
-                      <div class="canvas-q-type-selector">
-                        <select class="q-type-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
-                          @for (qt of questionTypes; track qt.type) {
-                            <option [value]="qt.type">{{ qt.label }}</option>
-                          }
-                        </select>
-                      </div>
-                      <input
-                        class="canvas-q-text-input"
-                        type="text"
-                        [ngModel]="q.text"
-                        (ngModelChange)="updateQuestionText(activeQuestionIndex, $event)"
-                        placeholder="Escribe tu pregunta aqui..."
-                      />
-                      @if (q.required) {
-                        <span class="required-badge">* Obligatoria</span>
-                      }
-
-                      @if (q.type === 'text') {
-                        <div class="text-area-fake">El encuestado escribira aqui su respuesta...</div>
-                      }
-
-                      @if (q.type === 'multiple-choice') {
-                        <div class="canvas-q-options">
-                          @for (opt of q.options; track opt.id; let oi = $index) {
-                            <div class="canvas-option-row">
-                              <div class="canvas-option-radio"></div>
-                              <input
-                                class="canvas-option-input"
-                                type="text"
-                                [ngModel]="opt.texto"
-                                (ngModelChange)="updateOption(activeQuestionIndex, oi, $event)"
-                                placeholder="Opcion {{ oi + 1 }}"
-                              />
-                              @if (q.options.length > 2) {
-                                <button class="canvas-option-remove" type="button" (click)="removeOption(activeQuestionIndex, oi)">×</button>
-                              }
-                            </div>
-                          }
-                          <button class="canvas-add-option" type="button" (click)="addOption(activeQuestionIndex)">Agregar opcion</button>
-                        </div>
-                      }
-
-                      @if (q.type === 'scale' || q.type === 'rating') {
-                        <div class="preview-scale-row">
-                          @for (n of q.type === 'rating' ? [1,2,3,4,5,6,7,8,9,10] : [1,2,3,4,5]; track n) {
-                            <span class="preview-scale-pill">{{ n }}</span>
-                          }
-                        </div>
-                      }
-                      <p class="canvas-q-hint">Click derecho para más opciones</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="question-nav-bar">
-                  <button class="question-nav-btn" type="button" (click)="moveQuestion(activeQuestionIndex, -1)" [disabled]="activeQuestionIndex === 0">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-                    Anterior
-                  </button>
-                  <button class="question-nav-btn question-nav-primary" type="button" (click)="moveQuestion(activeQuestionIndex, 1)" [disabled]="activeQuestionIndex === (survey()?.questions?.length || 1) - 1" [style.background]="progressBarConfig().color">
-                    Siguiente
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-                  </button>
-                </div>
-              </section>
-            }
-
-            @if (activeSection === 'end') {
-              <section class="end-stage" [ngStyle]="welcomeCardStyle()">
-                <div class="thanks-card" [ngClass]="cardEffectClasses()">
-                  @for (image of endImages(); track image.id; let ei = $index) {
-                    <div
-                      class="welcome-deco"
-                      [style.left.px]="image.config.x"
-                      [style.top.px]="image.config.y"
-                      [style.width.px]="image.config.width"
-                      [style.height.px]="image.config.height"
-                      [style.transform]="'rotate(' + image.config.rotation + 'deg)'"
-                      [style.zIndex]="image.config.zIndex"
-                      (mousedown)="startEndImageTransform(ei, 'move', $event)">
-                      <img [src]="image.imageUrl" alt="Decoracion final" />
-                      <button class="asset-handle asset-delete" type="button" (click)="removeEndImage(ei); $event.stopPropagation()">×</button>
-                      <button class="asset-handle asset-resize" type="button" (mousedown)="startEndImageTransform(ei, 'resize', $event)"></button>
-                    </div>
-                  }
-
-                  <div class="end-card-content">
-                    <div class="end-icon-wrap">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" [attr.stroke]="brand().primaryColor || '#7c3aed'" stroke-width="1.5">
-                        <path d="M9 12l2 2 4-4"/>
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                    </div>
-                    <input
-                      class="end-title-input"
-                      type="text"
-                      [ngModel]="endTitle()"
-                      (ngModelChange)="updateEndTitle($event)"
-                      placeholder="Gracias por participar"
-                      [style.font-family]="currentFontTitle()"
-                    />
-                    <textarea
-                      class="end-desc-input"
-                      [ngModel]="endDescription()"
-                      (ngModelChange)="updateEndDescription($event)"
-                      placeholder="Tus respuestas han sido registradas exitosamente."
-                      rows="3"
-                      [style.font-family]="currentFontBody()"
-                    ></textarea>
-                    <div class="end-actions">
-                      <button class="welcome-cta" [class.style-square]="brand().buttonStyle === 'square'" [class.style-pill]="brand().buttonStyle === 'pill'" [style.font-family]="currentFontButton()">
-                        Finalizar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
+            @if (currentScreen()) {
+              <app-canvas-stage 
+                [screen]="currentScreen()!"
+                [selectedIds]="selectedElementIds()"
+                (selectionChange)="onCanvasSelectionChange($event)"
+                (elementUpdate)="updateCanvasElement($event)">
+              </app-canvas-stage>
+            } @else {
+              <div class="canvas-empty-state">
+                <p>Cargando lienzo visual...</p>
+              </div>
             }
 
             @if (addQuestionPanel) {
@@ -337,6 +124,8 @@
         </main>
 
         <aside [class]="sidebarClass()">
+          <!-- Resize Handle -->
+          <div class="sidebar-resizer" (mousedown)="startResizing($event)" [class.active]="isResizing"></div>
           <!-- Canva-style Icon Navigation Bar -->
           <div class="custom-nav-bar">
             <button class="custom-nav-btn" [class.active]="customTab === 'content'" (click)="customTab = 'content'" title="Contenido">
@@ -518,29 +307,64 @@
               @if (customTab === 'typography') {
                 <div class="subtab-panel">
                   <h4 class="subtab-title">Tipografía</h4>
-                  <p class="subtab-desc">Define las fuentes de tu encuesta.</p>
-                  <label class="font-control">
-                    <span>Fuente títulos</span>
-                    <select class="font-select" [ngModel]="currentFontTitle()" (ngModelChange)="updateFont('fontTitle', $event)" [style.font-family]="currentFontTitle()">
-                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
-                    </select>
-                  </label>
-                  <label class="font-control">
-                    <span>Fuente cuerpo</span>
-                    <select class="font-select" [ngModel]="currentFontBody()" (ngModelChange)="updateFont('fontBody', $event)" [style.font-family]="currentFontBody()">
-                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
-                    </select>
-                  </label>
-                  <label class="font-control">
-                    <span>Fuente botones</span>
-                    <select class="font-select" [ngModel]="currentFontButton()" (ngModelChange)="updateFont('fontButton', $event)" [style.font-family]="currentFontButton()">
-                      @for (f of fontPresets; track f.family) { <option [value]="f.family" [style.font-family]="f.family">{{ f.family }}</option> }
-                    </select>
-                  </label>
-                  <div class="font-preview-card">
-                    <span class="font-preview-title" [style.font-family]="currentFontTitle()">Vista previa título</span>
-                    <span class="font-preview-body" [style.font-family]="currentFontBody()">Así se verá el texto del cuerpo.</span>
-                    <span class="font-preview-btn" [style.font-family]="currentFontButton()">Botón</span>
+                  <p class="subtab-desc">Experimenta con combinaciones profesionales.</p>
+
+                  <div class="typography-innovation-wrap">
+                    <h5 class="innovation-label">Combinaciones Mágicas</h5>
+                    <div class="pairing-scroll">
+                      @for (pair of fontPairings; track pair.name) {
+                        <div class="pairing-item-card" 
+                             [class.active]="brand().fontTitle === pair.title"
+                             (click)="applyFontPairing(pair)">
+                          <div class="pairing-item-preview">
+                            <span [style.font-family]="pair.title" class="p-title-demo">T</span>
+                            <span [style.font-family]="pair.body" class="p-body-demo">a</span>
+                          </div>
+                          <div class="pairing-item-meta">
+                            <span class="p-item-name">{{ pair.name }}</span>
+                            <span class="p-item-desc">{{ pair.description }}</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="innovation-divider"></div>
+
+                    <h5 class="innovation-label">Explorar Fuentes</h5>
+                    <div class="font-category-chips">
+                      @for (cat of ['All', 'Sans', 'Serif', 'Display']; track cat) {
+                        <button class="cat-chip" 
+                                [class.active]="selectedFontCategory === cat"
+                                (click)="selectedFontCategory = $any(cat)">{{ cat }}</button>
+                      }
+                    </div>
+
+                    <div class="visual-font-grid">
+                      @for (f of filteredFonts(); track f.family) {
+                        <button class="visual-font-card" 
+                                [class.active]="brand().fontTitle === f.family"
+                                (click)="updateFont('fontTitle', f.family); updateFont('fontBody', f.family)">
+                          <span class="v-font-sample" [style.font-family]="f.family">Aa</span>
+                          <span class="v-font-name">{{ f.family }}</span>
+                        </button>
+                      }
+                    </div>
+
+                    <div class="innovation-divider"></div>
+
+                    <h5 class="innovation-label">Ajuste fino</h5>
+                    <label class="font-control">
+                      <span>Títulos</span>
+                      <select class="font-select" [ngModel]="currentFontTitle()" (ngModelChange)="updateFont('fontTitle', $event)">
+                        @for (f of fontPresets; track f.family) { <option [value]="f.family">{{ f.family }}</option> }
+                      </select>
+                    </label>
+                    <label class="font-control">
+                      <span>Cuerpo</span>
+                      <select class="font-select" [ngModel]="currentFontBody()" (ngModelChange)="updateFont('fontBody', $event)">
+                        @for (f of fontPresets; track f.family) { <option [value]="f.family">{{ f.family }}</option> }
+                      </select>
+                    </label>
                   </div>
                 </div>
               }
@@ -760,22 +584,22 @@
   <div class="context-menu" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY">
     @if (survey(); as s) {
       <button class="context-menu-item" (click)="toggleRequired(activeQuestionIndex); hideContextMenu()">
-        <span class="ctx-icon">{{ currentQuestion()?.required ? '☐' : '☑' }}</span>
+        <i class="ctx-icon ph" [ngClass]="currentQuestion()?.required ? 'ph-lock-open' : 'ph-lock'"></i>
         {{ currentQuestion()?.required ? 'Quitar obligatoria' : 'Hacer obligatoria' }}
       </button>
       <button class="context-menu-item" (click)="duplicateQuestion(activeQuestionIndex); hideContextMenu()">
-        <span class="ctx-icon">📋</span> Duplicar pregunta
+        <i class="ctx-icon ph ph-copy"></i> Duplicar pregunta
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, -1); hideContextMenu()" [disabled]="activeQuestionIndex === 0">
-        <span class="ctx-icon">⬆</span> Mover arriba
+        <i class="ctx-icon ph ph-arrow-up"></i> Mover arriba
       </button>
       <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, 1); hideContextMenu()" [disabled]="activeQuestionIndex === s.questions.length - 1">
-        <span class="ctx-icon">⬇</span> Mover abajo
+        <i class="ctx-icon ph ph-arrow-down"></i> Mover abajo
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item context-menu-danger" (click)="removeQuestion(activeQuestionIndex); hideContextMenu()">
-        <span class="ctx-icon">🗑</span> Eliminar pregunta
+        <i class="ctx-icon ph ph-trash"></i> Eliminar pregunta
       </button>
     }
   </div>
@@ -810,3 +634,4 @@
     </div>
   </div>
 }
+

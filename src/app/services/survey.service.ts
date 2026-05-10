@@ -54,10 +54,48 @@ export interface DecoratedImage {
   config: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
 }
 
+export type CanvasElementType = 'text' | 'button' | 'image' | 'shape' | 'question' | 'progress';
+
+export interface CanvasElement {
+  id: string;
+  type: CanvasElementType;
+  content?: string;
+  questionId?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  zIndex: number;
+  locked: boolean;
+  hidden: boolean;
+  styles: Record<string, any>;
+}
+
+export interface CanvasScreen {
+  id: string;
+  type: 'welcome' | 'question' | 'end';
+  background: {
+    type: 'solid' | 'gradient' | 'image';
+    value: string;
+  };
+  elements: CanvasElement[];
+}
+
+export interface CanvasData {
+  screens: CanvasScreen[];
+}
+
 export interface SurveyMetadata {
+  canvas?: CanvasData;
   brand?: SurveyBrand;
   theme?: Record<string, any>;
   welcomeImages?: DecoratedImage[];
+  welcomeTitleConfig?: { x: number; y: number; width: number; height: number };
+  welcomeDescConfig?: { x: number; y: number; width: number; height: number };
+  welcomeKickerConfig?: { x: number; y: number; width: number; height: number };
+  welcomeCtaConfig?: { x: number; y: number; width: number; height: number };
+  welcomeMetaConfig?: { x: number; y: number; width: number; height: number };
   endTitle?: string;
   endDescription?: string;
   endImages?: DecoratedImage[];
@@ -214,9 +252,84 @@ export class SurveyService {
   }
 
   private hydrateSurvey(survey: Survey, metadataOverride?: SurveyMetadata): Survey {
+    const rawMetadata = metadataOverride ?? this.readMetadata(survey.id) ?? survey.metadata ?? {};
+    
+    if (!rawMetadata.canvas) {
+      rawMetadata.canvas = this.createDefaultCanvas(survey, rawMetadata);
+    }
+
     return {
       ...survey,
-      metadata: metadataOverride ?? this.readMetadata(survey.id) ?? survey.metadata
+      metadata: rawMetadata
+    };
+  }
+
+  private createDefaultCanvas(survey: Survey, metadata: SurveyMetadata): CanvasData {
+    const bg = metadata.brand?.backgroundColor ?? '#f4f0ff';
+    return {
+      screens: [
+        {
+          id: 'welcome',
+          type: 'welcome',
+          background: { type: 'solid', value: bg },
+          elements: [
+            {
+              id: 'welcome-title',
+              type: 'text',
+              content: survey.title || 'Bienvenido a la encuesta',
+              x: metadata.welcomeTitleConfig?.x ?? 50,
+              y: metadata.welcomeTitleConfig?.y ?? 50,
+              width: metadata.welcomeTitleConfig?.width ?? 600,
+              height: metadata.welcomeTitleConfig?.height ?? 80,
+              rotation: 0,
+              zIndex: 10,
+              locked: false,
+              hidden: false,
+              styles: {
+                fontSize: 48,
+                fontWeight: 800,
+                color: metadata.brand?.textColor ?? '#111827'
+              }
+            },
+            {
+              id: 'welcome-desc',
+              type: 'text',
+              content: survey.description || 'Por favor, responde a las siguientes preguntas.',
+              x: metadata.welcomeDescConfig?.x ?? 50,
+              y: metadata.welcomeDescConfig?.y ?? 150,
+              width: metadata.welcomeDescConfig?.width ?? 600,
+              height: metadata.welcomeDescConfig?.height ?? 60,
+              rotation: 0,
+              zIndex: 10,
+              locked: false,
+              hidden: false,
+              styles: {
+                fontSize: 18,
+                fontWeight: 400,
+                color: metadata.brand?.textColor ?? '#374151'
+              }
+            },
+            {
+              id: 'welcome-cta',
+              type: 'button',
+              content: metadata.ctaText || 'Comenzar encuesta',
+              x: metadata.welcomeCtaConfig?.x ?? 50,
+              y: metadata.welcomeCtaConfig?.y ?? 240,
+              width: metadata.welcomeCtaConfig?.width ?? 200,
+              height: metadata.welcomeCtaConfig?.height ?? 50,
+              rotation: 0,
+              zIndex: 10,
+              locked: false,
+              hidden: false,
+              styles: {
+                backgroundColor: metadata.brand?.primaryColor ?? '#7c3aed',
+                color: metadata.brand?.buttonTextColor ?? '#ffffff',
+                borderRadius: metadata.brand?.buttonStyle === 'pill' ? 9999 : metadata.brand?.buttonRadius ?? 8
+              }
+            }
+          ]
+        }
+      ]
     };
   }
 

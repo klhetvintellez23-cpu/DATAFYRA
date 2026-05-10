@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -17,7 +17,7 @@ import { AuthService } from '../../services/auth.service';
 
 type EditorTab = 'design' | 'preview' | 'collect' | 'analyze';
 type RightTab = 'content' | 'design';
-type AssetKind = 'logo' | 'welcome-image' | 'end-image' | 'question-image';
+type AssetKind = 'logo' | 'welcome-image' | 'end-image' | 'question-image' | 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta';
 type TransformMode = 'move' | 'resize';
 
 interface PalettePreset {
@@ -41,9 +41,11 @@ interface ActiveTransform {
   initialHeight: number;
 }
 
+import { CanvasStageComponent } from '../../components/canvas-stage/canvas-stage';
+
 @Component({
   selector: 'app-editor',
-  imports: [FormsModule, RouterLink, CommonModule],
+  imports: [FormsModule, RouterLink, CommonModule, CanvasStageComponent],
   templateUrl: './editor.html',
   styleUrl: './editor.css'
 })
@@ -61,17 +63,135 @@ export class EditorPage implements OnInit, OnDestroy {
   activeQuestionIndex = 0;
   addQuestionPanel = false;
   
+  // --- CANVAS STATE ---
+  selectedElementIds = signal<string[]>([]);
+  
+  canvasData = computed(() => {
+    return this.survey()?.metadata?.canvas;
+  });
+
+  currentScreen = computed(() => {
+    const data = this.canvasData();
+    if (!data) return null;
+    return data.screens.find(s => s.id === this.activeSection) || null;
+  });
+
+  currentElements = computed(() => {
+    return this.currentScreen()?.elements || [];
+  });
+  
+  onCanvasSelectionChange(ids: string[]) {
+    this.selectedElementIds.set(ids);
+  }
+
+  updateCanvasElement(event: { id: string, changes: Partial<any> }) {
+    this.survey.update(survey => {
+      if (!survey || !survey.metadata?.canvas) return survey;
+      
+      const newCanvas = { ...survey.metadata.canvas };
+      const newScreens = [...newCanvas.screens];
+      const screenIndex = newScreens.findIndex(s => s.id === this.activeSection);
+      
+      if (screenIndex !== -1) {
+        const screen = { ...newScreens[screenIndex] };
+        const elements = [...screen.elements];
+        const elIndex = elements.findIndex(e => e.id === event.id);
+        
+        if (elIndex !== -1) {
+          elements[elIndex] = { ...elements[elIndex], ...event.changes };
+          screen.elements = elements;
+          newScreens[screenIndex] = screen;
+          newCanvas.screens = newScreens;
+          
+          return {
+            ...survey,
+            metadata: { ...survey.metadata, canvas: newCanvas }
+          };
+        }
+      }
+      return survey;
+    });
+  }
+  
+  // History Stack for Undo/Redo
+  private historyStack: string[] = [];
+  private historyIndex = -1;
+  private isUndoingRedoing = false;
+  
   // Customization Tabs (Canva Style)
   customTab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' = 'palettes';
   currentTab: EditorTab = 'design';
 
+  previewDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+  contextMenuVisible = false;
+  contextMenuX = 0;
+  contextMenuY = 0;
+  collapsedSections: Record<string, boolean> = {};
+
   sidebarClass = () => this.currentTab === 'design' ? 'editor-sidebar-right custom-nav-active' : 'editor-sidebar-right';
+
+  // Resizable sidebar logic
+  isResizing = false;
+  rightSidebarWidth = Number(localStorage.getItem('df_sidebar_width')) || 440;
+
+  // Contextual Focus
+  focusSettings(tab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media', section?: 'welcome' | 'questions' | 'end', index?: number) {
+    this.currentTab = 'design';
+    this.customTab = tab;
+    if (section) this.activeSection = section;
+    if (index !== undefined) this.activeQuestionIndex = index;
+  }
+
+
+  startResizing(event: MouseEvent) {
+    this.isResizing = true;
+    event.preventDefault();
+  }
 
   setPreviewDevice(device: 'desktop' | 'tablet' | 'mobile'): void {
     this.previewDevice = device;
   }
 
   showTemplateModal = false;
+
+  // Floating Format Bar State
+  selectionVisible = false;
+  selectionPos = { x: 0, y: 0 };
+
+  @HostListener('document:selectionchange')
+  onSelectionChange() {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+      this.selectionVisible = false;
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    // Check if selection is within our editable canvas
+    const canvas = document.querySelector('.editor-canvas');
+    if (canvas && canvas.contains(range.commonAncestorContainer)) {
+      this.selectionPos = {
+        x: rect.left + (rect.width / 2) - 100, // Center the 200px wide bar
+        y: rect.top - 50 // Position above
+      };
+      this.selectionVisible = true;
+    } else {
+      this.selectionVisible = false;
+    }
+  }
+
+  onFontChange(font: string) {
+    if (!font) return;
+    this.loadGoogleFont(font);
+    document.execCommand('fontName', false, font);
+    // Also update the global font if it's the whole element (optional, but keep simple for now)
+  }
+
+  execCommand(command: string) {
+    document.execCommand(command, false);
+  }
 
   readonly templatePresets: {
     name: string;
@@ -86,7 +206,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Satisfacción del Cliente',
       description: 'Mide la experiencia de tus clientes con tu producto o servicio.',
-      icon: '⭐',
+      icon: 'ph-star',
       category: 'Negocio',
       brand: { primaryColor: '#2563eb', secondaryColor: '#0ea5e9', backgroundColor: '#eff6ff', surfaceColor: '#ffffff', textColor: '#1e3a5f', buttonStyle: 'pill', fontTitle: 'Poppins', fontBody: 'Inter', shadowPreset: 'soft' },
       questions: [
@@ -100,7 +220,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Clima Laboral',
       description: 'Evalúa el ambiente de trabajo y satisfacción del equipo.',
-      icon: '👥',
+      icon: 'ph-users',
       category: 'RRHH',
       brand: { primaryColor: '#059669', secondaryColor: '#10b981', backgroundColor: '#ecfdf5', surfaceColor: '#ffffff', textColor: '#064e3b', buttonStyle: 'rounded', fontTitle: 'Outfit', fontBody: 'Inter', shadowPreset: 'medium' },
       questions: [
@@ -114,7 +234,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Registro de Evento',
       description: 'Formulario de inscripción para eventos y conferencias.',
-      icon: '🎪',
+      icon: 'ph-ticket',
       category: 'Eventos',
       brand: { primaryColor: '#7c3aed', secondaryColor: '#a78bfa', backgroundColor: '#f5f3ff', surfaceColor: '#ffffff', textColor: '#3b0764', buttonStyle: 'pill', fontTitle: 'Space Grotesk', fontBody: 'Inter', shadowPreset: 'float', glassEffect: true },
       questions: [
@@ -128,7 +248,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Evaluación Educativa',
       description: 'Evalúa el desempeño docente y cursos académicos.',
-      icon: '📚',
+      icon: 'ph-books',
       category: 'Educación',
       brand: { primaryColor: '#1d4ed8', secondaryColor: '#3b82f6', backgroundColor: '#eef2ff', surfaceColor: '#ffffff', textColor: '#1e293b', buttonStyle: 'rounded', fontTitle: 'Merriweather', fontBody: 'Source Sans 3', shadowPreset: 'soft' },
       questions: [
@@ -142,7 +262,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Consulta Médica',
       description: 'Pre-consulta y seguimiento de pacientes.',
-      icon: '🏥',
+      icon: 'ph-first-aid',
       category: 'Salud',
       brand: { primaryColor: '#0d9488', secondaryColor: '#14b8a6', backgroundColor: '#f0fdfa', surfaceColor: '#ffffff', textColor: '#134e4a', buttonStyle: 'rounded', fontTitle: 'DM Sans', fontBody: 'Inter', shadowPreset: 'soft' },
       questions: [
@@ -156,7 +276,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Feedback de Producto',
       description: 'Recopila opiniones sobre tu producto digital.',
-      icon: '🚀',
+      icon: 'ph-rocket',
       category: 'Producto',
       brand: { primaryColor: '#e11d48', secondaryColor: '#f43f5e', backgroundColor: '#fff1f2', surfaceColor: '#ffffff', textColor: '#4c0519', buttonStyle: 'pill', fontTitle: 'Plus Jakarta Sans', fontBody: 'Inter', shadowPreset: 'medium', borderGlow: true },
       questions: [
@@ -170,7 +290,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Encuesta Gastronómica',
       description: 'Evalúa la experiencia en tu restaurante.',
-      icon: '🍽️',
+      icon: 'ph-fork-knife',
       category: 'Restaurante',
       brand: { primaryColor: '#b45309', secondaryColor: '#d97706', backgroundColor: '#fffbeb', surfaceColor: '#ffffff', textColor: '#451a03', buttonStyle: 'rounded', fontTitle: 'Playfair Display', fontBody: 'Lato', shadowPreset: 'soft' },
       questions: [
@@ -184,7 +304,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Encuesta Inmobiliaria',
       description: 'Captura preferencias para búsqueda de propiedades.',
-      icon: '🏠',
+      icon: 'ph-house',
       category: 'Inmobiliaria',
       brand: { primaryColor: '#374151', secondaryColor: '#6b7280', backgroundColor: '#f9fafb', surfaceColor: '#ffffff', textColor: '#111827', buttonStyle: 'square', fontTitle: 'Outfit', fontBody: 'Inter', shadowPreset: 'strong' },
       questions: [
@@ -368,27 +488,41 @@ export class EditorPage implements OnInit, OnDestroy {
   ];
 
   readonly fontPresets: { family: string; category: string }[] = [
-    { family: 'Inter', category: 'Sans-serif' },
-    { family: 'Poppins', category: 'Sans-serif' },
-    { family: 'Montserrat', category: 'Sans-serif' },
-    { family: 'Roboto', category: 'Sans-serif' },
-    { family: 'Lato', category: 'Sans-serif' },
-    { family: 'Open Sans', category: 'Sans-serif' },
-    { family: 'Nunito', category: 'Sans-serif' },
-    { family: 'Raleway', category: 'Sans-serif' },
+    { family: 'Inter', category: 'Sans' },
+    { family: 'Poppins', category: 'Sans' },
+    { family: 'Montserrat', category: 'Sans' },
+    { family: 'Roboto', category: 'Sans' },
+    { family: 'Lato', category: 'Sans' },
+    { family: 'Open Sans', category: 'Sans' },
+    { family: 'Nunito', category: 'Sans' },
+    { family: 'Raleway', category: 'Sans' },
     { family: 'Playfair Display', category: 'Serif' },
     { family: 'Merriweather', category: 'Serif' },
-    { family: 'Oswald', category: 'Sans-serif' },
-    { family: 'Rubik', category: 'Sans-serif' },
-    { family: 'Work Sans', category: 'Sans-serif' },
-    { family: 'Quicksand', category: 'Sans-serif' },
-    { family: 'DM Sans', category: 'Sans-serif' },
-    { family: 'Manrope', category: 'Sans-serif' },
-    { family: 'Urbanist', category: 'Sans-serif' },
+    { family: 'Oswald', category: 'Display' },
+    { family: 'Rubik', category: 'Sans' },
+    { family: 'Work Sans', category: 'Sans' },
+    { family: 'Quicksand', category: 'Sans' },
+    { family: 'DM Sans', category: 'Sans' },
+    { family: 'Manrope', category: 'Sans' },
+    { family: 'Urbanist', category: 'Sans' },
     { family: 'Bebas Neue', category: 'Display' },
-    { family: 'Archivo', category: 'Sans-serif' },
-    { family: 'Space Grotesk', category: 'Sans-serif' }
+    { family: 'Archivo', category: 'Sans' },
+    { family: 'Space Grotesk', category: 'Display' },
+    { family: 'Plus Jakarta Sans', category: 'Sans' },
+    { family: 'Outfit', category: 'Sans' },
+    { family: 'Crimson Text', category: 'Serif' },
+    { family: 'Lora', category: 'Serif' }
   ];
+
+  readonly fontPairings = [
+    { name: 'Moderno', title: 'Plus Jakarta Sans', body: 'Inter', description: 'Limpio y profesional' },
+    { name: 'Elegante', title: 'Playfair Display', body: 'Lora', description: 'Refinado y clásico' },
+    { name: 'Tech', title: 'Space Grotesk', body: 'Manrope', description: 'Futurista y geométrico' },
+    { name: 'Suave', title: 'Outfit', body: 'Quicksand', description: 'Amigable y redondeado' },
+    { name: 'Editorial', title: 'Oswald', body: 'Roboto', description: 'Impactante y estructurado' }
+  ];
+
+  selectedFontCategory: 'All' | 'Sans' | 'Serif' | 'Display' = 'All';
 
   private loadedFonts = new Set<string>();
 
@@ -415,14 +549,25 @@ export class EditorPage implements OnInit, OnDestroy {
     }
 
     void this.loadExistingSurvey(id);
+    // Initial history push
+    setTimeout(() => this.pushToHistory(), 1000);
   }
 
   ngOnDestroy(): void {
     this.saveSubject.complete();
   }
 
-  @HostListener('document:mousemove', ['$event'])
+  @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
+    if (this.isResizing) {
+      const newWidth = window.innerWidth - event.clientX;
+      if (newWidth > 300 && newWidth < (window.innerWidth * 0.7)) {
+        this.rightSidebarWidth = newWidth;
+        localStorage.setItem('df_sidebar_width', String(newWidth));
+      }
+      return;
+    }
+
     const transform = this.activeTransform;
     if (!transform) {
       return;
@@ -478,6 +623,36 @@ export class EditorPage implements OnInit, OnDestroy {
 
         images[imageIndex] = { ...item, config };
         return { ...survey, metadata: { ...metadata, welcomeImages: images } };
+      });
+      return;
+    }
+
+    if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta'].includes(transform.kind)) {
+      this.survey.update((survey) => {
+        if (!survey) return survey;
+        const metadata = this.ensureMetadata(survey.metadata);
+        
+        let configKey: 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeCtaConfig' | 'welcomeKickerConfig' | 'welcomeMetaConfig';
+        switch (transform.kind) {
+          case 'welcome-title': configKey = 'welcomeTitleConfig'; break;
+          case 'welcome-desc': configKey = 'welcomeDescConfig'; break;
+          case 'welcome-cta': configKey = 'welcomeCtaConfig'; break;
+          case 'welcome-kicker': configKey = 'welcomeKickerConfig'; break;
+          case 'welcome-meta': configKey = 'welcomeMetaConfig'; break;
+          default: return survey;
+        }
+
+        const config = { ...(metadata[configKey] ?? { x: 40, y: 150, width: 400, height: 100 }) };
+        if (transform.mode === 'move') {
+          config.x = transform.initialX + dx;
+          config.y = transform.initialY + dy;
+        } else {
+          config.width = Math.max(transform.initialWidth + dx, 50);
+          config.height = Math.max(transform.initialHeight + dy, 30);
+        }
+
+        metadata[configKey] = config;
+        return { ...survey, metadata };
       });
       return;
     }
@@ -540,14 +715,80 @@ export class EditorPage implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('document:mouseup')
+  @HostListener('window:mouseup')
   onMouseUp(): void {
+    if (this.isResizing) {
+      this.isResizing = false;
+      return;
+    }
+
     if (!this.activeTransform) {
       return;
     }
 
     this.activeTransform = null;
+    this.pushToHistory(); // Save state after transform
     this.queueSave();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    // Undo: Ctrl + Z
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+      event.preventDefault();
+      this.undo();
+    }
+    // Redo: Ctrl + Y or Ctrl + Shift + Z
+    if ((event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === 'y' || (event.shiftKey && event.key.toLowerCase() === 'z'))) {
+      event.preventDefault();
+      this.redo();
+    }
+    // Save: Ctrl + S
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      this.saveNow();
+    }
+  }
+
+  private pushToHistory() {
+    if (this.isUndoingRedoing) return;
+    const state = JSON.stringify(this.survey());
+    
+    // Only push if different from current head
+    if (this.historyIndex >= 0 && this.historyStack[this.historyIndex] === state) return;
+
+    // Remove any forward history if we're making a new change
+    this.historyStack = this.historyStack.slice(0, this.historyIndex + 1);
+    this.historyStack.push(state);
+    
+    // Limit history size to 50
+    if (this.historyStack.length > 50) this.historyStack.shift();
+    else this.historyIndex++;
+  }
+
+  undo() {
+    if (this.historyIndex > 0) {
+      this.historyIndex--;
+      this.applyHistoryState(this.historyStack[this.historyIndex]);
+    }
+  }
+
+  redo() {
+    if (this.historyIndex < this.historyStack.length - 1) {
+      this.historyIndex++;
+      this.applyHistoryState(this.historyStack[this.historyIndex]);
+    }
+  }
+
+  private applyHistoryState(stateJson: string) {
+    this.isUndoingRedoing = true;
+    try {
+      const state = JSON.parse(stateJson);
+      this.survey.set(state);
+      this.queueSave();
+    } finally {
+      this.isUndoingRedoing = false;
+    }
   }
 
   @HostListener('window:paste', ['$event'])
@@ -852,6 +1093,17 @@ export class EditorPage implements OnInit, OnDestroy {
     this.patchBrand({ [field]: family } as Partial<SurveyBrand>);
   }
 
+  applyFontPairing(pairing: { title: string, body: string }) {
+    this.updateFont('fontTitle', pairing.title);
+    this.updateFont('fontBody', pairing.body);
+    this.updateFont('fontButton', pairing.body);
+  }
+
+  filteredFonts() {
+    if (this.selectedFontCategory === 'All') return this.fontPresets;
+    return this.fontPresets.filter(f => f.category === this.selectedFontCategory);
+  }
+
   currentFontTitle(): string {
     return this.brand().fontTitle || 'Inter';
   }
@@ -896,9 +1148,9 @@ export class EditorPage implements OnInit, OnDestroy {
 
   readonly animationPresets: { value: string; label: string }[] = [
     { value: 'none', label: 'Ninguna' },
-    { value: 'fadeUp', label: 'Aparecer ↑' },
+    { value: 'fadeUp', label: 'Aparecer' },
     { value: 'scaleIn', label: 'Escalar' },
-    { value: 'slideLeft', label: 'Deslizar ←' }
+    { value: 'slideLeft', label: 'Deslizar' }
   ];
 
   toggleGlass(): void {
@@ -1357,6 +1609,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   queueSave(): void {
+    this.pushToHistory();
     this.saveSubject.next();
   }
 
@@ -1442,6 +1695,70 @@ export class EditorPage implements OnInit, OnDestroy {
       '--survey-font-button': `'${brand.fontButton || 'Inter'}', sans-serif`,
       '--survey-button-color': brand.buttonColor || brand.primaryColor || '#7c3aed',
       '--survey-button-text': brand.buttonTextColor || '#ffffff'
+    };
+  }
+
+  elementStyle(kind: AssetKind, index?: number): Record<string, string> {
+    const survey = this.survey();
+    if (!survey) return {};
+    const metadata = this.ensureMetadata(survey.metadata);
+    
+    let config: { x: number; y: number; width?: number; height?: number } | undefined;
+    
+    switch (kind) {
+      case 'logo': config = metadata.brand?.logoConfig; break;
+      case 'welcome-image': config = metadata.welcomeImages?.[index ?? 0]?.config; break;
+      case 'welcome-title': config = metadata.welcomeTitleConfig; break;
+      case 'welcome-desc': config = metadata.welcomeDescConfig; break;
+      case 'welcome-cta': config = metadata.welcomeCtaConfig; break;
+      case 'welcome-kicker': config = metadata.welcomeKickerConfig; break;
+      case 'welcome-meta': config = metadata.welcomeMetaConfig; break;
+    }
+
+    if (!config) return {};
+
+    return {
+      'position': 'absolute',
+      'left': `${config.x}px`,
+      'top': `${config.y}px`,
+      'width': config.width ? `${config.width}px` : 'auto',
+      'height': config.height ? `${config.height}px` : 'auto',
+      'z-index': kind.includes('image') ? '5' : '10'
+    };
+  }
+
+  startTransform(event: MouseEvent, kind: AssetKind, mode: TransformMode, index?: number): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const survey = this.survey();
+    if (!survey) return;
+    const metadata = this.ensureMetadata(survey.metadata);
+    
+    let config: { x: number; y: number; width: number; height: number } | undefined;
+    
+    switch (kind) {
+      case 'logo': config = metadata.brand?.logoConfig ?? this.defaultLogoConfig(); break;
+      case 'welcome-image': config = metadata.welcomeImages?.[index ?? 0]?.config; break;
+      case 'welcome-title': config = metadata.welcomeTitleConfig ?? { x: 44, y: 180, width: 500, height: 100 }; break;
+      case 'welcome-desc': config = metadata.welcomeDescConfig ?? { x: 44, y: 280, width: 450, height: 80 }; break;
+      case 'welcome-cta': config = metadata.welcomeCtaConfig ?? { x: 44, y: 400, width: 220, height: 60 }; break;
+      case 'welcome-kicker': config = metadata.welcomeKickerConfig ?? { x: 44, y: 140, width: 200, height: 30 }; break;
+      case 'welcome-meta': config = metadata.welcomeMetaConfig ?? { x: 44, y: 480, width: 300, height: 40 }; break;
+    }
+
+    if (!config) return;
+
+    this.activeTransform = {
+      kind,
+      index,
+      mode,
+      startX: event.clientX,
+      startY: event.clientY,
+      initialX: config.x,
+      initialY: config.y,
+      initialWidth: config.width,
+      initialHeight: config.height
     };
   }
 
@@ -1576,6 +1893,18 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   private readImageFile(file: File, onLoad: (imageUrl: string, width: number, height: number) => void): void {
+    // If it's a GIF, we preserve it to keep the animation
+    if (file.type === 'image/gif') {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => onLoad(reader.result as string, img.width, img.height);
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const image = new Image();
@@ -1596,13 +1925,19 @@ export class EditorPage implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
+
   private ensureMetadata(metadata?: SurveyMetadata): SurveyMetadata {
     return {
       brand: this.ensureBrand(metadata?.brand),
       welcomeImages: metadata?.welcomeImages ?? [],
       endTitle: metadata?.endTitle ?? 'Gracias por participar',
       endDescription: metadata?.endDescription ?? 'Tu respuesta ha sido registrada exitosamente.',
-      endImages: metadata?.endImages ?? []
+      endImages: metadata?.endImages ?? [],
+      welcomeTitleConfig: metadata?.welcomeTitleConfig,
+      welcomeDescConfig: metadata?.welcomeDescConfig,
+      welcomeCtaConfig: metadata?.welcomeCtaConfig,
+      welcomeKickerConfig: metadata?.welcomeKickerConfig,
+      welcomeMetaConfig: metadata?.welcomeMetaConfig
     };
   }
 
