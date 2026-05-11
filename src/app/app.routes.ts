@@ -10,6 +10,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/tour/tour').then(m => m.TourPage)
   },
   {
+    path: 'showcase',
+    loadComponent: () => import('./pages/showcase/showcase').then(m => m.ShowcasePage)
+  },
+  {
+    path: 'api-docs',
+    loadComponent: () => import('./pages/api-docs/api-docs').then(m => m.ApiDocsPage)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardPage)
   },

@@ -6,17 +6,33 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.55rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   border-radius: 9999px;
-  border: 2px solid #7C3AED;
+  border: 2px solid transparent;
   cursor: pointer;
   overflow: hidden;
   text-decoration: none;
   background-color: rgba(167, 139, 250, 0.15);
   color: #7C3AED;
   white-space: nowrap;
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wavy-btn:hover {
+  border-color: transparent;
+}
+
+/* Color Scheme Overrides */
+.wavy-btn[style*="background-color: rgb(243, 244, 246)"],
+.wavy-btn[style*="background-color: #f3f4f6"] {
+  color: #1d1b20;
+  border-color: #e5e7eb;
+}
+
+.wavy-btn[style*="background-color: rgb(29, 27, 32)"],
+.wavy-btn[style*="background-color: #1d1b20"] {
+  color: white;
 }
 
 /* ===== LARGE OVERRIDE ===== */

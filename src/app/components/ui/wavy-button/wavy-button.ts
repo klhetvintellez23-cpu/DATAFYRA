@@ -59,6 +59,7 @@ export class WavyButtonComponent implements OnInit, OnChanges {
   @Input() className: string = '';
   @Input() variant: 'default' | 'outline' = 'default';
   @Input() size: 'default' | 'lg' = 'default';
+  @Input() colorScheme: 'primary' | 'secondary' | 'dark' = 'primary';
   
   characters: string[] = [];
   isHovered = false;
@@ -75,7 +76,7 @@ export class WavyButtonComponent implements OnInit, OnChanges {
     if (changes['text']) {
       this.splitText();
     }
-    if (changes['variant']) {
+    if (changes['variant'] || changes['colorScheme']) {
       this.updateColors();
     }
   }
@@ -91,13 +92,32 @@ export class WavyButtonComponent implements OnInit, OnChanges {
         toBg: 'transparent',
         stroke: 'currentColor',
       };
-    } else {
-      // Soft Purple Trial: Soft tint idle, deep purple full on hover
-      this.colors = {
-        fromBg: 'rgba(167, 139, 250, 0.15)', // Soft purple tint
-        toBg: '#7C3AED',                     // Deep Purple target
-        stroke: '#7C3AED',                   // Deep Purple wave
-      };
+      return;
+    }
+
+    switch (this.colorScheme) {
+      case 'secondary':
+        this.colors = {
+          fromBg: 'rgba(243, 244, 246, 1)', // gray-100
+          toBg: 'rgba(229, 231, 235, 1)',   // gray-200
+          stroke: '#9ca3af',                // gray-400
+        };
+        break;
+      case 'dark':
+        this.colors = {
+          fromBg: '#1d1b20',
+          toBg: '#3c393f',
+          stroke: '#7F00FF',
+        };
+        break;
+      case 'primary':
+      default:
+        this.colors = {
+          fromBg: 'rgba(167, 139, 250, 0.15)', // Soft purple tint
+          toBg: '#7C3AED',                     // Deep Purple target
+          stroke: '#7C3AED',                   // Deep Purple wave
+        };
+        break;
     }
   }
 }

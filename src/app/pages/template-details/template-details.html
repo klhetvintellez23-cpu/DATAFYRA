@@ -53,11 +53,17 @@
                     </div>
 
                     <div class="pt-8 border-t border-gray-100 flex flex-col gap-4">
-                        <app-wavy-button 
-                            (click)="openAuth('register', $event)" 
-                            className="w-full h-14 bg-[#7F00FF] hover:bg-[#6a00d6] text-white rounded-[20px] font-black text-lg shadow-[0_15px_30px_-8px_rgba(127,0,255,0.25)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" 
-                            text="Usar esta plantilla">
-                        </app-wavy-button>
+                        <button 
+                            (click)="useTemplate($event)"
+                            [disabled]="isCreating()"
+                            class="w-full h-14 bg-[#7F00FF] hover:bg-[#6a00d6] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-[20px] font-black text-lg shadow-[0_15px_30px_-8px_rgba(127,0,255,0.25)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
+                            @if (isCreating()) {
+                                <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Creando encuesta...
+                            } @else {
+                                Usar esta plantilla
+                            }
+                        </button>
                         <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">Empieza gratis • Sin compromiso</p>
                     </div>
                 </div>

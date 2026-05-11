@@ -1,4 +1,4 @@
-import { Component, input, output, EventEmitter, inject } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -17,6 +17,7 @@ export class NavbarComponent {
   hijackAuth = input(false);
   isOverlayOpen = input(false);
   authModal = inject(AuthModalService);
+  mobileMenuOpen = signal(false);
 
   authAction = output<boolean>();
 
@@ -29,6 +30,7 @@ export class NavbarComponent {
 
   triggerAuth(isLogin: boolean, event?: Event) {
     if (event) event.preventDefault();
+    this.mobileMenuOpen.set(false);
     if (this.hijackAuth()) {
       this.authAction.emit(isLogin);
     } else {
@@ -37,7 +39,16 @@ export class NavbarComponent {
   }
 
   async logout(): Promise<void> {
+    this.mobileMenuOpen.set(false);
     await this.auth.logout();
     this.router.navigate(['/']);
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((open) => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 }

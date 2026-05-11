@@ -1,9 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
-export type QuestionType = 'rating' | 'multiple-choice' | 'text' | 'long-text' | 'scale';
+export type QuestionType =
+  | 'rating'
+  | 'multiple-choice'
+  | 'multi-select'
+  | 'text'
+  | 'long-text'
+  | 'scale'
+  | 'nps'
+  | 'email'
+  | 'phone'
+  | 'date'
+  | 'time';
 export type SurveyStatus = 'borrador' | 'activo' | 'cerrado';
-export type AnswerValue = string | number | boolean | Record<string, unknown> | null;
+export type AnswerValue = string | string[] | number | boolean | Record<string, unknown> | null;
 type SurveyQuestionDbType = 'calificacion' | 'seleccion_multiple' | 'texto' | 'texto_largo' | 'escala';
 
 export interface SurveyQuestionInput {
@@ -19,6 +30,20 @@ export interface SurveyQuestionInput {
   max?: number;
   imageUrl?: string;
   imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    minSelections?: number;
+    maxSelections?: number;
+    validationType?: 'email' | 'phone' | 'url' | 'number' | 'custom';
+    customPattern?: string;
+  };
+  logic?: Array<{
+    answerEquals?: AnswerValue;
+    answerIncludes?: string;
+    goTo?: string;
+  }>;
+  randomizeOptions?: boolean;
 }
 
 export interface SurveySaveInput {
@@ -41,10 +66,14 @@ export interface SurveyQuestionRow {
   enunciado: string;
   es_obligatoria: boolean;
   metadatos?: {
+    questionType?: QuestionType;
     min?: number;
     max?: number;
     imageUrl?: string;
     imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+    validation?: SurveyQuestionInput['validation'];
+    logic?: SurveyQuestionInput['logic'];
+    randomizeOptions?: boolean;
   } | null;
   indice_orden?: number | null;
   opciones_pregunta?: SurveyOptionRow[] | null;
@@ -69,6 +98,7 @@ export interface SurveyRow {
   titulo: string;
   descripcion: string;
   estado: SurveyStatus;
+  metadatos?: any;
   creado_el: string;
   actualizado_el: string;
   envios_count?: Array<{ count: number }> | null;
@@ -174,14 +204,26 @@ export class SurveyRepositoryService {
       return null;
     }
 
-    const { error: surveyError } = await this.supabase
+    const surveyPayload: Record<string, any> = {
+      titulo: input.title,
+      descripcion: input.description,
+      estado: input.status,
+      metadatos: input.metadata ?? null
+    };
+
+    let { error: surveyError } = await this.supabase
       .from('encuestas')
-      .update({
-        titulo: input.title,
-        descripcion: input.description,
-        estado: input.status
-      })
+      .update(surveyPayload)
       .eq('id', input.id);
+
+    if (surveyError && this.isMissingMetadataColumnError(surveyError)) {
+      delete surveyPayload['metadatos'];
+      const retry = await this.supabase
+        .from('encuestas')
+        .update(surveyPayload)
+        .eq('id', input.id);
+      surveyError = retry.error;
+    }
 
     if (surveyError) {
       console.error('Error updating survey:', surveyError);
@@ -237,7 +279,7 @@ export class SurveyRepositoryService {
 
       savedQuestionIds.push(questionId);
 
-      if (question.type !== 'multiple-choice') {
+      if (question.type !== 'multiple-choice' && question.type !== 'multi-select') {
         const { error } = await this.supabase
           .from('opciones_pregunta')
           .delete()
@@ -383,13 +425,19 @@ export class SurveyRepositoryService {
   private mapQuestionTypeToDb(type: QuestionType): SurveyQuestionDbType {
     switch (type) {
       case 'text':
+      case 'email':
+      case 'phone':
+      case 'date':
+      case 'time':
         return 'texto';
       case 'long-text':
         return 'texto_largo';
       case 'multiple-choice':
+      case 'multi-select':
         return 'seleccion_multiple';
       case 'rating':
         return 'calificacion';
+      case 'nps':
       case 'scale':
       default:
         return 'escala';
@@ -397,11 +445,11 @@ export class SurveyRepositoryService {
   }
 
   private buildMetadata(question: SurveyQuestionInput): Record<string, any> | null {
-    const meta: Record<string, any> = {};
+    const meta: Record<string, any> = { questionType: question.type };
     
-    if (question.type === 'rating' || question.type === 'scale') {
+    if (question.type === 'rating' || question.type === 'scale' || question.type === 'nps') {
       meta['min'] = question.min ?? 1;
-      meta['max'] = question.max ?? (question.type === 'rating' ? 10 : 5);
+      meta['max'] = question.max ?? 10;
     }
     
     if (question.imageUrl) {
@@ -411,6 +459,23 @@ export class SurveyRepositoryService {
       meta['imageConfig'] = question.imageConfig;
     }
 
+    if (question.validation && Object.values(question.validation).some((value) => value !== undefined && value !== '')) {
+      meta['validation'] = question.validation;
+    }
+
+    if (question.logic?.length) {
+      meta['logic'] = question.logic.filter((rule) => rule.goTo);
+    }
+
+    if (question.randomizeOptions) {
+      meta['randomizeOptions'] = true;
+    }
+
     return Object.keys(meta).length > 0 ? meta : null;
+  }
+
+  private isMissingMetadataColumnError(error: { message?: string; code?: string }): boolean {
+    const message = error.message?.toLowerCase() ?? '';
+    return message.includes('metadatos') && (message.includes('column') || message.includes('schema'));
   }
 }

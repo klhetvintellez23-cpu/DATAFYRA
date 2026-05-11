@@ -4,6 +4,7 @@ import { CanvasElement } from '../../services/survey.service';
 
 @Component({
   selector: 'app-canvas-element',
+  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="element-wrapper"
@@ -15,7 +16,10 @@ import { CanvasElement } from '../../services/survey.service';
          (click)="handleClick($event)">
          
       @if (element.type === 'text') {
-        <div class="element-text" [ngStyle]="element.styles" contenteditable="true" (blur)="onContentChange($event)">
+        <div class="element-text" 
+             [ngStyle]="element.styles" 
+             [attr.contenteditable]="!isReadonly" 
+             (blur)="onContentChange($event)">
           {{ element.content }}
         </div>
       }
@@ -52,6 +56,7 @@ import { CanvasElement } from '../../services/survey.service';
       height: 100%;
       outline: none;
       word-wrap: break-word;
+      white-space: pre-line;
     }
     .element-button {
       width: 100%;
@@ -79,17 +84,20 @@ import { CanvasElement } from '../../services/survey.service';
 export class CanvasElementComponent {
   @Input({ required: true }) element!: CanvasElement;
   @Input() selected = false;
+  @Input() isReadonly = false;
   
   @Output() elementClick = new EventEmitter<MouseEvent>();
   @Output() contentChange = new EventEmitter<string>();
 
   handleClick(event: MouseEvent) {
+    if (this.isReadonly) return;
     if (!this.element.locked) {
       this.elementClick.emit(event);
     }
   }
 
   onContentChange(event: Event) {
+    if (this.isReadonly) return;
     const target = event.target as HTMLElement;
     this.contentChange.emit(target.innerText);
   }

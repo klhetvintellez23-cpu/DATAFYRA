@@ -4,15 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { CanvasStageComponent } from '../../components/canvas-stage/canvas-stage';
+import { SurveySimulatorComponent } from '../../components/survey-simulator/survey-simulator';
 import {
+  ConditionalRule,
   DecoratedImage,
   Question,
+  QuestionValidation,
   QuestionType,
   Survey,
   SurveyBrand,
   SurveyMetadata,
   SurveyService
 } from '../../services/survey.service';
+import type { CanvasElement, CanvasScreen } from '../../services/survey.service';
 import { AuthService } from '../../services/auth.service';
 
 type EditorTab = 'design' | 'preview' | 'collect' | 'analyze';
@@ -41,11 +46,16 @@ interface ActiveTransform {
   initialHeight: number;
 }
 
-import { CanvasStageComponent } from '../../components/canvas-stage/canvas-stage';
+interface PublishChecklistItem {
+  label: string;
+  ok: boolean;
+  detail: string;
+}
 
 @Component({
   selector: 'app-editor',
-  imports: [FormsModule, RouterLink, CommonModule, CanvasStageComponent],
+  standalone: true,
+  imports: [FormsModule, RouterLink, CommonModule, SurveySimulatorComponent, CanvasStageComponent],
   templateUrl: './editor.html',
   styleUrl: './editor.css'
 })
@@ -58,69 +68,66 @@ export class EditorPage implements OnInit, OnDestroy {
   saveError = signal<string | null>(null);
   infoMessage = signal<string | null>(null);
   copied = signal(false);
+  publishChecklist = signal<PublishChecklistItem[]>([]);
+  showPublishChecklist = signal(false);
 
-  activeSection: 'welcome' | 'questions' | 'end' = 'welcome';
-  activeQuestionIndex = 0;
+  activeSection = signal<'welcome' | 'questions' | 'end'>('welcome');
+  activeQuestionIndex = signal(0);
   addQuestionPanel = false;
-  
+
   // --- CANVAS STATE ---
   selectedElementIds = signal<string[]>([]);
-  
+
   canvasData = computed(() => {
     return this.survey()?.metadata?.canvas;
   });
 
   currentScreen = computed(() => {
     const data = this.canvasData();
-    if (!data) return null;
-    return data.screens.find(s => s.id === this.activeSection) || null;
+    if (!data || !data.screens || data.screens.length === 0) return null;
+
+    const section = this.activeSection();
+    const qIndex = this.activeQuestionIndex();
+
+    const targetId = section === 'questions' ? `question-${qIndex}` : section;
+    const screen = data.screens.find(s => s.id === targetId);
+
+    // Fallback to help with state transitions or missing IDs
+    return screen || data.screens[0];
   });
 
   currentElements = computed(() => {
     return this.currentScreen()?.elements || [];
   });
-  
+
+  selectedCanvasElements = computed(() => {
+    const selected = new Set(this.selectedElementIds());
+    return this.currentElements().filter((element) => selected.has(element.id));
+  });
+
+  layerElements = computed(() => {
+    return [...this.currentElements()].sort((a, b) => b.zIndex - a.zIndex);
+  });
+
+  canUndo = computed(() => this.historyIndex > 0);
+  canRedo = computed(() => this.historyIndex < this.historyStack.length - 1);
+
   onCanvasSelectionChange(ids: string[]) {
     this.selectedElementIds.set(ids);
   }
 
-  updateCanvasElement(event: { id: string, changes: Partial<any> }) {
-    this.survey.update(survey => {
-      if (!survey || !survey.metadata?.canvas) return survey;
-      
-      const newCanvas = { ...survey.metadata.canvas };
-      const newScreens = [...newCanvas.screens];
-      const screenIndex = newScreens.findIndex(s => s.id === this.activeSection);
-      
-      if (screenIndex !== -1) {
-        const screen = { ...newScreens[screenIndex] };
-        const elements = [...screen.elements];
-        const elIndex = elements.findIndex(e => e.id === event.id);
-        
-        if (elIndex !== -1) {
-          elements[elIndex] = { ...elements[elIndex], ...event.changes };
-          screen.elements = elements;
-          newScreens[screenIndex] = screen;
-          newCanvas.screens = newScreens;
-          
-          return {
-            ...survey,
-            metadata: { ...survey.metadata, canvas: newCanvas }
-          };
-        }
-      }
-      return survey;
-    });
-  }
-  
+
+
   // History Stack for Undo/Redo
   private historyStack: string[] = [];
   private historyIndex = -1;
   private isUndoingRedoing = false;
-  
+  private copiedElementStyles: Record<string, any> | null = null;
+
   // Customization Tabs (Canva Style)
   customTab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' = 'palettes';
   currentTab: EditorTab = 'design';
+  designCanvasMode: 'functional' | 'free' = 'functional';
 
   previewDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   contextMenuVisible = false;
@@ -138,8 +145,8 @@ export class EditorPage implements OnInit, OnDestroy {
   focusSettings(tab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media', section?: 'welcome' | 'questions' | 'end', index?: number) {
     this.currentTab = 'design';
     this.customTab = tab;
-    if (section) this.activeSection = section;
-    if (index !== undefined) this.activeQuestionIndex = index;
+    if (section) this.activeSection.set(section);
+    if (index !== undefined) this.activeQuestionIndex.set(index);
   }
 
 
@@ -168,7 +175,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
-    
+
     // Check if selection is within our editable canvas
     const canvas = document.querySelector('.editor-canvas');
     if (canvas && canvas.contains(range.commonAncestorContainer)) {
@@ -339,16 +346,17 @@ export class EditorPage implements OnInit, OnDestroy {
           : []
       }));
       const metadata = this.ensureMetadata(survey.metadata);
-      return {
+      const updated = {
         ...survey,
         title: survey.title || tpl.name,
         questions,
         metadata: { ...metadata, brand, endTitle: tpl.endTitle, endDescription: 'Tus respuestas han sido registradas.' }
       };
+      return this.normalizeSurvey(updated);
     });
 
-    this.activeSection = 'welcome';
-    this.activeQuestionIndex = 0;
+    this.activeSection.set('welcome');
+    this.activeQuestionIndex.set(0);
     this.showTemplateModal = false;
     this.queueSave();
   }
@@ -481,10 +489,17 @@ export class EditorPage implements OnInit, OnDestroy {
   ];
 
   readonly questionTypes: { type: QuestionType; label: string; description: string }[] = [
-    { type: 'rating', label: 'Rating (1-10)', description: 'Puntaje del 1 al 10' },
-    { type: 'multiple-choice', label: 'Opcion multiple', description: 'Varias opciones a elegir' },
-    { type: 'text', label: 'Texto libre', description: 'Respuesta abierta' },
-    { type: 'scale', label: 'Escala (1-5)', description: 'Nivel de satisfaccion' }
+    { type: 'text', label: 'Texto corto', description: 'Respuesta breve' },
+    { type: 'long-text', label: 'Texto largo', description: 'Respuesta detallada' },
+    { type: 'multiple-choice', label: 'Seleccion unica', description: 'Una opcion a elegir' },
+    { type: 'multi-select', label: 'Seleccion multiple', description: 'Varias opciones a elegir' },
+    { type: 'scale', label: 'Escala 1-10', description: 'Nivel numerico' },
+    { type: 'nps', label: 'NPS', description: 'Recomendacion 0 a 10' },
+    { type: 'rating', label: 'Estrellas', description: 'Calificacion de 1 a 5' },
+    { type: 'email', label: 'Email', description: 'Correo electronico' },
+    { type: 'phone', label: 'Telefono', description: 'Numero de contacto' },
+    { type: 'date', label: 'Fecha', description: 'Selector de fecha' },
+    { type: 'time', label: 'Hora', description: 'Selector de hora' }
   ];
 
   readonly fontPresets: { family: string; category: string }[] = [
@@ -631,7 +646,7 @@ export class EditorPage implements OnInit, OnDestroy {
       this.survey.update((survey) => {
         if (!survey) return survey;
         const metadata = this.ensureMetadata(survey.metadata);
-        
+
         let configKey: 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeCtaConfig' | 'welcomeKickerConfig' | 'welcomeMetaConfig';
         switch (transform.kind) {
           case 'welcome-title': configKey = 'welcomeTitleConfig'; break;
@@ -733,6 +748,13 @@ export class EditorPage implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      if (this.addQuestionPanel) {
+        this.addQuestionPanel = false;
+      }
+      return;
+    }
+
     // Undo: Ctrl + Z
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
       event.preventDefault();
@@ -753,14 +775,14 @@ export class EditorPage implements OnInit, OnDestroy {
   private pushToHistory() {
     if (this.isUndoingRedoing) return;
     const state = JSON.stringify(this.survey());
-    
+
     // Only push if different from current head
     if (this.historyIndex >= 0 && this.historyStack[this.historyIndex] === state) return;
 
     // Remove any forward history if we're making a new change
     this.historyStack = this.historyStack.slice(0, this.historyIndex + 1);
     this.historyStack.push(state);
-    
+
     // Limit history size to 50
     if (this.historyStack.length > 50) this.historyStack.shift();
     else this.historyIndex++;
@@ -809,17 +831,17 @@ export class EditorPage implements OnInit, OnDestroy {
         return;
       }
 
-      if (this.activeSection === 'welcome') {
+      if (this.activeSection() === 'welcome') {
         this.readImageFile(file, (imageUrl, width, height) => {
           this.addWelcomeImage(imageUrl, width, height);
         });
-      } else if (this.activeSection === 'end') {
+      } else if (this.activeSection() === 'end') {
         this.readImageFile(file, (imageUrl, width, height) => {
           this.addEndImage(imageUrl, width, height);
         });
-      } else if (this.activeSection === 'questions') {
+      } else if (this.activeSection() === 'questions') {
         this.readImageFile(file, (imageUrl, width, height) => {
-          this.attachQuestionImage(this.activeQuestionIndex, imageUrl, width, height);
+          this.attachQuestionImage(this.activeQuestionIndex(), imageUrl, width, height);
         });
       }
       break;
@@ -882,19 +904,19 @@ export class EditorPage implements OnInit, OnDestroy {
       type,
       text: '',
       required: true,
-      options: type === 'multiple-choice'
+      options: this.isChoiceType(type)
         ? [
             { id: this.createLocalId('option'), texto: 'Opcion 1' },
             { id: this.createLocalId('option'), texto: 'Opcion 2' }
           ]
         : [],
-      min: type === 'rating' || type === 'scale' ? 1 : undefined,
-      max: type === 'rating' ? 10 : type === 'scale' ? 5 : undefined
+      min: this.isScaleType(type) ? (type === 'nps' ? 0 : 1) : undefined,
+      max: this.isScaleType(type) ? (type === 'rating' ? 5 : 10) : undefined
     };
 
-    this.survey.set({ ...survey, questions: [...survey.questions, question] });
-    this.activeQuestionIndex = survey.questions.length;
-    this.activeSection = 'questions';
+    this.survey.set(this.normalizeSurvey({ ...survey, questions: [...survey.questions, question] }));
+    this.activeQuestionIndex.set(survey.questions.length);
+    this.activeSection.set('questions');
     this.addQuestionPanel = false;
     this.queueSave();
   }
@@ -909,30 +931,33 @@ export class EditorPage implements OnInit, OnDestroy {
       const question = { ...questions[index] };
       question.type = type;
 
-      if (type === 'multiple-choice' && question.options.length === 0) {
+      if (this.isChoiceType(type) && question.options.length === 0) {
         question.options = [
           { id: this.createLocalId('option'), texto: 'Opcion 1' },
           { id: this.createLocalId('option'), texto: 'Opcion 2' }
         ];
       }
 
-      if (type !== 'multiple-choice') {
+      if (!this.isChoiceType(type)) {
         question.options = [];
       }
 
       if (type === 'rating') {
         question.min = 1;
+        question.max = 5;
+      } else if (type === 'nps') {
+        question.min = 0;
         question.max = 10;
       } else if (type === 'scale') {
         question.min = 1;
-        question.max = 5;
+        question.max = 10;
       } else {
         delete question.min;
         delete question.max;
       }
 
       questions[index] = question;
-      return { ...survey, questions };
+      return this.normalizeSurvey({ ...survey, questions });
     });
     this.queueSave();
   }
@@ -948,6 +973,44 @@ export class EditorPage implements OnInit, OnDestroy {
     }
 
     this.updateQuestion(index, { required: !question.required });
+  }
+
+  updateQuestionValidation(index: number, patch: Partial<QuestionValidation>): void {
+    const current = this.survey()?.questions[index]?.validation ?? {};
+    const validation = this.cleanValidation({ ...current, ...patch });
+    this.updateQuestion(index, { validation });
+  }
+
+  toggleRandomizeOptions(index: number): void {
+    const question = this.survey()?.questions[index];
+    if (!question) return;
+    this.updateQuestion(index, { randomizeOptions: !question.randomizeOptions });
+  }
+
+  updateQuestionLogic(index: number, patch: Partial<ConditionalRule>): void {
+    const question = this.survey()?.questions[index];
+    if (!question) return;
+    const current = question.logic?.[0] ?? {};
+    const next = { ...current, ...patch };
+    this.updateQuestion(index, { logic: next.goTo ? [next] : [] });
+  }
+
+  clearQuestionLogic(index: number): void {
+    this.updateQuestion(index, { logic: [] });
+  }
+
+  logicAnswerValue(question: Question): string {
+    const rule = question.logic?.[0];
+    const value = rule?.answerIncludes ?? rule?.answerEquals;
+    return typeof value === 'string' ? value : '';
+  }
+
+  logicTargetValue(question: Question): string {
+    return question.logic?.[0]?.goTo ?? '';
+  }
+
+  logicTargetQuestions(currentIndex: number): Question[] {
+    return this.survey()?.questions.filter((_, index) => index > currentIndex) ?? [];
   }
 
   updateOption(questionIndex: number, optionIndex: number, value: string): void {
@@ -1002,11 +1065,13 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   removeQuestion(index: number): void {
-    this.survey.update((survey) => survey ? {
-      ...survey,
-      questions: survey.questions.filter((_, questionIndex) => questionIndex !== index)
-    } : null);
-    this.activeQuestionIndex = Math.max(0, this.activeQuestionIndex - (this.activeQuestionIndex >= index ? 1 : 0));
+    this.survey.update((survey) => survey
+      ? this.normalizeSurvey({
+        ...survey,
+        questions: survey.questions.filter((_, questionIndex) => questionIndex !== index)
+      })
+      : null);
+    this.activeQuestionIndex.update(idx => Math.max(0, idx - (idx >= index ? 1 : 0)));
     this.queueSave();
   }
 
@@ -1029,9 +1094,9 @@ export class EditorPage implements OnInit, OnDestroy {
 
     const questions = [...survey.questions];
     questions.splice(index + 1, 0, clone);
-    this.survey.set({ ...survey, questions });
-    this.activeQuestionIndex = index + 1;
-    this.activeSection = 'questions';
+    this.survey.set(this.normalizeSurvey({ ...survey, questions }));
+    this.activeQuestionIndex.set(index + 1);
+    this.activeSection.set('questions');
     this.queueSave();
   }
 
@@ -1048,8 +1113,8 @@ export class EditorPage implements OnInit, OnDestroy {
 
       const questions = [...survey.questions];
       [questions[index], questions[target]] = [questions[target], questions[index]];
-      this.activeQuestionIndex = target;
-      return { ...survey, questions };
+      this.activeQuestionIndex.set(target);
+      return this.normalizeSurvey({ ...survey, questions });
     });
     this.queueSave();
   }
@@ -1233,6 +1298,61 @@ export class EditorPage implements OnInit, OnDestroy {
     return this.survey()?.metadata?.ctaText || 'Comenzar encuesta';
   }
 
+  paginationMode(): NonNullable<SurveyMetadata['paginationMode']> {
+    return this.survey()?.metadata?.paginationMode ?? 'one-by-one';
+  }
+
+  questionsPerPage(): number {
+    return this.survey()?.metadata?.questionsPerPage ?? 3;
+  }
+
+  updatePaginationMode(mode: NonNullable<SurveyMetadata['paginationMode']>): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      return {
+        ...survey,
+        metadata: {
+          ...metadata,
+          paginationMode: mode,
+          questionsPerPage: mode === 'paged' ? this.questionsPerPage() : metadata.questionsPerPage
+        }
+      };
+    });
+    this.queueSave();
+  }
+
+  updateQuestionsPerPage(value: number | string): void {
+    const parsed = Number(value);
+    const questionsPerPage = Math.max(2, Math.min(50, Number.isFinite(parsed) ? Math.round(parsed) : 3));
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      return {
+        ...survey,
+        metadata: {
+          ...metadata,
+          paginationMode: 'paged',
+          questionsPerPage
+        }
+      };
+    });
+    this.queueSave();
+  }
+
+  progressMode(): NonNullable<SurveyMetadata['progressMode']> {
+    return this.survey()?.metadata?.progressMode ?? 'percentage';
+  }
+
+  updateProgressMode(mode: NonNullable<SurveyMetadata['progressMode']>): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      return { ...survey, metadata: { ...metadata, progressMode: mode } };
+    });
+    this.queueSave();
+  }
+
   readonly progressStyles: { value: string; label: string }[] = [
     { value: 'line', label: 'Barra' },
     { value: 'dots', label: 'Puntos' },
@@ -1260,12 +1380,12 @@ export class EditorPage implements OnInit, OnDestroy {
 
   progressPercent(): number {
     const total = this.survey()?.questions.length || 1;
-    return Math.round(((this.activeQuestionIndex + 1) / total) * 100);
+    return Math.round(((this.activeQuestionIndex() + 1) / total) * 100);
   }
 
   questionNavLabel(): string {
     const total = this.survey()?.questions.length || 1;
-    return `${this.activeQuestionIndex + 1} de ${total}`;
+    return `${this.activeQuestionIndex() + 1} de ${total}`;
   }
 
   updateLogoSize(value: number): void {
@@ -1420,7 +1540,7 @@ export class EditorPage implements OnInit, OnDestroy {
     }
 
     this.readImageFile(file, (imageUrl, width, height) => {
-      this.attachQuestionImage(this.activeQuestionIndex, imageUrl, width, height);
+      this.attachQuestionImage(this.activeQuestionIndex(), imageUrl, width, height);
     });
 
     input.value = '';
@@ -1531,9 +1651,13 @@ export class EditorPage implements OnInit, OnDestroy {
       return;
     }
 
-    const validationError = this.validateBeforePublish(survey);
+    const checklist = this.getPublishChecklist(survey);
+    this.publishChecklist.set(checklist);
+
+    const validationError = checklist.find((item) => !item.ok)?.detail ?? null;
     if (validationError) {
       this.saveError.set(validationError);
+      this.showPublishChecklist.set(true);
       return;
     }
 
@@ -1550,6 +1674,7 @@ export class EditorPage implements OnInit, OnDestroy {
       this.currentTab = 'collect';
       this.pulseSavedState();
       this.infoMessage.set('Encuesta publicada correctamente.');
+      this.showPublishChecklist.set(false);
     } catch (error) {
       console.error('Error publishing survey:', error);
       this.saveError.set('No se pudo publicar la encuesta.');
@@ -1618,6 +1743,40 @@ export class EditorPage implements OnInit, OnDestroy {
     this.preview.set(tab === 'preview');
   }
 
+  closePublishChecklist(): void {
+    this.showPublishChecklist.set(false);
+  }
+
+  setDesignCanvasMode(mode: 'functional' | 'free'): void {
+    this.designCanvasMode = mode;
+    this.selectedElementIds.set([]);
+  }
+
+  applyFunctionalDesignToCurrentFreeScreen(): void {
+    this.resetCurrentFreeLayout();
+  }
+
+  resetCurrentFreeLayout(): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const normalized = this.normalizeSurvey({
+        ...survey,
+        metadata: {
+          ...this.ensureMetadata(survey.metadata),
+          canvas: {
+            screens: (survey.metadata?.canvas?.screens ?? []).filter((screen) => {
+              const target = this.activeSection() === 'questions' ? `question-${this.activeQuestionIndex()}` : this.activeSection();
+              return screen.id !== target;
+            })
+          }
+        }
+      });
+      return normalized;
+    });
+    this.selectedElementIds.set([]);
+    this.queueSave();
+  }
+
   goToAnalytics(): void {
     const survey = this.survey();
     if (survey) {
@@ -1635,9 +1794,11 @@ export class EditorPage implements OnInit, OnDestroy {
     return `${count} pregunta${count === 1 ? '' : 's'}`;
   }
 
-  currentQuestion(): Question | null {
-    return this.survey()?.questions[this.activeQuestionIndex] ?? null;
-  }
+  currentQuestion = computed(() => {
+    const survey = this.survey();
+    const index = this.activeQuestionIndex();
+    return survey?.questions[index] ?? null;
+  });
 
   welcomeImages(): DecoratedImage[] {
     return this.survey()?.metadata?.welcomeImages ?? [];
@@ -1702,9 +1863,9 @@ export class EditorPage implements OnInit, OnDestroy {
     const survey = this.survey();
     if (!survey) return {};
     const metadata = this.ensureMetadata(survey.metadata);
-    
+
     let config: { x: number; y: number; width?: number; height?: number } | undefined;
-    
+
     switch (kind) {
       case 'logo': config = metadata.brand?.logoConfig; break;
       case 'welcome-image': config = metadata.welcomeImages?.[index ?? 0]?.config; break;
@@ -1730,13 +1891,13 @@ export class EditorPage implements OnInit, OnDestroy {
   startTransform(event: MouseEvent, kind: AssetKind, mode: TransformMode, index?: number): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const survey = this.survey();
     if (!survey) return;
     const metadata = this.ensureMetadata(survey.metadata);
-    
+
     let config: { x: number; y: number; width: number; height: number } | undefined;
-    
+
     switch (kind) {
       case 'logo': config = metadata.brand?.logoConfig ?? this.defaultLogoConfig(); break;
       case 'welcome-image': config = metadata.welcomeImages?.[index ?? 0]?.config; break;
@@ -1805,18 +1966,191 @@ export class EditorPage implements OnInit, OnDestroy {
 
       const metadata = this.ensureMetadata(survey.metadata);
       const brand = this.ensureBrand(metadata.brand);
+      const updatedMetadata = {
+        ...metadata,
+        brand: { ...brand, ...patch }
+      };
+
+      // Recalculate canvas screens with new brand colors
+      return this.normalizeSurvey({ ...survey, metadata: updatedMetadata });
+    });
+    this.queueSave();
+  }
+
+  updateCanvasElement(event: { id: string; changes: Partial<CanvasElement> }): void {
+    this.survey.update((survey) => {
+      if (!survey || !survey.metadata?.canvas) return survey;
+
+      const canvas = { ...survey.metadata.canvas };
+      const section = this.activeSection();
+      const qIndex = this.activeQuestionIndex();
+      const targetId = section === 'questions' ? `question-${qIndex}` : section;
+
+      const screenIndex = canvas.screens.findIndex(s => s.id === targetId);
+      if (screenIndex === -1) return survey;
+
+      const screen = { ...canvas.screens[screenIndex] };
+      const elements = [...screen.elements];
+      const elIndex = elements.findIndex(e => e.id === event.id);
+
+      if (elIndex === -1) return survey;
+
+      const existing = elements[elIndex];
+      elements[elIndex] = {
+        ...existing,
+        ...event.changes,
+        styles: {
+          ...existing.styles,
+          ...(event.changes.styles ?? {}),
+          __freeEdited: true
+        }
+      };
+      screen.elements = elements;
+      canvas.screens[screenIndex] = screen;
+
       return {
         ...survey,
         metadata: {
-          ...metadata,
-          brand: {
-            ...brand,
-            ...patch
-          }
+          ...survey.metadata,
+          canvas
         }
       };
     });
     this.queueSave();
+  }
+
+  selectLayerElement(id: string): void {
+    this.selectedElementIds.set([id]);
+  }
+
+  alignSelected(direction: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'): void {
+    const elements = this.selectedCanvasElements();
+    if (elements.length === 0) return;
+
+    const updates: Record<string, Partial<CanvasElement>> = {};
+    for (const element of elements) {
+      if (element.locked) continue;
+      if (direction === 'left') updates[element.id] = { x: 40 };
+      if (direction === 'center') updates[element.id] = { x: Math.round((1000 - element.width) / 2) };
+      if (direction === 'right') updates[element.id] = { x: Math.round(1000 - element.width - 40) };
+      if (direction === 'top') updates[element.id] = { y: 40 };
+      if (direction === 'middle') updates[element.id] = { y: Math.round((600 - element.height) / 2) };
+      if (direction === 'bottom') updates[element.id] = { y: Math.round(600 - element.height - 40) };
+    }
+
+    this.patchCurrentScreenElements(updates);
+  }
+
+  bringSelectedForward(): void {
+    this.adjustSelectedZIndex(1);
+  }
+
+  sendSelectedBackward(): void {
+    this.adjustSelectedZIndex(-1);
+  }
+
+  duplicateSelectedElements(): void {
+    const selected = this.selectedCanvasElements();
+    if (selected.length === 0) return;
+
+    const clones = selected.map((element, index) => ({
+      ...element,
+      id: this.createLocalId(`${element.id}-copy`),
+      x: element.x + 24 + index * 8,
+      y: element.y + 24 + index * 8,
+      locked: false,
+      zIndex: element.zIndex + 10 + index
+    }));
+
+    this.survey.update((survey) => this.updateCurrentScreen(survey, (screen) => ({
+      ...screen,
+      elements: [...screen.elements, ...clones].sort((a, b) => a.zIndex - b.zIndex)
+    })));
+    this.selectedElementIds.set(clones.map((element) => element.id));
+    this.queueSave();
+  }
+
+  toggleSelectedLock(): void {
+    const selectedIds = this.selectedElementIds();
+    if (selectedIds.length === 0) return;
+    const selected = this.selectedCanvasElements();
+    const shouldLock = selected.some((element) => !element.locked);
+    this.patchCurrentScreenElements(Object.fromEntries(selectedIds.map((id) => [id, { locked: shouldLock }])));
+  }
+
+  deleteSelectedElements(): void {
+    const selectedIds = new Set(this.selectedElementIds());
+    if (selectedIds.size === 0) return;
+
+    this.survey.update((survey) => this.updateCurrentScreen(survey, (screen) => ({
+      ...screen,
+      elements: screen.elements.filter((element) => element.locked || !selectedIds.has(element.id))
+    })));
+    this.selectedElementIds.set([]);
+    this.queueSave();
+  }
+
+  copySelectedStyle(): void {
+    const element = this.selectedCanvasElements()[0];
+    if (!element) return;
+    this.copiedElementStyles = { ...element.styles };
+    this.infoMessage.set('Estilo copiado.');
+  }
+
+  pasteSelectedStyle(): void {
+    if (!this.copiedElementStyles) return;
+    const updates = Object.fromEntries(
+      this.selectedCanvasElements()
+        .filter((element) => !element.locked)
+        .map((element) => [element.id, { styles: { ...element.styles, ...this.copiedElementStyles } }])
+    );
+    this.patchCurrentScreenElements(updates);
+  }
+
+  private adjustSelectedZIndex(delta: number): void {
+    const updates = Object.fromEntries(
+      this.selectedCanvasElements()
+        .filter((element) => !element.locked)
+        .map((element) => [element.id, { zIndex: Math.max(0, element.zIndex + delta) }])
+    );
+    this.patchCurrentScreenElements(updates);
+  }
+
+  private patchCurrentScreenElements(updates: Record<string, Partial<CanvasElement>>): void {
+    if (Object.keys(updates).length === 0) return;
+
+    this.survey.update((survey) => this.updateCurrentScreen(survey, (screen) => ({
+      ...screen,
+      elements: screen.elements
+        .map((element) => updates[element.id] ? { ...element, ...updates[element.id] } : element)
+        .sort((a, b) => a.zIndex - b.zIndex)
+    })));
+    this.queueSave();
+  }
+
+  private updateCurrentScreen(survey: Survey | null, updater: (screen: CanvasScreen) => CanvasScreen): Survey | null {
+    if (!survey || !survey.metadata?.canvas) return survey;
+
+    const section = this.activeSection();
+    const qIndex = this.activeQuestionIndex();
+    const targetId = section === 'questions' ? `question-${qIndex}` : section;
+    const canvas = { ...survey.metadata.canvas };
+    const screenIndex = canvas.screens.findIndex((screen) => screen.id === targetId);
+    if (screenIndex === -1) return survey;
+
+    const screens = [...canvas.screens];
+    screens[screenIndex] = updater({ ...screens[screenIndex], elements: [...screens[screenIndex].elements] });
+
+    return {
+      ...survey,
+      metadata: {
+        ...survey.metadata,
+        canvas: {
+          ...canvas,
+          screens
+        }
+      }
+    };
   }
 
   private addWelcomeImage(imageUrl: string, width: number, height: number): void {
@@ -1928,6 +2262,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
   private ensureMetadata(metadata?: SurveyMetadata): SurveyMetadata {
     return {
+      canvas: metadata?.canvas,
       brand: this.ensureBrand(metadata?.brand),
       welcomeImages: metadata?.welcomeImages ?? [],
       endTitle: metadata?.endTitle ?? 'Gracias por participar',
@@ -1937,7 +2272,14 @@ export class EditorPage implements OnInit, OnDestroy {
       welcomeDescConfig: metadata?.welcomeDescConfig,
       welcomeCtaConfig: metadata?.welcomeCtaConfig,
       welcomeKickerConfig: metadata?.welcomeKickerConfig,
-      welcomeMetaConfig: metadata?.welcomeMetaConfig
+      welcomeMetaConfig: metadata?.welcomeMetaConfig,
+      ctaText: metadata?.ctaText ?? 'Comenzar encuesta',
+      paginationMode: metadata?.paginationMode ?? 'one-by-one',
+      questionsPerPage: metadata?.questionsPerPage ?? 3,
+      progressMode: metadata?.progressMode ?? 'percentage',
+      theme: metadata?.theme,
+      thankYouTitle: metadata?.thankYouTitle,
+      thankYouDescription: metadata?.thankYouDescription
     };
   }
 
@@ -1974,16 +2316,15 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   private normalizeSurvey(survey: Survey): Survey {
-    return {
+    let normalized = {
       ...survey,
       title: survey.title.trim() || 'Nueva Encuesta',
       description: survey.description.trim(),
-      metadata: this.ensureMetadata(survey.metadata),
       questions: survey.questions.map((question, index) => ({
         ...question,
         id: question.id || this.createLocalId(`question-${index}`),
         text: question.text.trim(),
-        options: question.type === 'multiple-choice'
+        options: this.isChoiceType(question.type)
           ? question.options
             .map((option, optionIndex) => ({
               ...option,
@@ -1992,36 +2333,706 @@ export class EditorPage implements OnInit, OnDestroy {
             }))
             .filter((option) => option.texto.length > 0)
           : [],
-        min: question.type === 'rating' || question.type === 'scale' ? 1 : undefined,
-        max: question.type === 'rating' ? 10 : question.type === 'scale' ? 5 : undefined
+        min: this.isScaleType(question.type) ? (question.type === 'nps' ? 0 : 1) : undefined,
+        max: this.isScaleType(question.type) ? (question.type === 'rating' ? 5 : 10) : undefined,
+        validation: this.cleanValidation(question.validation),
+        logic: question.logic?.filter((rule) => rule.goTo) ?? [],
+        randomizeOptions: this.isChoiceType(question.type) ? question.randomizeOptions ?? false : false
       }))
+    };
+
+    normalized.metadata = this.ensureCanvasScreens(this.ensureMetadata(normalized.metadata), normalized);
+
+    return normalized;
+  }
+
+  private isChoiceType(type: QuestionType): boolean {
+    return type === 'multiple-choice' || type === 'multi-select';
+  }
+
+  private isScaleType(type: QuestionType): boolean {
+    return type === 'rating' || type === 'scale' || type === 'nps';
+  }
+
+  private ensureCanvasScreens(metadata: SurveyMetadata, survey: Survey): SurveyMetadata {
+    if (!metadata.canvas) {
+      metadata.canvas = { screens: [] };
+    }
+
+    const canvas = metadata.canvas!;
+    const freeLayoutVersion = 3;
+    if (canvas.layoutVersion !== freeLayoutVersion) {
+      canvas.screens = [];
+      canvas.layoutVersion = freeLayoutVersion;
+    }
+
+    const brand = this.ensureBrand(metadata.brand);
+    const primaryColor = brand.primaryColor || '#7c3aed';
+    const secondaryColor = brand.secondaryColor || '#06b6d4';
+    const textColor = brand.textColor || '#111827';
+    const bg = brand.backgroundColor || '#f4f0ff';
+    const surfaceColor = brand.surfaceColor || '#ffffff';
+    const cardRadius = `${brand.cardRadius ?? 24}px`;
+    const shadow = this.canvasShadow(brand.shadowPreset);
+    const validQuestionScreenIds = new Set(survey.questions.map((_, index) => `question-${index}`));
+    canvas.screens = canvas.screens.filter((screen) => screen.type !== 'question' || validQuestionScreenIds.has(screen.id));
+
+    // Welcome Screen - Sync with brand
+    let welcomeScreen = canvas.screens.find(s => s.id === 'welcome');
+    if (!welcomeScreen) {
+      welcomeScreen = {
+        id: 'welcome',
+        type: 'welcome',
+        background: { type: 'gradient', value: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` },
+        elements: []
+      };
+      canvas.screens.push(welcomeScreen);
+    } else {
+      // Force sync background with brand for consistency
+      welcomeScreen.background = { type: 'gradient', value: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` };
+    }
+
+    welcomeScreen.elements = this.mergeCanvasElements(
+      welcomeScreen.elements,
+      this.createWelcomeCanvasElements(
+        survey,
+        metadata,
+        { primaryColor, secondaryColor, textColor, surfaceColor, cardRadius, shadow }
+      )
+    );
+
+    if (welcomeScreen.elements.length === 0) {
+      welcomeScreen.elements = [
+        {
+          id: 'welcome-kicker',
+          type: 'text',
+          content: 'VISTA PREVIA PÚBLICA',
+          x: 60, y: 80, width: 300, height: 30,
+          rotation: 0, zIndex: 10, locked: false, hidden: false,
+          styles: { fontSize: '12px', fontWeight: '800', color: '#ffffff', letterSpacing: '0.1em', opacity: '0.8' }
+        },
+        {
+          id: 'welcome-title',
+          type: 'text',
+          content: survey.title || 'Nueva Encuesta',
+          x: 60, y: 120, width: 880, height: 100,
+          rotation: 0, zIndex: 10, locked: false, hidden: false,
+          styles: { fontSize: '56px', fontWeight: '850', color: '#ffffff', lineHeight: '1.1' }
+        },
+        {
+          id: 'welcome-desc',
+          type: 'text',
+          content: survey.description || 'Descripción de tu encuesta',
+          x: 60, y: 240, width: 700, height: 60,
+          rotation: 0, zIndex: 10, locked: false, hidden: false,
+          styles: { fontSize: '20px', fontWeight: '400', color: '#ffffff', opacity: '0.9' }
+        },
+        {
+          id: 'welcome-cta',
+          type: 'button',
+          content: 'Comenzar encuesta',
+          x: 60, y: 340, width: 220, height: 56,
+          rotation: 0, zIndex: 10, locked: false, hidden: false,
+          styles: { backgroundColor: '#ffffff', color: primaryColor, borderRadius: '18px', fontWeight: '800' }
+        }
+      ];
+    }
+
+    // Question Screens - Sync with brand
+    survey.questions.forEach((q, i) => {
+      const screenId = `question-${i}`;
+      let qScreen = canvas.screens.find(s => s.id === screenId);
+      if (!qScreen) {
+        qScreen = {
+          id: screenId,
+          type: 'question',
+          background: { type: 'solid', value: bg },
+          elements: []
+        };
+        canvas.screens.push(qScreen);
+      } else {
+        qScreen.background = { type: 'solid', value: bg };
+      }
+
+      qScreen.elements = this.mergeCanvasElements(
+        qScreen.elements,
+        this.createQuestionCanvasElements(q, i, { primaryColor, secondaryColor, textColor, surfaceColor, bg, cardRadius, shadow })
+      );
+
+      // Question Card/Background
+      if (!qScreen.elements.find(e => e.id === `q-${i}-card`)) {
+        qScreen.elements.unshift({
+          id: `q-${i}-card`,
+          type: 'shape',
+          content: '',
+          x: 30, y: 40, width: 940, height: 520,
+          rotation: 0, zIndex: 1, locked: true, hidden: false,
+          styles: { backgroundColor: surfaceColor, borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }
+        });
+      }
+
+      if (qScreen.elements.length <= 1) { // Only card exists
+        qScreen.elements.push(
+          {
+            id: `q-${i}-kicker`,
+            type: 'text',
+            content: `PREGUNTA ${i + 1}`,
+            x: 70, y: 80, width: 200, height: 30,
+            rotation: 0, zIndex: 10, locked: false, hidden: false,
+            styles: { fontSize: '11px', fontWeight: '800', color: primaryColor, letterSpacing: '0.14em' }
+          },
+          {
+            id: `q-${i}-title`,
+            type: 'text',
+            content: q.text || 'Pregunta sin título',
+            x: 70, y: 110, width: 800, height: 80,
+            rotation: 0, zIndex: 10, locked: false, hidden: false,
+            styles: { fontSize: '32px', fontWeight: '800', color: textColor, lineHeight: '1.2' }
+          },
+          {
+            id: `q-${i}-options`,
+            type: 'text', // Using text for options representation for now
+            content: this.getOptionsPlaceholder(q),
+            x: 70, y: 220, width: 860, height: 280,
+            rotation: 0, zIndex: 10, locked: true, hidden: false,
+            styles: { fontSize: '16px', color: textColor, opacity: '0.6' }
+          }
+        );
+      }
+    });
+
+    let endScreen = canvas.screens.find(s => s.id === 'end');
+    if (!endScreen) {
+      endScreen = {
+        id: 'end',
+        type: 'end',
+        background: { type: 'gradient', value: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` },
+        elements: []
+      };
+      canvas.screens.push(endScreen);
+    } else {
+      endScreen.background = { type: 'gradient', value: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` };
+    }
+
+    endScreen.elements = this.mergeCanvasElements(
+      endScreen.elements,
+      this.createEndCanvasElements(metadata, { primaryColor, secondaryColor, textColor, surfaceColor, cardRadius, shadow })
+    );
+
+    return metadata;
+  }
+
+  private getOptionsPlaceholder(q: Question): string {
+    if (q.type === 'multiple-choice') {
+      return q.options.map(o => `○ ${o.texto}`).join('\n\n');
+    }
+    if (q.type === 'rating' || q.type === 'scale') {
+      return Array.from({ length: q.max || 5 }, (_, i) => `[ ${i + 1} ]`).join('  ');
+    }
+    if (q.type === 'text') {
+      return 'Escribe tu respuesta aquí...';
+    }
+    return 'Opciones de respuesta';
+  }
+
+  private mergeCanvasElements(existing: CanvasElement[], defaults: CanvasElement[]): CanvasElement[] {
+    const defaultsById = new Map(defaults.map((element) => [element.id, element]));
+    const merged = existing
+      .filter((element) => !defaultsById.has(element.id) || defaultsById.get(element.id)?.type === element.type)
+      .map((element) => {
+        const next = defaultsById.get(element.id);
+        if (!next) {
+          return element;
+        }
+
+        const generatedLayout = next.locked
+          ? {
+            x: next.x,
+            y: next.y,
+            width: next.width,
+            height: next.height,
+            rotation: next.rotation,
+            zIndex: next.zIndex
+          }
+          : {};
+
+        const keepFreeStyle = element.styles?.['__freeEdited'] === true;
+        return {
+          ...element,
+          ...generatedLayout,
+          content: next.content,
+          questionId: next.questionId,
+          locked: next.locked,
+          hidden: next.hidden,
+          styles: keepFreeStyle ? element.styles : next.styles
+        };
+      });
+
+    for (const element of defaults) {
+      if (!merged.some((item) => item.id === element.id)) {
+        merged.push(element);
+      }
+    }
+
+    return merged.sort((a, b) => a.zIndex - b.zIndex);
+  }
+
+  private createWelcomeCanvasElements(
+    survey: Survey,
+    metadata: SurveyMetadata,
+    theme: {
+      primaryColor: string;
+      secondaryColor: string;
+      textColor: string;
+      surfaceColor: string;
+      cardRadius: string;
+      shadow: string;
+    }
+  ): CanvasElement[] {
+    const questionCount = survey.questions.length || 1;
+
+    return [
+      {
+        id: 'welcome-bg-panel',
+        type: 'shape',
+        content: '',
+        x: 0, y: 0, width: 1000, height: 600,
+        rotation: 0, zIndex: 0, locked: true, hidden: false,
+        styles: {
+          background: `radial-gradient(circle at 12% 14%, ${theme.secondaryColor}26 0%, transparent 32%), radial-gradient(circle at 88% 12%, ${theme.primaryColor}26 0%, transparent 30%), linear-gradient(135deg, ${metadata.brand?.backgroundColor || '#f5f3ff'}, #ffffff)`
+        }
+      },
+      {
+        id: 'welcome-card',
+        type: 'shape',
+        content: '',
+        x: 70, y: 64, width: 860, height: 472,
+        rotation: 0, zIndex: 2, locked: true, hidden: false,
+        styles: {
+          backgroundColor: '#ffffff',
+          borderRadius: theme.cardRadius,
+          boxShadow: '0 28px 90px rgba(15,23,42,0.16)',
+          border: '1px solid rgba(15,23,42,0.08)'
+        }
+      },
+      {
+        id: 'welcome-kicker',
+        type: 'text',
+        content: 'ENCUESTA PUBLICA',
+        x: 128, y: 124, width: 220, height: 30,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: { fontSize: '12px', fontWeight: '850', color: theme.primaryColor, letterSpacing: '0.12em', textTransform: 'uppercase' }
+      },
+      {
+        id: 'welcome-title',
+        type: 'text',
+        content: survey.title || 'Bienvenido a nuestra Encuesta',
+        x: 128, y: 160, width: 510, height: 112,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: {
+          fontSize: '52px',
+          fontWeight: '900',
+          color: theme.textColor,
+          textAlign: 'left',
+          lineHeight: '1.04'
+        }
+      },
+      {
+        id: 'welcome-desc',
+        type: 'text',
+        content: survey.description || 'Tu opinión es muy valiosa para nosotros. Solo te tomará un minuto.',
+        x: 128, y: 292, width: 510, height: 86,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: {
+          fontSize: '18px',
+          fontWeight: '400',
+          lineHeight: '1.55',
+          color: theme.textColor,
+          textAlign: 'left',
+          opacity: '0.7'
+        }
+      },
+      {
+        id: 'welcome-cta',
+        type: 'button',
+        content: metadata.ctaText || 'Comenzar encuesta',
+        x: 128, y: 414, width: 248, height: 58,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: {
+          backgroundColor: theme.primaryColor,
+          color: '#ffffff',
+          borderRadius: '16px',
+          fontWeight: '800',
+          fontSize: '16px',
+          boxShadow: `0 12px 24px ${theme.primaryColor}33`
+        }
+      },
+      {
+        id: 'welcome-preview-panel',
+        type: 'shape',
+        content: '',
+        x: 680, y: 138, width: 190, height: 324,
+        rotation: 0, zIndex: 6, locked: false, hidden: false,
+        styles: { background: `${theme.primaryColor}1f`, border: '1px solid rgba(255,255,255,0.38)', borderRadius: '28px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.32), 0 24px 60px rgba(15,23,42,0.12)' }
+      },
+      {
+        id: 'welcome-meta',
+        type: 'text',
+        content: `${questionCount} pregunta${questionCount === 1 ? '' : 's'}  |  1 min`,
+        x: 398, y: 432, width: 260, height: 22,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: { fontSize: '13px', fontWeight: '700', color: theme.textColor, textAlign: 'left', opacity: '0.5' }
+      }
+    ];
+  }
+
+  private createQuestionCanvasElements(
+    question: Question,
+    index: number,
+    theme: {
+      primaryColor: string;
+      secondaryColor: string;
+      textColor: string;
+      surfaceColor: string;
+      bg: string;
+      cardRadius: string;
+      shadow: string;
+    }
+  ): CanvasElement[] {
+    const optionHeight = question.type === 'text' ? 150 : question.type === 'scale' ? 96 : 210;
+    const optionY = question.type === 'text' ? 300 : 285;
+
+    const baseElements: CanvasElement[] = [
+      {
+        id: `q-${index}-accent`,
+        type: 'shape',
+        content: '',
+        x: 0, y: 0, width: 1000, height: 600,
+        rotation: 0, zIndex: 0, locked: true, hidden: false,
+        styles: {
+          background: `radial-gradient(circle at 86% 12%, ${theme.secondaryColor}33 0%, transparent 30%), radial-gradient(circle at 8% 90%, ${theme.primaryColor}26 0%, transparent 28%)`
+        }
+      },
+      {
+        id: `q-${index}-card`,
+        type: 'shape',
+        content: '',
+        x: 40, y: 44, width: 920, height: 512,
+        rotation: 0, zIndex: 1, locked: true, hidden: false,
+        styles: {
+          backgroundColor: theme.surfaceColor,
+          borderRadius: theme.cardRadius,
+          boxShadow: theme.shadow,
+          border: `1px solid ${theme.primaryColor}1f`
+        }
+      },
+      {
+        id: `q-${index}-pill`,
+        type: 'shape',
+        content: '',
+        x: 76, y: 78, width: 148, height: 32,
+        rotation: 0, zIndex: 2, locked: true, hidden: false,
+        styles: { backgroundColor: `${theme.primaryColor}18`, borderRadius: '999px' }
+      },
+      {
+        id: `q-${index}-kicker`,
+        type: 'text',
+        content: `PREGUNTA ${index + 1}`,
+        x: 96, y: 85, width: 180, height: 22,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: { fontSize: '11px', fontWeight: '800', color: theme.primaryColor, letterSpacing: '0.12em' }
+      },
+      {
+        id: `q-${index}-title`,
+        type: 'text',
+        content: question.text || this.defaultQuestionTitle(question.type),
+        x: 76, y: 132, width: 760, height: 92,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: { fontSize: '34px', fontWeight: '850', color: theme.textColor, lineHeight: '1.18' }
+      },
+      {
+        id: `q-${index}-helper`,
+        type: 'text',
+        content: this.getQuestionHelper(question.type),
+        x: 76, y: 230, width: 660, height: 32,
+        rotation: 0, zIndex: 10, locked: true, hidden: false,
+        styles: { fontSize: '15px', fontWeight: '600', color: theme.textColor, opacity: '0.54' }
+      },
+      {
+        id: `q-${index}-options-bg`,
+        type: 'shape',
+        content: '',
+        x: 76, y: optionY, width: 820, height: optionHeight,
+        rotation: 0, zIndex: 2, locked: true, hidden: false,
+        styles: {
+          backgroundColor: question.type === 'text' ? `${theme.bg}cc` : `${theme.primaryColor}0d`,
+          border: question.type === 'text' ? `2px dashed ${theme.primaryColor}55` : `1px solid ${theme.primaryColor}1f`,
+          borderRadius: question.type === 'text' ? '22px' : '18px'
+        }
+      },
+      {
+        id: `q-${index}-options`,
+        type: 'text',
+        content: this.getPrettyOptionsPlaceholder(question),
+        x: 104, y: optionY + 26, width: 760, height: optionHeight - 44,
+        rotation: 0, zIndex: 10, locked: true, hidden: false,
+        styles: this.questionOptionsStyle(question, theme)
+      }
+    ];
+
+    if (question.type === 'rating' || question.type === 'scale') {
+      return [
+        ...baseElements.map((element) => element.id === `q-${index}-options`
+          ? { ...element, hidden: true, content: '' }
+          : element),
+        ...this.createScaleCanvasButtons(question, index, theme, optionY)
+      ];
+    }
+
+    return baseElements;
+  }
+
+  private createScaleCanvasButtons(
+    question: Question,
+    index: number,
+    theme: { primaryColor: string; secondaryColor: string; textColor: string },
+    y: number
+  ): CanvasElement[] {
+    const min = question.min ?? 1;
+    const max = question.max ?? 10;
+    const values = Array.from({ length: Math.max(0, max - min + 1) }, (_, valueIndex) => min + valueIndex);
+    const isTenPoint = values.length > 5;
+    const buttonWidth = isTenPoint ? 68 : 88;
+    const gap = isTenPoint ? 10 : 16;
+    const startX = isTenPoint ? 104 : 126;
+    const top = y + 28;
+
+    return values.map((value, valueIndex) => ({
+      id: `q-${index}-scale-btn-${value}`,
+      type: 'button',
+      content: String(value),
+      x: startX + valueIndex * (buttonWidth + gap),
+      y: top,
+      width: buttonWidth,
+      height: 58,
+      rotation: 0,
+      zIndex: 12,
+      locked: true,
+      hidden: false,
+      styles: {
+        background: '#ffffff',
+        color: theme.primaryColor,
+        border: `2px solid ${theme.primaryColor}33`,
+        borderRadius: '16px',
+        fontSize: '20px',
+        fontWeight: '850',
+        boxShadow: '0 10px 24px rgba(15, 23, 42, 0.08)'
+      }
+    }));
+  }
+
+  private createEndCanvasElements(
+    metadata: SurveyMetadata,
+    theme: {
+      primaryColor: string;
+      secondaryColor: string;
+      textColor: string;
+      surfaceColor: string;
+      cardRadius: string;
+      shadow: string;
+    }
+  ): CanvasElement[] {
+    return [
+      {
+        id: 'end-bg-panel',
+        type: 'shape',
+        content: '',
+        x: 0, y: 0, width: 1000, height: 600,
+        rotation: 0, zIndex: 0, locked: true, hidden: false,
+        styles: {
+          background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.secondaryColor})`
+        }
+      },
+      {
+        id: 'end-card',
+        type: 'shape',
+        content: '',
+        x: 200, y: 100, width: 600, height: 400,
+        rotation: 0, zIndex: 2, locked: true, hidden: false,
+        styles: {
+          backgroundColor: '#ffffff',
+          borderRadius: theme.cardRadius,
+          boxShadow: '0 40px 100px rgba(0,0,0,0.15)',
+          border: '1px solid rgba(255,255,255,0.2)'
+        }
+      },
+      {
+        id: 'end-icon-circle',
+        type: 'shape',
+        content: '',
+        x: 460, y: 140, width: 80, height: 80,
+        rotation: 0, zIndex: 10, locked: true, hidden: false,
+        styles: {
+          backgroundColor: `${theme.primaryColor}15`,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }
+      },
+      {
+        id: 'end-icon-check',
+        type: 'text',
+        content: '✓',
+        x: 460, y: 140, width: 80, height: 80,
+        rotation: 0, zIndex: 11, locked: true, hidden: false,
+        styles: {
+          fontSize: '40px',
+          color: theme.primaryColor,
+          textAlign: 'center',
+          lineHeight: '80px',
+          fontWeight: '900'
+        }
+      },
+      {
+        id: 'end-title',
+        type: 'text',
+        content: metadata.thankYouTitle || '¡Muchas gracias!',
+        x: 250, y: 240, width: 500, height: 60,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: {
+          fontSize: '36px',
+          fontWeight: '900',
+          color: theme.textColor,
+          textAlign: 'center'
+        }
+      },
+      {
+        id: 'end-desc',
+        type: 'text',
+        content: metadata.thankYouDescription || 'Tus respuestas han sido enviadas con éxito. Apreciamos mucho tu tiempo.',
+        x: 250, y: 310, width: 500, height: 60,
+        rotation: 0, zIndex: 10, locked: false, hidden: false,
+        styles: {
+          fontSize: '18px',
+          fontWeight: '400',
+          color: theme.textColor,
+          textAlign: 'center',
+          opacity: '0.6'
+        }
+      }
+    ];
+  }
+
+  private getPrettyOptionsPlaceholder(question: Question): string {
+    if (question.type === 'multiple-choice') {
+      const options = question.options.length
+        ? question.options
+        : [
+          { id: 'default-option-1', texto: 'Opcion 1' },
+          { id: 'default-option-2', texto: 'Opcion 2' }
+        ];
+      return options.map((option) => `( )  ${option.texto}`).join('\n');
+    }
+
+    if (question.type === 'rating') {
+      return Array.from({ length: question.max || 10 }, (_, index) => `${index + 1}`).join('   ');
+    }
+
+    if (question.type === 'scale') {
+      return Array.from({ length: question.max || 5 }, (_, index) => `${index + 1}`).join('        ');
+    }
+
+    return 'Escribe tu respuesta aqui...';
+  }
+
+  private questionOptionsStyle(
+    question: Question,
+    theme: { primaryColor: string; secondaryColor: string; textColor: string }
+  ): Record<string, string> {
+    if (question.type === 'rating' || question.type === 'scale') {
+      return {
+        fontSize: question.type === 'rating' ? '22px' : '28px',
+        fontWeight: '850',
+        color: theme.primaryColor,
+        lineHeight: '1.9',
+        textAlign: 'center',
+        letterSpacing: '0'
+      };
+    }
+
+    if (question.type === 'text') {
+      return {
+        fontSize: '18px',
+        color: theme.textColor,
+        opacity: '0.5',
+        lineHeight: '1.6'
+      };
+    }
+
+    return {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: theme.textColor,
+      lineHeight: '2.35'
     };
   }
 
-  private validateBeforePublish(survey: Survey): string | null {
-    if (!survey.title.trim()) {
-      return 'Agrega un titulo antes de publicar.';
+  private defaultQuestionTitle(type: QuestionType): string {
+    if (type === 'multiple-choice') return 'Elige una opcion';
+    if (type === 'rating') return 'Como calificarias tu experiencia?';
+    if (type === 'scale') return 'Selecciona el nivel que mejor te represente';
+    return 'Cuentanos tu respuesta';
+  }
+
+  private getQuestionHelper(type: QuestionType): string {
+    if (type === 'multiple-choice') return 'Selecciona una de las opciones disponibles.';
+    if (type === 'rating') return 'Usa una puntuacion del 1 al 10.';
+    if (type === 'scale') return 'Marca un valor de 1 a 10.';
+    return 'Respuesta abierta para capturar mas contexto.';
+  }
+
+  private canvasShadow(preset?: SurveyBrand['shadowPreset']): string {
+    if (preset === 'none') return 'none';
+    if (preset === 'medium') return '0 18px 55px rgba(15, 23, 42, 0.12)';
+    if (preset === 'strong') return '0 26px 80px rgba(15, 23, 42, 0.18)';
+    if (preset === 'float') return '0 34px 90px rgba(15, 23, 42, 0.16)';
+    return '0 14px 44px rgba(15, 23, 42, 0.09)';
+  }
+
+  private getPublishChecklist(survey: Survey): PublishChecklistItem[] {
+    const hasTitle = survey.title.trim().length > 0;
+    const hasQuestions = survey.questions.length > 0;
+    const completeQuestions = survey.questions.every((question) => question.text.trim().length > 0);
+    const completeOptions = survey.questions.every((question) => {
+      if (!this.isChoiceType(question.type)) return true;
+      return question.options.filter((option) => option.texto.trim().length > 0).length >= 2;
+    });
+    const validLogic = survey.questions.every((question) => {
+      const target = question.logic?.[0]?.goTo;
+      return !target || target === 'end' || survey.questions.some((item) => item.id === target);
+    });
+    const hasBrokenImages = Boolean(survey.metadata?.brand?.logoUrl === '' || survey.questions.some((question) => question.imageUrl === ''));
+
+    return [
+      { label: 'Titulo', ok: hasTitle, detail: hasTitle ? 'Listo.' : 'Agrega un titulo antes de publicar.' },
+      { label: 'Preguntas', ok: hasQuestions, detail: hasQuestions ? `${survey.questions.length} pregunta(s).` : 'Agrega al menos una pregunta antes de publicar.' },
+      { label: 'Enunciados', ok: completeQuestions, detail: completeQuestions ? 'Todas las preguntas tienen texto.' : 'Hay preguntas sin enunciado.' },
+      { label: 'Opciones', ok: completeOptions, detail: completeOptions ? 'Las preguntas de seleccion tienen opciones validas.' : 'Cada pregunta de seleccion necesita al menos dos opciones validas.' },
+      { label: 'Logica condicional', ok: validLogic, detail: validLogic ? 'Los saltos apuntan a pantallas validas.' : 'Hay una regla condicional con destino invalido.' },
+      { label: 'Recursos visuales', ok: !hasBrokenImages, detail: hasBrokenImages ? 'Revisa imagenes o logos faltantes.' : 'Sin recursos rotos detectados.' }
+    ];
+  }
+
+  private cleanValidation(validation?: QuestionValidation): QuestionValidation | undefined {
+    if (!validation) return undefined;
+    const next: QuestionValidation = {};
+    for (const [key, value] of Object.entries(validation) as Array<[keyof QuestionValidation, any]>) {
+      if (value === undefined || value === null || value === '') continue;
+      if (typeof value === 'number' && Number.isNaN(value)) continue;
+      next[key] = value as never;
     }
-
-    if (survey.questions.length === 0) {
-      return 'Agrega al menos una pregunta antes de publicar.';
-    }
-
-    for (let index = 0; index < survey.questions.length; index++) {
-      const question = survey.questions[index];
-      if (!question.text.trim()) {
-        return `La pregunta ${index + 1} no tiene enunciado.`;
-      }
-
-      if (question.type === 'multiple-choice') {
-        const validOptions = question.options.filter((option) => option.texto.trim().length > 0);
-        if (validOptions.length < 2) {
-          return `La pregunta ${index + 1} necesita al menos dos opciones validas.`;
-        }
-      }
-    }
-
-    return null;
+    return Object.keys(next).length ? next : undefined;
   }
 
   private pulseSavedState(): void {

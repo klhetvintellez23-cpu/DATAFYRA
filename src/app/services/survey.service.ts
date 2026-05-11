@@ -9,6 +9,21 @@ export interface QuestionOption {
   texto: string;
 }
 
+export interface QuestionValidation {
+  minLength?: number;
+  maxLength?: number;
+  minSelections?: number;
+  maxSelections?: number;
+  validationType?: 'email' | 'phone' | 'url' | 'number' | 'custom';
+  customPattern?: string;
+}
+
+export interface ConditionalRule {
+  answerEquals?: AnswerValue;
+  answerIncludes?: string;
+  goTo?: string;
+}
+
 export interface Question {
   id: string;
   type: QuestionType;
@@ -19,6 +34,9 @@ export interface Question {
   max?: number;
   imageUrl?: string;
   imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+  validation?: QuestionValidation;
+  logic?: ConditionalRule[];
+  randomizeOptions?: boolean;
 }
 
 export interface SurveyBrand {
@@ -84,6 +102,7 @@ export interface CanvasScreen {
 
 export interface CanvasData {
   screens: CanvasScreen[];
+  layoutVersion?: number;
 }
 
 export interface SurveyMetadata {
@@ -98,8 +117,13 @@ export interface SurveyMetadata {
   welcomeMetaConfig?: { x: number; y: number; width: number; height: number };
   endTitle?: string;
   endDescription?: string;
+  thankYouTitle?: string;
+  thankYouDescription?: string;
   endImages?: DecoratedImage[];
   ctaText?: string;
+  paginationMode?: 'one-by-one' | 'paged' | 'all-at-once';
+  questionsPerPage?: number;
+  progressMode?: 'percentage' | 'steps' | 'hidden';
 }
 
 export interface Answer {
@@ -194,8 +218,12 @@ export class SurveyService {
         min: question.min,
         max: question.max,
         imageUrl: question.imageUrl,
-        imageConfig: question.imageConfig
-      }))
+        imageConfig: question.imageConfig,
+        validation: question.validation,
+        logic: question.logic,
+        randomizeOptions: question.randomizeOptions
+      })),
+      metadata: survey.metadata
     });
 
     if (!row) {
@@ -266,71 +294,145 @@ export class SurveyService {
 
   private createDefaultCanvas(survey: Survey, metadata: SurveyMetadata): CanvasData {
     const bg = metadata.brand?.backgroundColor ?? '#f4f0ff';
-    return {
-      screens: [
-        {
-          id: 'welcome',
-          type: 'welcome',
-          background: { type: 'solid', value: bg },
-          elements: [
-            {
-              id: 'welcome-title',
-              type: 'text',
-              content: survey.title || 'Bienvenido a la encuesta',
-              x: metadata.welcomeTitleConfig?.x ?? 50,
-              y: metadata.welcomeTitleConfig?.y ?? 50,
-              width: metadata.welcomeTitleConfig?.width ?? 600,
-              height: metadata.welcomeTitleConfig?.height ?? 80,
-              rotation: 0,
-              zIndex: 10,
-              locked: false,
-              hidden: false,
-              styles: {
-                fontSize: 48,
-                fontWeight: 800,
-                color: metadata.brand?.textColor ?? '#111827'
-              }
-            },
-            {
-              id: 'welcome-desc',
-              type: 'text',
-              content: survey.description || 'Por favor, responde a las siguientes preguntas.',
-              x: metadata.welcomeDescConfig?.x ?? 50,
-              y: metadata.welcomeDescConfig?.y ?? 150,
-              width: metadata.welcomeDescConfig?.width ?? 600,
-              height: metadata.welcomeDescConfig?.height ?? 60,
-              rotation: 0,
-              zIndex: 10,
-              locked: false,
-              hidden: false,
-              styles: {
-                fontSize: 18,
-                fontWeight: 400,
-                color: metadata.brand?.textColor ?? '#374151'
-              }
-            },
-            {
-              id: 'welcome-cta',
-              type: 'button',
-              content: metadata.ctaText || 'Comenzar encuesta',
-              x: metadata.welcomeCtaConfig?.x ?? 50,
-              y: metadata.welcomeCtaConfig?.y ?? 240,
-              width: metadata.welcomeCtaConfig?.width ?? 200,
-              height: metadata.welcomeCtaConfig?.height ?? 50,
-              rotation: 0,
-              zIndex: 10,
-              locked: false,
-              hidden: false,
-              styles: {
-                backgroundColor: metadata.brand?.primaryColor ?? '#7c3aed',
-                color: metadata.brand?.buttonTextColor ?? '#ffffff',
-                borderRadius: metadata.brand?.buttonStyle === 'pill' ? 9999 : metadata.brand?.buttonRadius ?? 8
-              }
+    const screens: any[] = [
+      {
+        id: 'welcome',
+        type: 'welcome',
+        background: { type: 'solid', value: bg },
+        elements: [
+          {
+            id: 'welcome-title',
+            type: 'text',
+            content: survey.title || 'Bienvenido a la encuesta',
+            x: metadata.welcomeTitleConfig?.x ?? 50,
+            y: metadata.welcomeTitleConfig?.y ?? 50,
+            width: metadata.welcomeTitleConfig?.width ?? 600,
+            height: metadata.welcomeTitleConfig?.height ?? 80,
+            rotation: 0,
+            zIndex: 10,
+            locked: false,
+            hidden: false,
+            styles: {
+              fontSize: 48,
+              fontWeight: 800,
+              color: metadata.brand?.textColor ?? '#111827'
             }
-          ]
+          },
+          {
+            id: 'welcome-desc',
+            type: 'text',
+            content: survey.description || 'Por favor, responde a las siguientes preguntas.',
+            x: metadata.welcomeDescConfig?.x ?? 50,
+            y: metadata.welcomeDescConfig?.y ?? 150,
+            width: metadata.welcomeDescConfig?.width ?? 600,
+            height: metadata.welcomeDescConfig?.height ?? 60,
+            rotation: 0,
+            zIndex: 10,
+            locked: false,
+            hidden: false,
+            styles: {
+              fontSize: 18,
+              fontWeight: 400,
+              color: metadata.brand?.textColor ?? '#374151'
+            }
+          },
+          {
+            id: 'welcome-cta',
+            type: 'button',
+            content: metadata.ctaText || 'Comenzar encuesta',
+            x: metadata.welcomeCtaConfig?.x ?? 50,
+            y: metadata.welcomeCtaConfig?.y ?? 240,
+            width: metadata.welcomeCtaConfig?.width ?? 200,
+            height: metadata.welcomeCtaConfig?.height ?? 50,
+            rotation: 0,
+            zIndex: 10,
+            locked: false,
+            hidden: false,
+            styles: {
+              backgroundColor: metadata.brand?.primaryColor ?? '#7c3aed',
+              color: metadata.brand?.buttonTextColor ?? '#ffffff',
+              borderRadius: metadata.brand?.buttonStyle === 'pill' ? 9999 : metadata.brand?.buttonRadius ?? 8
+            }
+          }
+        ]
+      }
+    ];
+
+    // Add question screens
+    survey.questions.forEach((q, i) => {
+      screens.push({
+        id: `question-${i}`,
+        type: 'question',
+        background: { type: 'solid', value: bg },
+        elements: [
+          {
+            id: `q-${i}-title`,
+            type: 'text',
+            content: q.text || `Pregunta ${i + 1}`,
+            x: 50,
+            y: 50,
+            width: 600,
+            height: 60,
+            rotation: 0,
+            zIndex: 10,
+            locked: false,
+            hidden: false,
+            styles: {
+              fontSize: 32,
+              fontWeight: 700,
+              color: metadata.brand?.textColor ?? '#111827'
+            }
+          }
+        ]
+      });
+    });
+
+    // Add end screen
+    screens.push({
+      id: 'end',
+      type: 'end',
+      background: { type: 'solid', value: bg },
+      elements: [
+        {
+          id: 'end-title',
+          type: 'text',
+          content: metadata.endTitle || '¡Gracias por participar!',
+          x: 50,
+          y: 50,
+          width: 600,
+          height: 80,
+          rotation: 0,
+          zIndex: 10,
+          locked: false,
+          hidden: false,
+          styles: {
+            fontSize: 48,
+            fontWeight: 800,
+            color: metadata.brand?.textColor ?? '#111827'
+          }
+        },
+        {
+          id: 'end-desc',
+          type: 'text',
+          content: metadata.endDescription || 'Tus respuestas han sido registradas.',
+          x: 50,
+          y: 150,
+          width: 600,
+          height: 60,
+          rotation: 0,
+          zIndex: 10,
+          locked: false,
+          hidden: false,
+          styles: {
+            fontSize: 18,
+            fontWeight: 400,
+            color: metadata.brand?.textColor ?? '#374151'
+          }
         }
       ]
-    };
+    });
+
+    return { screens };
   }
 
   private readMetadata(surveyId: string): SurveyMetadata | undefined {

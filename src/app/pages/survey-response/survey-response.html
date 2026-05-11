@@ -1,116 +1,55 @@
-<div class="response-page" [ngStyle]="themeStyle()">
+<main class="response-page" [ngStyle]="themeStyle()">
+  <div class="response-background" aria-hidden="true"></div>
+
   @if (notFound()) {
-    <div class="response-center">
-      <div class="not-found vp-glass-strong">
-        <span class="nf-icon">◆</span>
-        <h2>Encuesta no encontrada</h2>
-        <p>Esta encuesta no existe o ya no está activa.</p>
-        <a href="/" class="vp-btn vp-btn-primary">Ir al inicio</a>
+    <section class="response-center">
+      <div class="not-found-card">
+        <div class="not-found-icon">?</div>
+        <h1>Encuesta no encontrada</h1>
+        <p>Esta encuesta no existe, fue cerrada o todavia no esta activa.</p>
+        <a href="/" class="home-link">Ir al inicio</a>
       </div>
-    </div>
-  } @else if (completed()) {
-    <div class="response-center">
-      <div class="thank-you">
-        <div class="confetti-container">
-          @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; track i) {
-            <div class="confetti" [style.--delay]="(i * 0.15) + 's'" [style.--x]="(i * 37 % 100) + '%'" [style.--color]="i % 3 === 0 ? '#00C4CC' : (i % 3 === 1 ? '#8B5FC7' : '#FBBF24')"></div>
-          }
+    </section>
+  } @else if (survey(); as s) {
+    @if (completed()) {
+      <app-survey-thank-you-screen [survey]="s" [brand]="brand()"></app-survey-thank-you-screen>
+    } @else if (!started()) {
+      <app-survey-welcome-screen
+        [survey]="s"
+        [brand]="brand()"
+        [questionCount]="totalQuestions()"
+        (start)="startSurvey()">
+      </app-survey-welcome-screen>
+    } @else if (currentPageQuestions().length) {
+      @if (progressMode() !== 'hidden') {
+        <div class="response-progress" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
+          <div class="response-progress-fill" [style.width]="progress() + '%'"></div>
+          <span class="response-progress-label">{{ progressLabel() }}</span>
         </div>
-        <div class="ty-content vp-glass-strong">
-          <span class="ty-icon">✦</span>
-          <h1>{{ survey()?.metadata?.endTitle || 'Gracias por participar' }}</h1>
-          <p>{{ survey()?.metadata?.endDescription || 'Tu respuesta ha sido registrada exitosamente.' }}</p>
-          <div class="ty-brand">
-            <span class="ty-powered">Powered by</span>
-            <span class="ty-logo">Data<span class="brand-accent">fyra</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  } @else if (currentQuestion(); as question) {
-    <div class="response-wrapper">
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width]="progress() + '%'"></div>
-      </div>
+      }
 
-      <div class="response-brand">
-        @if (brand().logoUrl) {
-          <img [src]="brand().logoUrl" class="response-brand-logo" alt="Logo" />
-        } @else {
-          <span>Data<span class="brand-accent">fyra</span></span>
+      <section class="response-question-page" [class.multi-question-page]="currentPageQuestions().length > 1">
+        @for (question of currentPageQuestions(); track question.id) {
+          <app-survey-question-card
+            [question]="question"
+            [index]="s.questions.indexOf(question)"
+            [total]="totalQuestions()"
+            [answer]="getAnswer(question.id)"
+            [error]="$first ? (validationError() || submitError()) : ''"
+            (answerChange)="updateAnswer(question.id, $event)">
+          </app-survey-question-card>
         }
-      </div>
+      </section>
 
-      <div class="question-container">
-        <div class="question-counter">
-          <span class="counter-current">{{ currentIndex() + 1 }}</span>
-          <span class="counter-sep">/</span>
-          <span class="counter-total">{{ totalQuestions() }}</span>
-        </div>
-
-        <h2 class="question-text">{{ question.text }}</h2>
-
-        @if (question.required) {
-          <span class="required-tag">* Requerida</span>
-        }
-
-        @if (question.type === 'rating') {
-          <div class="response-rating">
-            @for (n of generateRange(question.min || 1, question.max || 10); track n) {
-              <button class="rating-btn" [class.selected]="currentAnswer() === n" (click)="selectRating(n)">
-                {{ n }}
-              </button>
-            }
-          </div>
-          <div class="rating-labels">
-            <span>Nada satisfecho</span>
-            <span>Muy satisfecho</span>
-          </div>
-        }
-
-        @if (question.type === 'scale') {
-          <div class="response-scale">
-            @for (n of generateRange(question.min || 1, question.max || 5); track n) {
-              <button class="scale-btn" [class.selected]="currentAnswer() === n" (click)="selectRating(n)">
-                {{ n }}
-              </button>
-            }
-          </div>
-        }
-
-        @if (question.type === 'multiple-choice') {
-          <div class="response-options">
-            @for (opt of question.options; track opt.id) {
-              <button class="option-card" [class.selected]="currentAnswer() === opt.texto" (click)="selectOption(opt.texto)">
-                <span class="option-radio" [class.checked]="currentAnswer() === opt.texto"></span>
-                {{ opt.texto }}
-              </button>
-            }
-          </div>
-        }
-
-        @if (question.type === 'text') {
-          <div class="response-text">
-            <textarea
-              class="vp-input vp-textarea resp-textarea"
-              placeholder="Escribe tu respuesta aquí..."
-              [ngModel]="currentAnswer() ?? ''"
-              (ngModelChange)="updateText($event)"
-              rows="4"
-            ></textarea>
-            <span class="char-count">{{ (currentAnswer()?.toString()?.length || 0) }} caracteres</span>
-          </div>
-        }
-      </div>
-
-      <div class="response-nav">
-        <button class="vp-btn vp-btn-ghost nav-btn" (click)="goPrev()" [disabled]="isFirst()">
-          ← Anterior
-        </button>
-        <button class="vp-btn vp-btn-primary nav-btn" (click)="goNext()" [disabled]="!canProceed()">
-          {{ isLast() ? 'Enviar ✓' : 'Siguiente →' }}
-        </button>
-      </div>
-    </div>
+      <app-survey-navigation-buttons
+        [isFirst]="isFirst()"
+        [isLast]="isLast()"
+        [busy]="isSubmitting()"
+        (previous)="goPrev()"
+        (next)="goNext()">
+      </app-survey-navigation-buttons>
+    } @else {
+      <app-survey-thank-you-screen [survey]="s" [brand]="brand()"></app-survey-thank-you-screen>
+    }
   }
-</div>
+</main>

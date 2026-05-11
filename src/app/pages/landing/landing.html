@@ -1,14 +1,13 @@
 <app-navbar />
 
 <main class="flex-grow vp-animate-fade-in font-body text-[#1d1b20]" style="font-family: 'Epilogue', sans-serif;">
-  <!-- Hero Section -->
   <section class="relative pt-32 pb-32 overflow-hidden bg-[#F9F5FF]">
     <div class="max-w-[90rem] mx-auto px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
       <div class="z-10">
         <h1 class="text-6xl lg:text-[5.5rem] font-bold text-[#1d1b20] leading-[1.05] tracking-tighter mb-8">
           <app-lustre-text text="Crea encuestas gratis" [speed]="6"></app-lustre-text>
         </h1>
-        
+
         <div class="ag-checklist mb-12 text-[#49454e] font-light text-xl space-y-4">
           <div class="ag-checklist-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
@@ -41,7 +40,7 @@
               [delay]="2600"></app-typing-text>
           </div>
         </div>
-        
+
         <div class="flex flex-wrap gap-4 mt-10">
           <app-wavy-button (click)="openAuth('register', $event)" className="px-20 py-8 editorial-gradient text-white font-bold rounded-[2.5rem] shadow-2xl hover:shadow-primary/40 transition-all text-3xl tracking-wide" text="Crea una encuesta"></app-wavy-button>
         </div>
@@ -63,182 +62,165 @@
     </div>
   </section>
 
-  <!-- Steps Section -->
-  <section class="py-32 bg-white">
-    <div class="max-w-[90rem] mx-auto px-8 lg:px-12">
-      <h2 class="text-5xl md:text-6xl font-bold text-center tracking-tighter mb-24 text-[#1d1b20]">Crea encuestas y obtén respuestas en 3 pasos</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-start">
+  <section class="py-28 bg-white">
+    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <h2 class="text-4xl md:text-6xl font-bold text-center mb-20 text-[#1d1b20]">Crea encuestas y obtén respuestas en 3 pasos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 items-start">
         <div class="space-y-6">
-          <img alt="Survey Builder Interface" class="rounded-3xl shadow-lg w-full mb-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8n_RIYc6ooOa00pUXSiQ7hNjVPIfT9jaha9lNyy8WPSlbwVsuo4d205m3NNPgDALuJ1FW8188-YD2yQAt2a2WoaAWVnFDVM8ClAO1jK9XcCkEK1ObyvzqVepTr8p7F2xplbU3zyIiith7a3R7haVux3KyAYrWcCbRpQ9M9ddgbvBAzod1qnveboSi4vaWq2-IUefevWK8E2fKlhHFMhgBQvXJ4Z9nkBQhVxacRJbqwiO8GopQTtODafQQGIeUu3Z7uhGs5W0fJp5m" />
-          <div class="text-5xl font-black text-[#7f00ff] tracking-tighter">01</div>
-          <h3 class="text-3xl font-bold tracking-tighter text-[#1d1b20]">Crea un cuestionario</h3>
+          <div class="step-visual">
+            <span class="material-symbols-outlined">dynamic_form</span>
+            <div class="step-lines"><i></i><i></i><i></i></div>
+          </div>
+          <div class="text-5xl font-black text-[#7f00ff]">01</div>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Crea un cuestionario</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Nuestro generador de cuestionarios fácil de usar y altamente premiado le permitirá diseñar encuestas como un profesional.
+            Diseña preguntas, opciones, escalas y formularios desde un editor claro y rápido.
           </p>
         </div>
         <div class="space-y-6">
-          <div class="aspect-[4/3] bg-[#ebe7e9] rounded-3xl shadow-inner w-full mb-6 flex items-center justify-center text-[#49454e]/50">
-            <span class="material-symbols-outlined text-6xl">share</span>
+          <div class="step-visual">
+            <span class="material-symbols-outlined">share</span>
+            <div class="share-dots"><i></i><i></i><i></i></div>
           </div>
-          <div class="text-5xl font-black text-[#7f00ff] tracking-tighter">02</div>
-          <h3 class="text-3xl font-bold tracking-tighter text-[#1d1b20]">Comparte tu encuesta</h3>
+          <div class="text-5xl font-black text-[#7f00ff]">02</div>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Comparte tu encuesta</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Distribuye tus encuestas a través de múltiples canales, incluyendo correo electrónico, redes sociales, y enlaces directos.
+            Publica un enlace y distribúyelo por los canales donde ya está tu audiencia.
           </p>
         </div>
         <div class="space-y-6">
-          <div class="aspect-[4/3] bg-[#ebe7e9] rounded-3xl shadow-inner w-full mb-6 flex items-center justify-center text-[#49454e]/50">
-            <span class="material-symbols-outlined text-6xl">analytics</span>
+          <div class="step-visual">
+            <span class="material-symbols-outlined">analytics</span>
+            <div class="mini-bars"><i></i><i></i><i></i><i></i></div>
           </div>
-          <div class="text-5xl font-black text-[#7f00ff] tracking-tighter">03</div>
-          <h3 class="text-3xl font-bold tracking-tighter text-[#1d1b20]">Analiza resultados</h3>
+          <div class="text-5xl font-black text-[#7f00ff]">03</div>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Analiza resultados</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Obtén insights valiosos con nuestras herramientas de análisis. Visualiza los datos en tiempo real y toma decisiones informadas.
+            Visualiza respuestas, detecta patrones y toma decisiones con datos frescos.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Grid Section -->
-  <section class="py-32 bg-[#F9F5FF]">
-    <div class="max-w-[90rem] mx-auto px-8 lg:px-12">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
-        <div class="lg:col-span-1">
-          <h2 class="text-4xl md:text-5xl font-bold tracking-tighter text-[#1d1b20]">¿Por qué Datafyra es adecuado para ti?</h2>
+  <section class="py-28 bg-[#F9F5FF]">
+    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-14 items-start">
+        <div>
+          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20]">¿Por qué Datafyra es adecuado para ti?</h2>
         </div>
         <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-          <div class="flex gap-6">
-            <span class="material-symbols-outlined text-[#7f00ff] text-4xl">photo_library</span>
-            <div>
-              <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">Plantillas de encuestas</h4>
-              <ul class="space-y-2 text-[#49454e] font-light">
-                <li>Empieza rápido y fácilmente</li>
-                <li>100+ ejemplos de encuestas</li>
-                <li>70+ diseños atractivos</li>
-              </ul>
+          @for (feature of featureList; track feature.title) {
+            <div class="flex gap-5">
+              <span class="material-symbols-outlined text-[#7f00ff] text-4xl">{{ feature.icon }}</span>
+              <div>
+                <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">{{ feature.title }}</h4>
+                <p class="text-[#49454e] font-light leading-relaxed">{{ feature.description }}</p>
+              </div>
             </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <div class="max-w-[90rem] mx-auto px-6 sm:px-8">
+      <div class="decision-panel">
+        <div class="decision-copy">
+          <h2 class="text-4xl md:text-6xl font-bold text-[#1d1b20] leading-tight">Toma decisiones eficaces y basadas en datos</h2>
+          <p class="text-lg text-[#49454e] font-light leading-relaxed max-w-xl">
+            Centraliza la creación, distribución y lectura de tus encuestas sin depender de hojas de cálculo manuales.
+          </p>
+          <app-wavy-button
+            (click)="openAuth('register', $event)"
+            className="px-10 sm:px-14 py-5 editorial-gradient text-white font-bold rounded-[2rem] shadow-2xl hover:shadow-primary/40 transition-all text-xl sm:text-2xl"
+            text="Crear encuesta gratis">
+          </app-wavy-button>
+        </div>
+        <div class="analytics-mockup" aria-label="Vista previa de analíticas">
+          <div class="analytics-header">
+            <span>Resultados</span>
+            <strong>1,248 respuestas</strong>
           </div>
-          <div class="flex gap-6">
-            <span class="material-symbols-outlined text-[#7f00ff] text-4xl">support_agent</span>
-            <div>
-              <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">Soporte cercano</h4>
-              <ul class="space-y-2 text-[#49454e] font-light">
-                <li>Soporte 24/7</li>
-                <li>Respuesta rápida</li>
-                <li>94% de satisfacción de cliente</li>
-              </ul>
-            </div>
+          <div class="analytics-grid">
+            <div><span>NPS</span><strong>72</strong></div>
+            <div><span>Finalización</span><strong>84%</strong></div>
           </div>
-          <div class="flex gap-6">
-            <span class="material-symbols-outlined text-[#7f00ff] text-4xl">shield_locked</span>
-            <div>
-              <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">Garantía y seguridad</h4>
-              <ul class="space-y-2 text-[#49454e] font-light">
-                <li>Seguridad 2048-bit SSL</li>
-                <li>Copias de seguridad diarias</li>
-                <li>GDPR compliant</li>
-              </ul>
-            </div>
-          </div>
-          <div class="flex gap-6">
-            <span class="material-symbols-outlined text-[#7f00ff] text-4xl">savings</span>
-            <div>
-              <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">Gratis para siempre</h4>
-              <ul class="space-y-2 text-[#49454e] font-light">
-                <li>Las funciones básicas siempre son gratuitas</li>
-                <li>Para empresas, organizaciones o gubernamentales</li>
-                <li>Respuesta a todos los dispositivos</li>
-              </ul>
-            </div>
+          <div class="analytics-bars">
+            <span style="height: 34%"></span>
+            <span style="height: 58%"></span>
+            <span style="height: 48%"></span>
+            <span style="height: 76%"></span>
+            <span style="height: 92%"></span>
+            <span style="height: 67%"></span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Data-Driven Decision Section -->
-  <section class="py-12 bg-white">
-    <div class="max-w-[90rem] mx-auto px-8">
-      <div class="bg-white rounded-[3rem] shadow-xl border border-[#e7e0ec] flex flex-col lg:flex-row items-stretch overflow-hidden min-h-[600px] lg:min-h-[700px]">
-        <div class="w-full lg:w-1/2 p-16 lg:p-24 flex flex-col items-start justify-center text-left space-y-8">
-          <h2 class="text-6xl md:text-7xl font-bold tracking-tighter text-[#1d1b20] leading-tight">Toma decisiones eficaces y basadas en datos</h2>
-          <div class="mt-10">
-            <app-wavy-button (click)="openAuth('register', $event)" className="px-20 py-8 editorial-gradient text-white font-bold rounded-[2.5rem] shadow-2xl hover:shadow-primary/40 transition-all text-3xl tracking-wide" text="Realice una encuesta"></app-wavy-button>
-          </div>
-        </div>
-        <div class="w-full lg:w-1/2 relative lg:min-h-0 bg-[#ebe7e9] p-10 lg:p-16 space-y-6 min-h-[300px]">
-          <img alt="Dashboard Analytics Mockup" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS_AZxqiqvs39u1A1VhDBL4-ItrmxjrWEo-caC-XtK6nnpvaXn2kMV_EO55r-13L6e5QchZPIzbH-JdqzpAdddWGm2_C2sbqqanTe2PIyUsAMthP8jFqhSgwoHEw3_40HhNFM1u2fJecrKQqRw4EI8X3vmiwAqwuKPDjvWquEdgbQxUCEec7Gs9ghJnzplYdv6xK_zruXOXPZPhCneFKps9eU7QZn1XRp-_kcBl8VFUjnf4TbqBHYwajlTFUov1GKohP0nOcFHtRvZ" />
-        </div>
+  <section class="py-28 bg-white border-t border-gray-100">
+    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="text-center max-w-4xl mx-auto mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] mb-6">Plantillas listas para usar</h2>
+        <p class="text-xl text-[#49454e] font-light">Empieza con estructuras diseñadas para investigación, feedback y operaciones.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- Templates Section -->
-  <section class="py-32 bg-white border-t border-gray-100">
-    <div class="max-w-[90rem] mx-auto px-8 lg:px-12">
-      <div class="text-center max-w-4xl mx-auto mb-20">
-        <h2 class="text-5xl font-bold tracking-tighter text-[#1d1b20] mb-6">Plantillas listas para usar</h2>
-        <p class="text-xl text-[#49454e] font-light">Explora nuestra amplia colección de plantillas diseñadas por expertos en investigación.</p>
-      </div>
-      <div class="mb-16">
-        <div class="flex justify-between items-end mb-8">
+      <div class="mb-12">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-8">
           <div>
-            <h2 class="text-4xl font-bold tracking-tighter mb-4 text-[#1d1b20]">Plantillas más populares</h2>
-            <p class="text-[#49454e] font-light">Empieza con estructuras diseñadas por expertos en investigación.</p>
+            <h3 class="text-3xl md:text-4xl font-bold mb-4 text-[#1d1b20]">Plantillas populares</h3>
+            <p class="text-[#49454e] font-light">Elige una base y personalízala en el editor.</p>
           </div>
-          <button class="text-[#7f00ff] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
+          <a routerLink="/templates" class="text-[#7f00ff] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
             Ver todas las plantillas <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-          </button>
+          </a>
         </div>
         <div class="flex flex-wrap gap-3">
-          <button class="px-6 py-2 rounded-full border border-primary text-white transition-colors text-sm font-medium bg-[#7f00ff]">NPS</button>
-          <button class="px-6 py-2 text-[#49454e] hover:text-[#7f00ff] transition-colors text-sm font-medium">Educación</button>
-          <button class="px-6 py-2 text-[#49454e] hover:text-[#7f00ff] transition-colors text-sm font-medium">Recursos Humanos</button>
-          <button class="px-6 py-2 text-[#49454e] hover:text-[#7f00ff] transition-colors text-sm font-medium">Mercado</button>
+          @for (category of templateCategories; track category) {
+            <a routerLink="/templates" class="px-5 py-2 rounded-full text-sm font-medium transition-colors"
+              [class.bg-[#7f00ff]]="$first"
+              [class.text-white]="$first"
+              [class.text-[#49454e]]="!$first"
+              [class.hover:text-[#7f00ff]]="!$first">
+              {{ category }}
+            </a>
+          }
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="group cursor-pointer">
-          <div class="relative h-80 rounded-2xl overflow-hidden mb-6 bg-[#ebe7e9]">
-            <img alt="Customer Satisfaction" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt5lStAPnjzyISVlmQlRQgc4v3SKysuOur4Sqlq6N-GHT0L0d9WXSDWdoirnu7ELUw83Dst-occglmhb9IAc4JlJ0rl6jcmti7U_pEacCaFCVQZ_F-fbnb636EhoHZIdcuPOFg12btDzUL2r3pRIgNn0EWNmqi_cj8OLzRozp1YDtiHTTs3TI58jM_7pdW4RvuqNhgpTnDI9naYnoToo6gx7o_7blQOGjj03q4B6RHYUjDWaiUIWr33GcrjCCdZyYCCYTNOUfNLY5f" />
-            <div class="absolute inset-0 bg-black/10"></div>
-            <div class="absolute top-6 left-6">
-              <span class="bg-white/90 backdrop-blur text-[#7f00ff] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">NPS &amp; Feedback</span>
+        @for (template of popularTemplates; track template.id) {
+          <a [routerLink]="['/templates', template.id]" class="group block text-[#1d1b20]">
+            <div class="template-preview mb-6">
+              <span class="template-badge">{{ template.badge }}</span>
+              <div class="template-window">
+                <div class="template-window-bar"><i></i><i></i><i></i></div>
+                <strong>{{ template.title }}</strong>
+                <p>{{ template.prompt }}</p>
+                <div class="template-options"><span></span><span></span><span></span></div>
+              </div>
             </div>
-          </div>
-          <h4 class="text-2xl font-bold mb-2 text-[#1d1b20]">Satisfacción del cliente</h4>
-          <p class="text-[#49454e] font-light leading-relaxed">Mide la lealtad y el sentimiento de tus clientes con métricas estandarizadas de la industria.</p>
-        </div>
-        <div class="group cursor-pointer">
-          <div class="relative h-80 rounded-2xl overflow-hidden mb-6 bg-[#ebe7e9]">
-            <img alt="Product Evaluation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRYNgeDYwK2B4Ol6cIWwgxoRuIk1DFZZT3cYGdywIS41znfY5D6CHzQ5RbmG_AjJJq6VMG2I4ggaRzhOUl5C4PpuumO9stM5zLijfiLf_cn2DcDVgIOF7lePdGjg6qJ0QGWBJfUkqbHhU7mZNCskbqtEgGXi6pMJBz8FqMnA-HvPRX4L1cPAiT4NaChMsfTHobOBUHcTYFFrqbWPFbw9kXSSW12i6bP99Y6HhXwMUKV-EIgCZKMDorsO7uPucVJdr-vRPOCNpMpey_" />
-            <div class="absolute inset-0 bg-black/10"></div>
-            <div class="absolute top-6 left-6">
-              <span class="bg-white/90 backdrop-blur text-[#7f00ff] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Lanzamiento</span>
-            </div>
-          </div>
-          <h4 class="text-2xl font-bold mb-2 text-[#1d1b20]">Evaluación de producto</h4>
-          <p class="text-[#49454e] font-light leading-relaxed">Valida ideas y recopila feedback sobre características específicas antes de salir al mercado.</p>
-        </div>
+            <h4 class="text-2xl font-bold mb-2 text-[#1d1b20]">{{ template.title }}</h4>
+            <p class="text-[#49454e] font-light leading-relaxed">{{ template.description }}</p>
+          </a>
+        }
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="dark:bg-black w-full py-12 border-t border-[#E0E0E0] dark:border-[#2A2A2A] mt-auto font-['Epilogue'] bg-white">
-    <div class="max-w-[1200px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex flex-col items-center md:items-start space-y-4">
-        <div class="text-xl font-black text-black dark:text-white">Datafyra</div>
-        <p class="text-gray-500 dark:text-gray-500 text-sm">
-          © 2024 The Precision Curator. Precision data collection for editorial excellence.
+  <footer class="w-full py-12 border-t border-[#E0E0E0] mt-auto font-['Epilogue'] bg-white">
+    <div class="max-w-[1200px] mx-auto px-6 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex flex-col items-center md:items-start space-y-3">
+        <div class="text-xl font-black text-black">Datafyra</div>
+        <p class="text-gray-500 text-sm">
+          © 2026 Datafyra. Encuestas simples, respuestas claras.
         </p>
       </div>
       <div class="flex flex-wrap justify-center gap-6">
-        <a class="text-gray-500 dark:text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="#">Privacidad</a>
-        <a class="text-gray-500 dark:text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="#">Términos</a>
-        <a class="text-gray-500 dark:text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="#">Seguridad</a>
-        <a class="text-gray-500 dark:text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="#">Contacto</a>
+        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/templates">Plantillas</a>
+        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/tour">Guía</a>
+        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/api-docs">API y seguridad</a>
+        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="mailto:hola@datafyra.com">Contacto</a>
       </div>
     </div>
   </footer>

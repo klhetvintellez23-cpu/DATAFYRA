@@ -11,6 +11,7 @@ export class SurveyMapperService {
       title: survey.titulo,
       description: survey.descripcion,
       status: survey.estado,
+      metadata: survey.metadatos,
       createdAt: survey.creado_el,
       updatedAt: survey.actualizado_el,
       responses_count: survey.envios_count?.[0]?.count || survey.envios?.length || 0,
@@ -34,13 +35,16 @@ export class SurveyMapperService {
   private mapQuestion(question: NonNullable<SurveyRow['preguntas']>[number]): Question {
     return {
       id: question.id,
-      type: this.mapQuestionType(question.tipo),
+      type: this.mapQuestionType(question.tipo, question.metadatos?.questionType),
       text: question.enunciado,
       required: question.es_obligatoria,
       min: question.metadatos?.min,
       max: question.metadatos?.max,
       imageUrl: question.metadatos?.imageUrl,
       imageConfig: question.metadatos?.imageConfig,
+      validation: question.metadatos?.validation,
+      logic: question.metadatos?.logic ?? [],
+      randomizeOptions: question.metadatos?.randomizeOptions ?? false,
       options: (question.opciones_pregunta || []).map((option) => ({
         id: option.id,
         texto: option.texto
@@ -48,10 +52,16 @@ export class SurveyMapperService {
     };
   }
 
-  private mapQuestionType(type: string): Question['type'] {
+  private mapQuestionType(type: string, metadataType?: string): Question['type'] {
+    if (this.isKnownQuestionType(metadataType)) {
+      return metadataType;
+    }
+
     switch (type) {
       case 'texto':
         return 'text';
+      case 'texto_largo':
+        return 'long-text';
       case 'seleccion_multiple':
         return 'multiple-choice';
       case 'calificacion':
@@ -60,6 +70,22 @@ export class SurveyMapperService {
       default:
         return 'scale';
     }
+  }
+
+  private isKnownQuestionType(type: string | undefined): type is Question['type'] {
+    return [
+      'rating',
+      'multiple-choice',
+      'multi-select',
+      'text',
+      'long-text',
+      'scale',
+      'nps',
+      'email',
+      'phone',
+      'date',
+      'time'
+    ].includes(type ?? '');
   }
 
   extractAnswerValue(value: SurveyAnswerRow['valor']): AnswerValue {

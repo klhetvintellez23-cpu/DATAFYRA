@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
-import { AuthModalComponent } from '../../components/auth-modal/auth-modal.component';
 import { AuthModalService } from '../../services/auth-modal.service';
-import { WavyButtonComponent } from '../../components/ui/wavy-button/wavy-button';
+import { AuthService } from '../../services/auth.service';
+import { SurveyService } from '../../services/survey.service';
+import { QuestionType } from '../../services/survey-repository.service';
 
-interface Question {
+interface TemplateQuestion {
   text: string;
   type: 'choice' | 'rating' | 'text' | 'dropdown';
   options?: string[];
@@ -21,13 +22,13 @@ interface TemplateData {
   description: string;
   idealFor: string[];
   fullDescription: string;
-  questions: Question[];
+  questions: TemplateQuestion[];
 }
 
 @Component({
   selector: 'app-template-details',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink, WavyButtonComponent],
+  imports: [CommonModule, NavbarComponent, RouterLink],
   templateUrl: './template-details.html',
   styleUrl: './template-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -35,9 +36,13 @@ interface TemplateData {
 export class TemplateDetailsPage implements OnInit {
   private route = inject(ActivatedRoute);
   private authModalService = inject(AuthModalService);
-  
+  private auth = inject(AuthService);
+  private surveyService = inject(SurveyService);
+  private router = inject(Router);
+
   templateId: string | null = null;
   template: TemplateData | undefined;
+  isCreating = signal(false);
 
   templates: Record<string, TemplateData> = {
     'satisfaccion-cliente': {
@@ -70,7 +75,7 @@ export class TemplateDetailsPage implements OnInit {
         },
         {
           text: '¿Qué probabilidad hay de que recomiende nuestra empresa a un amigo?',
-          type: 'dropdown',
+          type: 'choice',
           options: ['0 - Nada probable', '1-3', '4-6', '7-8', '9-10 - Muy probable']
         }
       ]
@@ -106,40 +111,40 @@ export class TemplateDetailsPage implements OnInit {
       ]
     },
     'business': {
-        id: 'business',
-        title: 'Business Growth Survey',
-        category: 'Corporativo',
-        popularity: '12400',
-        description: 'Mide la salud de tu negocio con esta plantilla integral. Analiza el mercado y la satisfacción interna.',
-        idealFor: ['startups', 'pymes', 'corporaciones'],
-        fullDescription: 'Perfecta para planes trimestrales. Recopila datos sobre la cultura organizacional, eficiencia de procesos y visión de mercado.',
-        questions: [
-          {
-            text: '¿Cómo calificaría el clima laboral actualmente?',
-            type: 'rating'
-          },
-          {
-            text: '¿Qué herramienta tecnológica consideras indispensable?',
-            type: 'dropdown',
-            options: ['Slack/Discord', 'Jira/Asana', 'Zoom/Meet', 'GitHub/GitLab']
-          },
-          {
-            text: '¿Siente que las metas del trimestre son claras?',
-            type: 'choice',
-            options: ['Totalmente claro', 'Algo claro', 'Poco claro', 'Nada claro']
-          },
-          {
-            text: '¿Qué área del negocio crees que tiene más potencial de crecimiento?',
-            type: 'text',
-            placeholder: 'Ej: Ventas, I+D, Marketing...'
-          },
-          {
-            text: '¿Cómo calificaría el liderazgo del equipo directivo?',
-            type: 'choice',
-            options: ['Inspirador', 'Efectivo', 'Neutral', 'Ineficaz']
-          }
-        ]
-      }
+      id: 'business',
+      title: 'Business Growth Survey',
+      category: 'Corporativo',
+      popularity: '12400',
+      description: 'Mide la salud de tu negocio con esta plantilla integral. Analiza el mercado y la satisfacción interna.',
+      idealFor: ['startups', 'pymes', 'corporaciones'],
+      fullDescription: 'Perfecta para planes trimestrales. Recopila datos sobre la cultura organizacional, eficiencia de procesos y visión de mercado.',
+      questions: [
+        {
+          text: '¿Cómo calificaría el clima laboral actualmente?',
+          type: 'rating'
+        },
+        {
+          text: '¿Qué herramienta tecnológica consideras indispensable?',
+          type: 'choice',
+          options: ['Slack/Discord', 'Jira/Asana', 'Zoom/Meet', 'GitHub/GitLab']
+        },
+        {
+          text: '¿Siente que las metas del trimestre son claras?',
+          type: 'choice',
+          options: ['Totalmente claro', 'Algo claro', 'Poco claro', 'Nada claro']
+        },
+        {
+          text: '¿Qué área del negocio crees que tiene más potencial de crecimiento?',
+          type: 'text',
+          placeholder: 'Ej: Ventas, I+D, Marketing...'
+        },
+        {
+          text: '¿Cómo calificaría el liderazgo del equipo directivo?',
+          type: 'choice',
+          options: ['Inspirador', 'Efectivo', 'Neutral', 'Ineficaz']
+        }
+      ]
+    }
   };
 
   ngOnInit() {
@@ -149,6 +154,72 @@ export class TemplateDetailsPage implements OnInit {
         this.template = this.templates[this.templateId];
       }
     });
+  }
+
+  async useTemplate(event: Event) {
+    event.preventDefault();
+    if (!this.template) return;
+
+    // If not logged in, open auth modal
+    if (!this.auth.isLoggedIn()) {
+      this.authModalService.open('register');
+      return;
+    }
+
+    const userId = this.auth.user()?.id;
+    if (!userId) return;
+
+    this.isCreating.set(true);
+
+    try {
+      // 1. Create a blank survey with the template's title + description
+      const survey = await this.surveyService.createSurvey(
+        userId,
+        this.template.title,
+        this.template.description
+      );
+
+      if (!survey) {
+        this.isCreating.set(false);
+        return;
+      }
+
+      // 2. Map template questions to the SurveyService Question format
+      const questions = this.template.questions.map((q, index) => ({
+        id: `q-tmpl-${Date.now()}-${index}`,
+        type: this.toQuestionType(q.type),
+        text: q.text,
+        required: false,
+        options: (q.options ?? []).map((opt, i) => ({ id: `opt-${index}-${i}`, texto: opt })),
+        min: q.type === 'rating' ? 1 : undefined,
+        max: q.type === 'rating' ? 5 : undefined,
+      }));
+
+      // 3. Save the survey with populated questions
+      const populated = await this.surveyService.saveSurvey({
+        ...survey,
+        questions,
+      });
+
+      if (populated) {
+        this.router.navigate(['/editor', populated.id]);
+      }
+    } catch (e) {
+      console.error('Error creating survey from template:', e);
+    } finally {
+      this.isCreating.set(false);
+    }
+  }
+
+  /** Maps template question types to the DB-compatible QuestionType */
+  private toQuestionType(type: TemplateQuestion['type']): QuestionType {
+    switch (type) {
+      case 'rating':   return 'rating';
+      case 'text':     return 'text';
+      case 'dropdown': return 'multiple-choice'; // closest DB equivalent
+      case 'choice':   return 'multiple-choice';
+      default:         return 'text';
+    }
   }
 
   openAuth(mode: 'login' | 'register', event: Event) {

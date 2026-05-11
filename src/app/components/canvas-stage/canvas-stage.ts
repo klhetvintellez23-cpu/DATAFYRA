@@ -6,9 +6,19 @@ import { CanvasScreen, CanvasElement } from '../../services/survey.service';
 
 @Component({
   selector: 'app-canvas-stage',
+  standalone: true,
   imports: [CommonModule, NgxMoveableModule, CanvasElementComponent],
   template: `
-    <div class="canvas-board" #canvasBoard [ngStyle]="getBackgroundStyle()" (mousedown)="onBoardClick($event)">
+    <div class="canvas-board" 
+         #canvasBoard 
+         [ngStyle]="getBackgroundStyle()" 
+         [class.readonly-mode]="isReadonly"
+         (mousedown)="onBoardClick($event)">
+      
+      @if (!isReadonly) {
+        <div class="canvas-grid-overlay"></div>
+      }
+
       @for (el of screen.elements; track el.id) {
         <div class="moveable-target"
              [id]="el.id"
@@ -18,34 +28,46 @@ import { CanvasScreen, CanvasElement } from '../../services/survey.service';
              [style.height.px]="el.height"
              [style.transform]="'rotate(' + el.rotation + 'deg)'"
              [style.z-index]="el.zIndex"
-             (mousedown)="onElementMouseDown($event, el.id)">
+             (mousedown)="!isReadonly && onElementMouseDown($event, el.id)">
              
           <app-canvas-element 
             [element]="el"
-            [selected]="selectedIds.includes(el.id)"
+            [selected]="!isReadonly && selectedIds.includes(el.id)"
+            [isReadonly]="isReadonly"
             (contentChange)="onContentChange(el.id, $event)">
           </app-canvas-element>
         </div>
       }
       
-      <ngx-moveable
-        #moveable
-        [target]="moveableTargets"
-        [draggable]="true"
-        [resizable]="true"
-        [rotatable]="true"
-        [keepRatio]="false"
-        [snappable]="true"
-        (drag)="onDrag($event)"
-        (dragEnd)="onDragEnd($event)"
-        (resize)="onResize($event)"
-        (resizeEnd)="onResizeEnd($event)"
-        (rotate)="onRotate($event)"
-        (rotateEnd)="onRotateEnd($event)"
-      ></ngx-moveable>
+      @if (!isReadonly) {
+        <ngx-moveable
+          #moveable
+          [target]="moveableTargets"
+          [draggable]="true"
+          [resizable]="true"
+          [rotatable]="true"
+          [keepRatio]="false"
+          [snappable]="true"
+          (drag)="onDrag($event)"
+          (dragEnd)="onDragEnd($event)"
+          (resize)="onResize($event)"
+          (resizeEnd)="onResizeEnd($event)"
+          (rotate)="onRotate($event)"
+          (rotateEnd)="onRotateEnd($event)"
+        ></ngx-moveable>
+      }
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 1000px;
+      height: 600px;
+      margin: 0 auto;
+      background: white;
+      position: relative;
+      z-index: 1;
+    }
     .canvas-board {
       width: 100%;
       height: 100%;
@@ -54,9 +76,20 @@ import { CanvasScreen, CanvasElement } from '../../services/survey.service';
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
+    .canvas-grid-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
     .moveable-target {
       position: absolute;
       will-change: transform, left, top, width, height;
+    }
+    .readonly-mode {
+      cursor: default;
     }
     :host ::ng-deep .moveable-control-box {
       z-index: 9999 !important;
@@ -74,6 +107,7 @@ import { CanvasScreen, CanvasElement } from '../../services/survey.service';
 export class CanvasStageComponent implements OnInit, OnChanges {
   @Input({ required: true }) screen!: CanvasScreen;
   @Input() selectedIds: string[] = [];
+  @Input() isReadonly: boolean = false;
   
   @Output() selectionChange = new EventEmitter<string[]>();
   @Output() elementUpdate = new EventEmitter<{ id: string, changes: Partial<CanvasElement> }>();
@@ -92,7 +126,9 @@ export class CanvasStageComponent implements OnInit, OnChanges {
 
   updateTargets() {
     setTimeout(() => {
+      const lockedIds = new Set((this.screen?.elements ?? []).filter((element) => element.locked).map((element) => element.id));
       this.moveableTargets = this.selectedIds
+        .filter((id) => !lockedIds.has(id))
         .map(id => document.getElementById(id))
         .filter((el): el is HTMLElement => el !== null);
     });
@@ -119,9 +155,6 @@ export class CanvasStageComponent implements OnInit, OnChanges {
   }
 
   onElementMouseDown(e: MouseEvent, id: string) {
-    const el = this.screen.elements.find(e => e.id === id);
-    if (el?.locked) return;
-    
     e.stopPropagation();
     if (!this.selectedIds.includes(id)) {
       if (e.shiftKey) {
@@ -142,6 +175,7 @@ export class CanvasStageComponent implements OnInit, OnChanges {
   }
   
   onDragEnd({ target }: any) {
+    if (this.isElementLocked(target.id)) return;
     const left = parseFloat(target.style.left);
     const top = parseFloat(target.style.top);
     this.elementUpdate.emit({ id: target.id, changes: { x: left, y: top } });
@@ -155,6 +189,7 @@ export class CanvasStageComponent implements OnInit, OnChanges {
   }
   
   onResizeEnd({ target }: any) {
+    if (this.isElementLocked(target.id)) return;
     const width = parseFloat(target.style.width);
     const height = parseFloat(target.style.height);
     const left = parseFloat(target.style.left);
@@ -167,9 +202,14 @@ export class CanvasStageComponent implements OnInit, OnChanges {
   }
   
   onRotateEnd({ target }: any) {
+    if (this.isElementLocked(target.id)) return;
     const rotationStr = target.style.transform;
     const match = rotationStr.match(/rotate\(([-\d.]+)deg\)/);
     const rotation = match ? parseFloat(match[1]) : 0;
     this.elementUpdate.emit({ id: target.id, changes: { rotation } });
+  }
+
+  private isElementLocked(id: string): boolean {
+    return this.screen.elements.some((element) => element.id === id && element.locked);
   }
 }

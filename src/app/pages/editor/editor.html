@@ -15,6 +15,14 @@
       <button class="editor-tab" [class.active]="currentTab === 'analyze'" (click)="setCurrentTab('analyze')">Analizar</button>
     </div>
     <div class="editor-topbar-right">
+      <div class="history-actions">
+        <button class="history-btn" type="button" (click)="undo()" [disabled]="!canUndo()" title="Deshacer">
+          <span class="material-symbols-outlined">undo</span>
+        </button>
+        <button class="history-btn" type="button" (click)="redo()" [disabled]="!canRedo()" title="Rehacer">
+          <span class="material-symbols-outlined">redo</span>
+        </button>
+      </div>
       <div class="device-preview-toggles">
         <button class="device-btn" [class.active]="previewDevice === 'desktop'" type="button" (click)="setPreviewDevice('desktop')" title="Escritorio">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -69,22 +77,22 @@
         <aside class="editor-sidebar-left">
           <div class="sidebar-section-label">ESTRUCTURA</div>
           <ul class="structure-list">
-            <li class="structure-item" [class.active]="activeSection === 'welcome'" (click)="activeSection = 'welcome'">
+            <li class="structure-item" [class.active]="activeSection() === 'welcome'" (click)="activeSection.set('welcome')">
               <span class="structure-item-label">Bienvenida</span>
             </li>
             @for (q of s.questions; track q.id; let qi = $index) {
-              <li class="structure-item" [class.active]="activeSection === 'questions' && activeQuestionIndex === qi" (click)="activeQuestionIndex = qi; activeSection = 'questions'">
+              <li class="structure-item" [class.active]="activeSection() === 'questions' && activeQuestionIndex() === qi" (click)="activeQuestionIndex.set(qi); activeSection.set('questions')">
                 <span class="structure-item-label">{{ q.text || 'Pregunta ' + (qi + 1) }}</span>
                 <span class="struct-badge">Q{{ qi + 1 }}</span>
               </li>
             }
-            <li class="structure-item" [class.active]="activeSection === 'end'" (click)="activeSection = 'end'">
+            <li class="structure-item" [class.active]="activeSection() === 'end'" (click)="activeSection.set('end')">
               <span class="structure-item-label">Finalización</span>
             </li>
           </ul>
 
           <div class="sidebar-add-actions">
-            <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="addQuestionPanel = !addQuestionPanel">Agregar pregunta</button>
+            <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="addQuestionPanel = true">Agregar pregunta</button>
             <button class="sidebar-add-btn sidebar-template-btn" (click)="showTemplateModal = true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
               Usar plantilla
@@ -94,18 +102,84 @@
 
         <main class="editor-canvas" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
           <div class="canvas-scroll">
-            @if (currentScreen()) {
-              <app-canvas-stage 
-                [screen]="currentScreen()!"
-                [selectedIds]="selectedElementIds()"
-                (selectionChange)="onCanvasSelectionChange($event)"
-                (elementUpdate)="updateCanvasElement($event)">
-              </app-canvas-stage>
-            } @else {
-              <div class="canvas-empty-state">
-                <p>Cargando lienzo visual...</p>
+            <div class="design-mode-toolbar">
+              <div class="design-mode-tabs" aria-label="Modo de diseÃ±o">
+                <button class="design-mode-tab" [class.active]="designCanvasMode === 'functional'" type="button" (click)="setDesignCanvasMode('functional')">Funcional</button>
+                <button class="design-mode-tab" [class.active]="designCanvasMode === 'free'" type="button" (click)="setDesignCanvasMode('free')">Libre</button>
               </div>
-            }
+              <span class="design-mode-hint">
+                {{ designCanvasMode === 'free' ? 'Arrastra, redimensiona y edita elementos visuales.' : 'Prueba la pantalla como la respondera el usuario.' }}
+              </span>
+              @if (designCanvasMode === 'free') {
+                <button class="design-reset-btn" type="button" (click)="applyFunctionalDesignToCurrentFreeScreen()">Aplicar diseño funcional</button>
+              }
+            </div>
+
+            <div class="design-workspace" [class.free-workspace]="designCanvasMode === 'free'">
+              <div class="design-live-wrap">
+                @if (designCanvasMode === 'free') {
+                  <div class="free-floating-toolbar" [class.disabled]="selectedElementIds().length === 0">
+                    <button type="button" title="Alinear izquierda" (click)="alignSelected('left')"><span class="material-symbols-outlined">align_horizontal_left</span></button>
+                    <button type="button" title="Alinear centro" (click)="alignSelected('center')"><span class="material-symbols-outlined">align_horizontal_center</span></button>
+                    <button type="button" title="Alinear derecha" (click)="alignSelected('right')"><span class="material-symbols-outlined">align_horizontal_right</span></button>
+                    <span class="toolbar-separator"></span>
+                    <button type="button" title="Traer al frente" (click)="bringSelectedForward()"><span class="material-symbols-outlined">flip_to_front</span></button>
+                    <button type="button" title="Enviar atrás" (click)="sendSelectedBackward()"><span class="material-symbols-outlined">flip_to_back</span></button>
+                    <button type="button" title="Duplicar" (click)="duplicateSelectedElements()"><span class="material-symbols-outlined">content_copy</span></button>
+                    <button type="button" title="Bloquear" (click)="toggleSelectedLock()"><span class="material-symbols-outlined">lock</span></button>
+                    <button type="button" title="Copiar estilo" (click)="copySelectedStyle()"><span class="material-symbols-outlined">format_paint</span></button>
+                    <button type="button" title="Pegar estilo" (click)="pasteSelectedStyle()"><span class="material-symbols-outlined">imagesearch_roller</span></button>
+                    <button type="button" title="Borrar" class="danger-tool" (click)="deleteSelectedElements()"><span class="material-symbols-outlined">delete</span></button>
+                  </div>
+                }
+
+                <div class="design-live-frame" [class.free-mode]="designCanvasMode === 'free'" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
+                  @if (designCanvasMode === 'free') {
+                    @if (currentScreen()) {
+                      <app-canvas-stage
+                        [screen]="currentScreen()!"
+                        [selectedIds]="selectedElementIds()"
+                        (selectionChange)="onCanvasSelectionChange($event)"
+                        (elementUpdate)="updateCanvasElement($event)">
+                      </app-canvas-stage>
+                    } @else {
+                      <div class="canvas-empty-state">
+                        <p>Cargando lienzo visual...</p>
+                      </div>
+                    }
+                  } @else {
+                    <app-survey-simulator
+                      [survey]="s"
+                      [designMode]="true"
+                      [designSection]="activeSection()"
+                      [designQuestionIndex]="activeQuestionIndex()">
+                    </app-survey-simulator>
+                  }
+                </div>
+              </div>
+
+              @if (designCanvasMode === 'free') {
+                <aside class="layers-panel">
+                  <div class="layers-panel-header">
+                    <span>Capas</span>
+                    <small>{{ layerElements().length }}</small>
+                  </div>
+                  <div class="layers-list">
+                    @for (element of layerElements(); track element.id) {
+                      <button
+                        type="button"
+                        class="layer-row"
+                        [class.active]="selectedElementIds().includes(element.id)"
+                        (click)="selectLayerElement(element.id)">
+                        <span class="material-symbols-outlined">{{ element.locked ? 'lock' : element.type === 'text' ? 'text_fields' : element.type }}</span>
+                        <span class="layer-name">{{ element.content || element.id }}</span>
+                        <small>{{ element.zIndex }}</small>
+                      </button>
+                    }
+                  </div>
+                </aside>
+              }
+            </div>
 
             @if (addQuestionPanel) {
               <div class="add-question-panel">
@@ -181,21 +255,135 @@
                     ></textarea>
                   </div>
 
-                  @if (activeSection === 'questions' && currentQuestion(); as q) {
+                  <div class="right-section">
+                    <div class="right-section-label">PREGUNTAS POR PAGINA</div>
+                    <div class="button-style-grid pagination-mode-grid">
+                      <button class="button-style-card" [class.active]="paginationMode() === 'one-by-one'" type="button" (click)="updatePaginationMode('one-by-one')">Una</button>
+                      <button class="button-style-card" [class.active]="paginationMode() === 'paged'" type="button" (click)="updatePaginationMode('paged')">Varias</button>
+                      <button class="button-style-card" [class.active]="paginationMode() === 'all-at-once'" type="button" (click)="updatePaginationMode('all-at-once')">Todas</button>
+                    </div>
+                    @if (paginationMode() === 'paged') {
+                      <label class="slider-control">
+                        <span>Cantidad: {{ questionsPerPage() }}</span>
+                        <input type="range" min="2" max="12" [ngModel]="questionsPerPage()" (ngModelChange)="updateQuestionsPerPage($event)" />
+                      </label>
+                      <input class="right-select" type="number" min="2" max="50" [ngModel]="questionsPerPage()" (ngModelChange)="updateQuestionsPerPage($event)" />
+                    }
+                    <div class="right-section-label">PROGRESO PUBLICO</div>
+                    <div class="button-style-grid">
+                      <button class="button-style-card" [class.active]="progressMode() === 'percentage'" type="button" (click)="updateProgressMode('percentage')">Porcentaje</button>
+                      <button class="button-style-card" [class.active]="progressMode() === 'steps'" type="button" (click)="updateProgressMode('steps')">Pasos</button>
+                      <button class="button-style-card" [class.active]="progressMode() === 'hidden'" type="button" (click)="updateProgressMode('hidden')">Oculto</button>
+                    </div>
+                  </div>
+
+                  @if (activeSection() === 'questions' && currentQuestion(); as q) {
+                    <div class="right-section">
+                      <div class="right-section-label">PREGUNTA</div>
+                      <textarea
+                        class="right-textarea"
+                        [ngModel]="q.text"
+                        (ngModelChange)="updateQuestionText(activeQuestionIndex(), $event)"
+                        rows="3"
+                        placeholder="Escribe el enunciado de la pregunta..."
+                      ></textarea>
+                    </div>
+
                     <div class="right-section">
                       <div class="right-section-label">TIPO DE PREGUNTA</div>
-                      <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex, $event)">
+                      <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex(), $event)">
                         @for (qt of questionTypes; track qt.type) {
                           <option [value]="qt.type">{{ qt.label }}</option>
                         }
                       </select>
-                      <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex)">
+                      <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex())">
                         {{ q.required ? 'Marcar opcional' : 'Marcar obligatoria' }}
                       </button>
                     </div>
+
+                    @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+                      <div class="right-section">
+                        <div class="right-section-label">OPCIONES</div>
+                        <div class="editor-option-list">
+                          @for (option of q.options; track option.id; let oi = $index) {
+                            <div class="editor-option-row">
+                              <input
+                                class="right-select"
+                                type="text"
+                                [ngModel]="option.texto"
+                                (ngModelChange)="updateOption(activeQuestionIndex(), oi, $event)"
+                                placeholder="Opcion..."
+                              />
+                              <button class="canvas-option-remove" type="button" (click)="removeOption(activeQuestionIndex(), oi)" [disabled]="q.options.length <= 2">×</button>
+                            </div>
+                          }
+                        </div>
+                        <button class="canvas-add-option" type="button" (click)="addOption(activeQuestionIndex())">Agregar opcion</button>
+                        <label class="effect-toggle compact-toggle">
+                          <input type="checkbox" [checked]="q.randomizeOptions" (change)="toggleRandomizeOptions(activeQuestionIndex())" />
+                          <span class="effect-toggle-label">Orden aleatorio al responder</span>
+                        </label>
+                      </div>
+                    }
+
+                    <div class="right-section">
+                      <div class="right-section-label">VALIDACIONES</div>
+                      @if (q.type === 'text' || q.type === 'long-text' || q.type === 'email' || q.type === 'phone') {
+                        <div class="control-row-pair">
+                          <label class="font-control">
+                            <span>Min. caracteres</span>
+                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.minLength" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { minLength: +$event || undefined })" />
+                          </label>
+                          <label class="font-control">
+                            <span>Max. caracteres</span>
+                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.maxLength" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { maxLength: +$event || undefined })" />
+                          </label>
+                        </div>
+                      }
+                      @if (q.type === 'multi-select') {
+                        <div class="control-row-pair">
+                          <label class="font-control">
+                            <span>Min. seleccion</span>
+                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.minSelections" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { minSelections: +$event || undefined })" />
+                          </label>
+                          <label class="font-control">
+                            <span>Max. seleccion</span>
+                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.maxSelections" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { maxSelections: +$event || undefined })" />
+                          </label>
+                        </div>
+                      }
+                    </div>
+
+                    @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+                      <div class="right-section">
+                        <div class="right-section-label">LOGICA CONDICIONAL</div>
+                        <label class="font-control">
+                          <span>Si responde</span>
+                          <select class="right-select" [ngModel]="logicAnswerValue(q)" (ngModelChange)="updateQuestionLogic(activeQuestionIndex(), q.type === 'multi-select' ? { answerIncludes: $event } : { answerEquals: $event })">
+                            <option value="">Sin condicion</option>
+                            @for (option of q.options; track option.id) {
+                              <option [value]="option.texto">{{ option.texto }}</option>
+                            }
+                          </select>
+                        </label>
+                        <label class="font-control">
+                          <span>Ir a</span>
+                          <select class="right-select" [ngModel]="logicTargetValue(q)" (ngModelChange)="updateQuestionLogic(activeQuestionIndex(), { goTo: $event })">
+                            <option value="">Siguiente normal</option>
+                            @for (target of logicTargetQuestions(activeQuestionIndex()); track target.id; let ti = $index) {
+                              <option [value]="target.id">Pregunta {{ activeQuestionIndex() + ti + 2 }}</option>
+                            }
+                            <option value="end">Pantalla final</option>
+                          </select>
+                        </label>
+                        @if (q.logic?.length) {
+                          <button class="editor-action-btn" type="button" (click)="clearQuestionLogic(activeQuestionIndex())">Quitar regla</button>
+                        }
+                      </div>
+                    }
                   }
 
-                  @if (activeSection === 'end') {
+                  @if (activeSection() === 'end') {
                     <div class="right-section">
                       <div class="right-section-label">MENSAJE FINAL</div>
                       <input
@@ -449,7 +637,7 @@
                     <button class="upload-btn upload-btn-danger" type="button" (click)="removeLogo()">Quitar logo</button>
                   }
                   <p class="helper-copy">Arrastra el logo y las imágenes dentro de Bienvenida para posicionarlos.</p>
-                  @if (activeSection === 'questions') {
+                  @if (activeSection() === 'questions') {
                     <div class="effect-divider"></div>
                     <h4 class="subtab-title">Imagen de pregunta</h4>
                     <input type="file" id="upload-question-img" accept="image/*" (change)="onQuestionImageSelected($event)" style="display:none" />
@@ -458,10 +646,10 @@
                       Subir imagen
                     </button>
                     @if (currentQuestion()?.imageUrl) {
-                      <button class="upload-btn upload-btn-danger" type="button" (click)="removeQuestionImage(activeQuestionIndex)">Quitar imagen</button>
+                      <button class="upload-btn upload-btn-danger" type="button" (click)="removeQuestionImage(activeQuestionIndex())">Quitar imagen</button>
                     }
                   }
-                  @if (activeSection === 'end') {
+                  @if (activeSection() === 'end') {
                     <div class="effect-divider"></div>
                     <h4 class="subtab-title">Decoración final</h4>
                     <input type="file" id="upload-end-deco" accept="image/*" (change)="onEndImageSelected($event)" style="display:none" />
@@ -479,57 +667,9 @@
     }
 
     @if (currentTab === 'preview') {
-      <div class="editor-stage">
-        <div class="preview-shell" [ngStyle]="responseThemeStyle()">
-          <div class="preview-head">
-            @if (brand().logoUrl) {
-              <img [src]="brand().logoUrl" class="preview-brand-logo" alt="Logo" />
-            }
-            <span class="preview-kicker">Vista previa pública</span>
-            <h2>{{ s.title || 'Nueva Encuesta' }}</h2>
-            <p>{{ s.description || 'Agrega una descripción para contextualizar la encuesta.' }}</p>
-          </div>
-
-          @for (image of welcomeImages(); track image.id) {
-            <div class="preview-floating-image" [style.left.px]="image.config.x" [style.top.px]="image.config.y" [style.width.px]="image.config.width" [style.height.px]="image.config.height">
-              <img [src]="image.imageUrl" alt="Decoración" />
-            </div>
-          }
-
-          @for (q of s.questions; track q.id; let qi = $index) {
-            <div class="preview-question-card">
-              <span class="preview-question-index">Pregunta {{ qi + 1 }}</span>
-              <h3>{{ q.text || 'Pregunta sin título' }}</h3>
-              @if (q.imageUrl) {
-                <img [src]="q.imageUrl" class="preview-question-image" alt="Imagen" />
-              }
-              @if (q.type === 'text') {
-                <textarea class="preview-textarea" rows="4" placeholder="Respuesta abierta"></textarea>
-              }
-              @if (q.type === 'multiple-choice') {
-                <div class="preview-options">
-                  @for (opt of q.options; track opt.id) {
-                    <label class="preview-option">
-                      <input type="radio" disabled />
-                      <span>{{ opt.texto }}</span>
-                    </label>
-                  }
-                </div>
-              }
-              @if (q.type === 'scale' || q.type === 'rating') {
-                <div class="preview-scale-row">
-                  @for (n of q.type === 'rating' ? [1,2,3,4,5,6,7,8,9,10] : [1,2,3,4,5]; track n) {
-                    <span class="preview-scale-pill">{{ n }}</span>
-                  }
-                </div>
-              }
-            </div>
-          }
-
-          <div class="preview-question-card thanks-card">
-            <h2>{{ endTitle() }}</h2>
-            <p>{{ endDescription() }}</p>
-          </div>
+      <div class="editor-stage preview-stage">
+        <div class="preview-device-frame" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
+          <app-survey-simulator [survey]="s"></app-survey-simulator>
         </div>
       </div>
     }
@@ -583,25 +723,75 @@
   <div class="context-menu-backdrop" (click)="hideContextMenu()" (contextmenu)="hideContextMenu(); $event.preventDefault()"></div>
   <div class="context-menu" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY">
     @if (survey(); as s) {
-      <button class="context-menu-item" (click)="toggleRequired(activeQuestionIndex); hideContextMenu()">
+      <button class="context-menu-item" (click)="toggleRequired(activeQuestionIndex()); hideContextMenu()">
         <i class="ctx-icon ph" [ngClass]="currentQuestion()?.required ? 'ph-lock-open' : 'ph-lock'"></i>
         {{ currentQuestion()?.required ? 'Quitar obligatoria' : 'Hacer obligatoria' }}
       </button>
-      <button class="context-menu-item" (click)="duplicateQuestion(activeQuestionIndex); hideContextMenu()">
+      <button class="context-menu-item" (click)="duplicateQuestion(activeQuestionIndex()); hideContextMenu()">
         <i class="ctx-icon ph ph-copy"></i> Duplicar pregunta
       </button>
       <div class="context-menu-divider"></div>
-      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, -1); hideContextMenu()" [disabled]="activeQuestionIndex === 0">
+      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex(), -1); hideContextMenu()" [disabled]="activeQuestionIndex() === 0">
         <i class="ctx-icon ph ph-arrow-up"></i> Mover arriba
       </button>
-      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex, 1); hideContextMenu()" [disabled]="activeQuestionIndex === s.questions.length - 1">
+      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex(), 1); hideContextMenu()" [disabled]="activeQuestionIndex() === s.questions.length - 1">
         <i class="ctx-icon ph ph-arrow-down"></i> Mover abajo
       </button>
       <div class="context-menu-divider"></div>
-      <button class="context-menu-item context-menu-danger" (click)="removeQuestion(activeQuestionIndex); hideContextMenu()">
+      <button class="context-menu-item context-menu-danger" (click)="removeQuestion(activeQuestionIndex()); hideContextMenu()">
         <i class="ctx-icon ph ph-trash"></i> Eliminar pregunta
       </button>
     }
+  </div>
+}
+
+@if (addQuestionPanel) {
+  <div class="template-modal-backdrop" (click)="addQuestionPanel = false"></div>
+  <div class="add-question-modal" role="dialog" aria-modal="true" aria-label="Agregar pregunta">
+    <div class="add-question-modal-header">
+      <div>
+        <span class="add-question-eyebrow">Nueva pregunta</span>
+        <h2>Elige el tipo de pregunta</h2>
+        <p>Selecciona una opcion para agregarla al flujo actual de la encuesta.</p>
+      </div>
+      <button class="template-close-btn" type="button" (click)="addQuestionPanel = false" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="add-q-grid add-q-modal-grid">
+      @for (qt of questionTypes; track qt.type) {
+        <button class="add-q-type-btn" type="button" (click)="addQuestion(qt.type)">
+          <span class="add-q-type-name">{{ qt.label }}</span>
+          <span class="add-q-type-desc">{{ qt.description }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (showPublishChecklist()) {
+  <div class="template-modal-backdrop" (click)="closePublishChecklist()"></div>
+  <div class="publish-checklist-modal" role="dialog" aria-modal="true" aria-label="Checklist antes de publicar">
+    <div class="template-modal-header">
+      <div>
+        <h2 class="template-modal-title">Checklist antes de publicar</h2>
+        <p class="template-modal-desc">Revisa que la encuesta este lista antes de compartirla.</p>
+      </div>
+      <button class="template-close-btn" type="button" (click)="closePublishChecklist()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="publish-checklist-list">
+      @for (item of publishChecklist(); track item.label) {
+        <div class="publish-checklist-item" [class.ok]="item.ok" [class.error]="!item.ok">
+          <span class="material-symbols-outlined">{{ item.ok ? 'check_circle' : 'error' }}</span>
+          <div>
+            <strong>{{ item.label }}</strong>
+            <p>{{ item.detail }}</p>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 }
 
@@ -634,4 +824,3 @@
     </div>
   </div>
 }
-
