@@ -16,6 +16,7 @@ export type QuestionType =
 export type SurveyStatus = 'borrador' | 'activo' | 'cerrado';
 export type AnswerValue = string | string[] | number | boolean | Record<string, unknown> | null;
 type SurveyQuestionDbType = 'calificacion' | 'seleccion_multiple' | 'texto' | 'texto_largo' | 'escala';
+type SurveyElementConfig = { x: number; y: number; width: number; height: number; rotation?: number; zIndex?: number; positioned?: boolean; originX?: number; originY?: number };
 
 export interface SurveyQuestionInput {
   id: string;
@@ -29,7 +30,11 @@ export interface SurveyQuestionInput {
   min?: number;
   max?: number;
   imageUrl?: string;
-  imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+  imageConfig?: SurveyElementConfig;
+  metaConfig?: SurveyElementConfig;
+  titleConfig?: SurveyElementConfig;
+  helpConfig?: SurveyElementConfig;
+  answerConfig?: SurveyElementConfig;
   validation?: {
     minLength?: number;
     maxLength?: number;
@@ -70,7 +75,11 @@ export interface SurveyQuestionRow {
     min?: number;
     max?: number;
     imageUrl?: string;
-    imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+    imageConfig?: SurveyElementConfig;
+    metaConfig?: SurveyElementConfig;
+    titleConfig?: SurveyElementConfig;
+    helpConfig?: SurveyElementConfig;
+    answerConfig?: SurveyElementConfig;
     validation?: SurveyQuestionInput['validation'];
     logic?: SurveyQuestionInput['logic'];
     randomizeOptions?: boolean;
@@ -457,6 +466,18 @@ export class SurveyRepositoryService {
     }
     if (question.imageConfig) {
       meta['imageConfig'] = question.imageConfig;
+    }
+    if (question.metaConfig) {
+      meta['metaConfig'] = question.metaConfig;
+    }
+    if (question.titleConfig) {
+      meta['titleConfig'] = question.titleConfig;
+    }
+    if (question.helpConfig) {
+      meta['helpConfig'] = question.helpConfig;
+    }
+    if (question.answerConfig) {
+      meta['answerConfig'] = question.answerConfig;
     }
 
     if (question.validation && Object.values(question.validation).some((value) => value !== undefined && value !== '')) {

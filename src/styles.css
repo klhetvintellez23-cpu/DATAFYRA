@@ -228,36 +228,6 @@ a:hover {
 .w-full { width: 100%; }
 
 
-/* Custom Scrollbar Premium - Gordito y Bonito */
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  border-radius: 10px;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-}
-
-/* Firefox Support */
-* {
-  scrollbar-width: auto;
-  scrollbar-color: #3b82f6 rgba(0, 0, 0, 0.05);
-}
-
 .split-auth-overlay {
   position: fixed;
   inset: 0;

@@ -1,10 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, computed, signal } from '@angular/core';
-import { AnswerValue, Question, Survey, SurveyBrand } from '../../services/survey.service';
+import { Component, EventEmitter, Input, OnChanges, Output, computed, signal } from '@angular/core';
+import { AnswerValue, Question, Survey, SurveyBrand, SurveyElementConfig } from '../../services/survey.service';
 import { SurveyNavigationButtonsComponent } from '../../pages/survey-response/components/survey-navigation-buttons';
 import { SurveyQuestionCardComponent } from '../../pages/survey-response/components/survey-question-card';
 import { SurveyThankYouScreenComponent } from '../../pages/survey-response/components/survey-thank-you-screen';
 import { SurveyWelcomeScreenComponent } from '../../pages/survey-response/components/survey-welcome-screen';
+
+type SimulatorTransformKind =
+  | 'logo'
+  | 'welcome-title'
+  | 'welcome-desc'
+  | 'welcome-cta'
+  | 'welcome-kicker'
+  | 'welcome-meta'
+  | 'welcome-preview'
+  | 'question-meta'
+  | 'question-title'
+  | 'question-help'
+  | 'question-image'
+  | 'question-answer'
+  | 'end-rule'
+  | 'end-icon'
+  | 'end-title'
+  | 'end-desc'
+  | 'end-summary'
+  | 'end-brand';
+type TransformMode = 'move' | 'resize';
 
 @Component({
   selector: 'app-survey-simulator',
@@ -26,12 +47,24 @@ import { SurveyWelcomeScreenComponent } from '../../pages/survey-response/compon
       </div>
 
       @if (shouldShowThanks()) {
-        <app-survey-thank-you-screen [survey]="survey" [brand]="brand()"></app-survey-thank-you-screen>
+        <app-survey-thank-you-screen
+          [survey]="survey"
+          [brand]="brand()"
+          [designMode]="designMode"
+          (transformStart)="transformStart.emit($event)"
+          (titleChange)="endTitleChange.emit($event)"
+          (descriptionChange)="endDescriptionChange.emit($event)">
+        </app-survey-thank-you-screen>
       } @else if (shouldShowWelcome()) {
         <app-survey-welcome-screen
           [survey]="survey"
           [brand]="brand()"
           [questionCount]="survey.questions.length"
+          [designMode]="designMode"
+          (transformStart)="transformStart.emit($event)"
+          (titleChange)="welcomeTitleChange.emit($event)"
+          (descriptionChange)="welcomeDescriptionChange.emit($event)"
+          (ctaTextChange)="ctaTextChange.emit($event)"
           (start)="startSurvey()">
         </app-survey-welcome-screen>
       } @else if (shouldShowQuestions()) {
@@ -47,6 +80,9 @@ import { SurveyWelcomeScreenComponent } from '../../pages/survey-response/compon
               [total]="survey.questions.length"
               [answer]="getAnswer(question.id)"
               [error]="$first ? validationError() : ''"
+              [designMode]="designMode"
+              (transformStart)="transformStart.emit($event)"
+              (questionTextChange)="questionTextChange.emit({ index: survey.questions.indexOf(question), text: $event })"
               (answerChange)="updateAnswer(question.id, $event)">
             </app-survey-question-card>
           }
@@ -146,6 +182,13 @@ export class SurveySimulatorComponent implements OnChanges {
   @Input() designMode = false;
   @Input() designSection: 'welcome' | 'questions' | 'end' = 'welcome';
   @Input() designQuestionIndex = 0;
+  @Output() welcomeTitleChange = new EventEmitter<string>();
+  @Output() welcomeDescriptionChange = new EventEmitter<string>();
+  @Output() ctaTextChange = new EventEmitter<string>();
+  @Output() questionTextChange = new EventEmitter<{ index: number; text: string }>();
+  @Output() endTitleChange = new EventEmitter<string>();
+  @Output() endDescriptionChange = new EventEmitter<string>();
+  @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: SimulatorTransformKind; mode: TransformMode; index?: number; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
 
   private readonly inputVersion = signal(0);
   currentPageIndex = signal(0);

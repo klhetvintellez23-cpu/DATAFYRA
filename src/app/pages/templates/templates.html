@@ -52,17 +52,15 @@
                     @for (item of filteredTemplates(); track item.title) {
                         <a [routerLink]="['/templates', item.id]" class="group block space-y-5 animate-fade-in-up no-underline">
                             <div class="aspect-[4/3] rounded-[32px] overflow-hidden bg-gray-100 border border-gray-100 relative shadow-sm group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <!-- Template Image Placeholder -->
-                                <div class="w-full h-full flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
-                                    @if (item.image) {
-                                        <div class="w-full h-full bg-cover bg-center rounded-2xl shadow-inner" [style.background-image]="'url(' + item.image + ')'"></div>
-                                    } @else {
-                                        <span class="material-symbols-outlined text-5xl text-gray-200">dashboard_customize</span>
-                                    }
-                                </div>
+                                <img [src]="item.image" [alt]="item.title" class="template-card-image" loading="lazy" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent opacity-70 group-hover:opacity-90 transition-opacity"></div>
                                 <div class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-[#7F00FF] uppercase tracking-widest shadow-sm">
                                     Gratis
+                                </div>
+                                <div class="absolute left-5 bottom-5 right-5">
+                                    <div class="inline-flex px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-black text-[#1d1b20] uppercase tracking-widest shadow-sm">
+                                        {{ item.category }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="space-y-1 px-2">

@@ -24,6 +24,18 @@ export interface ConditionalRule {
   goTo?: string;
 }
 
+export interface SurveyElementConfig {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  zIndex?: number;
+  positioned?: boolean;
+  originX?: number;
+  originY?: number;
+}
+
 export interface Question {
   id: string;
   type: QuestionType;
@@ -33,7 +45,11 @@ export interface Question {
   min?: number;
   max?: number;
   imageUrl?: string;
-  imageConfig?: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+  imageConfig?: SurveyElementConfig;
+  metaConfig?: SurveyElementConfig;
+  titleConfig?: SurveyElementConfig;
+  helpConfig?: SurveyElementConfig;
+  answerConfig?: SurveyElementConfig;
   validation?: QuestionValidation;
   logic?: ConditionalRule[];
   randomizeOptions?: boolean;
@@ -41,7 +57,7 @@ export interface Question {
 
 export interface SurveyBrand {
   logoUrl?: string;
-  logoConfig?: { x: number; y: number; width: number; height: number };
+  logoConfig?: SurveyElementConfig;
   primaryColor?: string;
   secondaryColor?: string;
   backgroundColor?: string;
@@ -69,7 +85,7 @@ export interface SurveyBrand {
 export interface DecoratedImage {
   id: string;
   imageUrl: string;
-  config: { x: number; y: number; width: number; height: number; rotation: number; zIndex: number };
+  config: SurveyElementConfig;
 }
 
 export type CanvasElementType = 'text' | 'button' | 'image' | 'shape' | 'question' | 'progress';
@@ -110,16 +126,23 @@ export interface SurveyMetadata {
   brand?: SurveyBrand;
   theme?: Record<string, any>;
   welcomeImages?: DecoratedImage[];
-  welcomeTitleConfig?: { x: number; y: number; width: number; height: number };
-  welcomeDescConfig?: { x: number; y: number; width: number; height: number };
-  welcomeKickerConfig?: { x: number; y: number; width: number; height: number };
-  welcomeCtaConfig?: { x: number; y: number; width: number; height: number };
-  welcomeMetaConfig?: { x: number; y: number; width: number; height: number };
+  welcomeTitleConfig?: SurveyElementConfig;
+  welcomeDescConfig?: SurveyElementConfig;
+  welcomeKickerConfig?: SurveyElementConfig;
+  welcomeCtaConfig?: SurveyElementConfig;
+  welcomeMetaConfig?: SurveyElementConfig;
+  welcomePreviewConfig?: SurveyElementConfig;
   endTitle?: string;
   endDescription?: string;
   thankYouTitle?: string;
   thankYouDescription?: string;
   endImages?: DecoratedImage[];
+  endRuleConfig?: SurveyElementConfig;
+  endIconConfig?: SurveyElementConfig;
+  endTitleConfig?: SurveyElementConfig;
+  endDescConfig?: SurveyElementConfig;
+  endSummaryConfig?: SurveyElementConfig;
+  endBrandConfig?: SurveyElementConfig;
   ctaText?: string;
   paginationMode?: 'one-by-one' | 'paged' | 'all-at-once';
   questionsPerPage?: number;
@@ -219,6 +242,10 @@ export class SurveyService {
         max: question.max,
         imageUrl: question.imageUrl,
         imageConfig: question.imageConfig,
+        metaConfig: question.metaConfig,
+        titleConfig: question.titleConfig,
+        helpConfig: question.helpConfig,
+        answerConfig: question.answerConfig,
         validation: question.validation,
         logic: question.logic,
         randomizeOptions: question.randomizeOptions

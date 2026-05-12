@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { CanvasStageComponent } from '../../components/canvas-stage/canvas-stage';
 import { SurveySimulatorComponent } from '../../components/survey-simulator/survey-simulator';
 import {
   ConditionalRule,
@@ -14,6 +13,7 @@ import {
   QuestionType,
   Survey,
   SurveyBrand,
+  SurveyElementConfig,
   SurveyMetadata,
   SurveyService
 } from '../../services/survey.service';
@@ -22,8 +22,29 @@ import { AuthService } from '../../services/auth.service';
 
 type EditorTab = 'design' | 'preview' | 'collect' | 'analyze';
 type RightTab = 'content' | 'design';
-type AssetKind = 'logo' | 'welcome-image' | 'end-image' | 'question-image' | 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta';
+type AssetKind =
+  | 'logo'
+  | 'welcome-image'
+  | 'end-image'
+  | 'question-image'
+  | 'welcome-title'
+  | 'welcome-desc'
+  | 'welcome-cta'
+  | 'welcome-kicker'
+  | 'welcome-meta'
+  | 'welcome-preview'
+  | 'question-meta'
+  | 'question-title'
+  | 'question-help'
+  | 'question-answer'
+  | 'end-rule'
+  | 'end-icon'
+  | 'end-title'
+  | 'end-desc'
+  | 'end-summary'
+  | 'end-brand';
 type TransformMode = 'move' | 'resize';
+type LayoutFrameMap = Record<string, SurveyElementConfig>;
 
 interface PalettePreset {
   name: string;
@@ -44,6 +65,8 @@ interface ActiveTransform {
   initialY: number;
   initialWidth: number;
   initialHeight: number;
+  originX: number;
+  originY: number;
 }
 
 interface PublishChecklistItem {
@@ -55,7 +78,7 @@ interface PublishChecklistItem {
 @Component({
   selector: 'app-editor',
   standalone: true,
-  imports: [FormsModule, RouterLink, CommonModule, SurveySimulatorComponent, CanvasStageComponent],
+  imports: [FormsModule, RouterLink, CommonModule, SurveySimulatorComponent],
   templateUrl: './editor.html',
   styleUrl: './editor.css'
 })
@@ -125,9 +148,8 @@ export class EditorPage implements OnInit, OnDestroy {
   private copiedElementStyles: Record<string, any> | null = null;
 
   // Customization Tabs (Canva Style)
-  customTab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' = 'palettes';
+  customTab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' | null = null;
   currentTab: EditorTab = 'design';
-  designCanvasMode: 'functional' | 'free' = 'functional';
 
   previewDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   contextMenuVisible = false;
@@ -135,18 +157,47 @@ export class EditorPage implements OnInit, OnDestroy {
   contextMenuY = 0;
   collapsedSections: Record<string, boolean> = {};
 
-  sidebarClass = () => this.currentTab === 'design' ? 'editor-sidebar-right custom-nav-active' : 'editor-sidebar-right';
+  sidebarClass = () => {
+    if (this.currentTab !== 'design') return 'editor-sidebar-right';
+    return this.customTab ? 'editor-sidebar-right custom-nav-active panel-open' : 'editor-sidebar-right custom-nav-active panel-closed';
+  };
+
+  effectiveRightSidebarWidth(): number {
+    if (this.currentTab === 'design' && !this.customTab) return 68;
+    return Math.max(500, this.rightSidebarWidth);
+  }
 
   // Resizable sidebar logic
   isResizing = false;
-  rightSidebarWidth = Number(localStorage.getItem('df_sidebar_width')) || 440;
+  rightSidebarWidth = Number(localStorage.getItem('df_sidebar_width')) || 520;
 
   // Contextual Focus
   focusSettings(tab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media', section?: 'welcome' | 'questions' | 'end', index?: number) {
     this.currentTab = 'design';
-    this.customTab = tab;
+    this.openCustomTab(tab);
     if (section) this.activeSection.set(section);
     if (index !== undefined) this.activeQuestionIndex.set(index);
+  }
+
+  openCustomTab(tab: 'content' | 'palettes' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media'): void {
+    this.customTab = tab;
+  }
+
+  closeCustomPanel(): void {
+    this.customTab = null;
+  }
+
+  customTabTitle(): string {
+    switch (this.customTab) {
+      case 'content': return 'Contenido';
+      case 'palettes': return 'Paletas';
+      case 'colors': return 'Colores';
+      case 'buttons': return 'Botón';
+      case 'typography': return 'Texto';
+      case 'effects': return 'Efectos';
+      case 'media': return 'Medios';
+      default: return '';
+    }
   }
 
 
@@ -601,12 +652,16 @@ export class EditorPage implements OnInit, OnDestroy {
         const brand = this.ensureBrand(survey.metadata?.brand);
         const config = { ...(brand.logoConfig ?? this.defaultLogoConfig()) };
         if (transform.mode === 'move') {
-          config.x = this.clamp(transform.initialX + dx, -40, 560);
-          config.y = this.clamp(transform.initialY + dy, -20, 320);
+          config.x = this.clamp(transform.initialX + dx, -120, 900);
+          config.y = this.clamp(transform.initialY + dy, -120, 760);
         } else {
-          config.width = this.clamp(transform.initialWidth + dx, 48, 320);
-          config.height = this.clamp(transform.initialHeight + dy, 32, 220);
+          const size = this.resizeWithAspectRatio(transform, dx, dy, 48, 320, 32, 220);
+          config.width = size.width;
+          config.height = size.height;
         }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
         brand.logoConfig = config;
         return { ...survey, metadata: { ...this.ensureMetadata(survey.metadata), brand } };
       });
@@ -629,12 +684,16 @@ export class EditorPage implements OnInit, OnDestroy {
 
         const config = { ...item.config };
         if (transform.mode === 'move') {
-          config.x = this.clamp(transform.initialX + dx, -80, 620);
-          config.y = this.clamp(transform.initialY + dy, -40, 380);
+          config.x = this.clamp(transform.initialX + dx, -160, 900);
+          config.y = this.clamp(transform.initialY + dy, -160, 760);
         } else {
-          config.width = this.clamp(transform.initialWidth + dx, 40, 420);
-          config.height = this.clamp(transform.initialHeight + dy, 40, 420);
+          const size = this.resizeWithAspectRatio(transform, dx, dy, 40, 420, 40, 420);
+          config.width = size.width;
+          config.height = size.height;
         }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
 
         images[imageIndex] = { ...item, config };
         return { ...survey, metadata: { ...metadata, welcomeImages: images } };
@@ -642,18 +701,19 @@ export class EditorPage implements OnInit, OnDestroy {
       return;
     }
 
-    if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta'].includes(transform.kind)) {
+    if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta', 'welcome-preview'].includes(transform.kind)) {
       this.survey.update((survey) => {
         if (!survey) return survey;
         const metadata = this.ensureMetadata(survey.metadata);
 
-        let configKey: 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeCtaConfig' | 'welcomeKickerConfig' | 'welcomeMetaConfig';
+        let configKey: 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeCtaConfig' | 'welcomeKickerConfig' | 'welcomeMetaConfig' | 'welcomePreviewConfig';
         switch (transform.kind) {
           case 'welcome-title': configKey = 'welcomeTitleConfig'; break;
           case 'welcome-desc': configKey = 'welcomeDescConfig'; break;
           case 'welcome-cta': configKey = 'welcomeCtaConfig'; break;
           case 'welcome-kicker': configKey = 'welcomeKickerConfig'; break;
           case 'welcome-meta': configKey = 'welcomeMetaConfig'; break;
+          case 'welcome-preview': configKey = 'welcomePreviewConfig'; break;
           default: return survey;
         }
 
@@ -661,10 +721,51 @@ export class EditorPage implements OnInit, OnDestroy {
         if (transform.mode === 'move') {
           config.x = transform.initialX + dx;
           config.y = transform.initialY + dy;
+          config.width = transform.initialWidth;
+          config.height = transform.initialHeight;
         } else {
           config.width = Math.max(transform.initialWidth + dx, 50);
           config.height = Math.max(transform.initialHeight + dy, 30);
         }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
+
+        metadata[configKey] = config;
+        return { ...survey, metadata };
+      });
+      return;
+    }
+
+    if (['end-rule', 'end-icon', 'end-title', 'end-desc', 'end-summary', 'end-brand'].includes(transform.kind)) {
+      this.survey.update((survey) => {
+        if (!survey) return survey;
+        const metadata = this.ensureMetadata(survey.metadata);
+
+        let configKey: 'endRuleConfig' | 'endIconConfig' | 'endTitleConfig' | 'endDescConfig' | 'endSummaryConfig' | 'endBrandConfig';
+        switch (transform.kind) {
+          case 'end-rule': configKey = 'endRuleConfig'; break;
+          case 'end-icon': configKey = 'endIconConfig'; break;
+          case 'end-title': configKey = 'endTitleConfig'; break;
+          case 'end-desc': configKey = 'endDescConfig'; break;
+          case 'end-summary': configKey = 'endSummaryConfig'; break;
+          case 'end-brand': configKey = 'endBrandConfig'; break;
+          default: return survey;
+        }
+
+        const config = { ...(metadata[configKey] ?? { x: 40, y: 120, width: 420, height: 80 }) };
+        if (transform.mode === 'move') {
+          config.x = transform.initialX + dx;
+          config.y = transform.initialY + dy;
+          config.width = transform.initialWidth;
+          config.height = transform.initialHeight;
+        } else {
+          config.width = Math.max(transform.initialWidth + dx, 24);
+          config.height = Math.max(transform.initialHeight + dy, 16);
+        }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
 
         metadata[configKey] = config;
         return { ...survey, metadata };
@@ -688,12 +789,16 @@ export class EditorPage implements OnInit, OnDestroy {
 
         const config = { ...item.config };
         if (transform.mode === 'move') {
-          config.x = this.clamp(transform.initialX + dx, -80, 620);
-          config.y = this.clamp(transform.initialY + dy, -40, 380);
+          config.x = this.clamp(transform.initialX + dx, -160, 900);
+          config.y = this.clamp(transform.initialY + dy, -160, 760);
         } else {
-          config.width = this.clamp(transform.initialWidth + dx, 40, 420);
-          config.height = this.clamp(transform.initialHeight + dy, 40, 420);
+          const size = this.resizeWithAspectRatio(transform, dx, dy, 40, 420, 40, 420);
+          config.width = size.width;
+          config.height = size.height;
         }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
 
         images[imageIndex] = { ...item, config };
         return { ...survey, metadata: { ...metadata, endImages: images } };
@@ -716,14 +821,61 @@ export class EditorPage implements OnInit, OnDestroy {
 
         const config = { ...question.imageConfig };
         if (transform.mode === 'move') {
-          config.x = this.clamp(transform.initialX + dx, -20, 420);
-          config.y = this.clamp(transform.initialY + dy, -20, 280);
+          config.x = this.clamp(transform.initialX + dx, -160, 900);
+          config.y = this.clamp(transform.initialY + dy, -160, 760);
         } else {
-          config.width = this.clamp(transform.initialWidth + dx, 40, 320);
-          config.height = this.clamp(transform.initialHeight + dy, 40, 320);
+          const size = this.resizeWithAspectRatio(transform, dx, dy, 40, 320, 40, 320);
+          config.width = size.width;
+          config.height = size.height;
         }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
 
         question.imageConfig = config;
+        questions[questionIndex] = question;
+        return { ...survey, questions };
+      });
+      return;
+    }
+
+    if (['question-meta', 'question-title', 'question-help', 'question-answer'].includes(transform.kind) && transform.index !== undefined) {
+      const questionIndex = transform.index;
+      this.survey.update((survey) => {
+        if (!survey) {
+          return survey;
+        }
+
+        const questions = [...survey.questions];
+        const question = { ...questions[questionIndex] };
+        if (!question) {
+          return survey;
+        }
+
+        let configKey: 'metaConfig' | 'titleConfig' | 'helpConfig' | 'answerConfig';
+        switch (transform.kind) {
+          case 'question-meta': configKey = 'metaConfig'; break;
+          case 'question-title': configKey = 'titleConfig'; break;
+          case 'question-help': configKey = 'helpConfig'; break;
+          case 'question-answer': configKey = 'answerConfig'; break;
+          default: return survey;
+        }
+
+        const config = { ...(question[configKey] ?? { x: 0, y: 80, width: 640, height: 100 }) };
+        if (transform.mode === 'move') {
+          config.x = transform.initialX + dx;
+          config.y = transform.initialY + dy;
+          config.width = transform.initialWidth;
+          config.height = transform.initialHeight;
+        } else {
+          config.width = Math.max(transform.initialWidth + dx, 50);
+          config.height = Math.max(transform.initialHeight + dy, 30);
+        }
+        config.originX = transform.originX;
+        config.originY = transform.originY;
+        config.positioned = true;
+
+        question[configKey] = config;
         questions[questionIndex] = question;
         return { ...survey, questions };
       });
@@ -1567,19 +1719,11 @@ export class EditorPage implements OnInit, OnDestroy {
     if (!config) {
       return;
     }
+    const positionedConfig = config as SurveyElementConfig;
 
     event.preventDefault();
     event.stopPropagation();
-    this.activeTransform = {
-      kind: 'logo',
-      mode,
-      startX: event.clientX,
-      startY: event.clientY,
-      initialX: config.x,
-      initialY: config.y,
-      initialWidth: config.width,
-      initialHeight: config.height
-    };
+    this.activeTransform = this.createActiveTransform('logo', mode, event, positionedConfig);
   }
 
   startWelcomeImageTransform(index: number, mode: TransformMode, event: MouseEvent): void {
@@ -1590,17 +1734,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
-    this.activeTransform = {
-      kind: 'welcome-image',
-      index,
-      mode,
-      startX: event.clientX,
-      startY: event.clientY,
-      initialX: item.config.x,
-      initialY: item.config.y,
-      initialWidth: item.config.width,
-      initialHeight: item.config.height
-    };
+    this.activeTransform = this.createActiveTransform('welcome-image', mode, event, item.config, index);
   }
 
   startEndImageTransform(index: number, mode: TransformMode, event: MouseEvent): void {
@@ -1611,17 +1745,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
-    this.activeTransform = {
-      kind: 'end-image',
-      index,
-      mode,
-      startX: event.clientX,
-      startY: event.clientY,
-      initialX: item.config.x,
-      initialY: item.config.y,
-      initialWidth: item.config.width,
-      initialHeight: item.config.height
-    };
+    this.activeTransform = this.createActiveTransform('end-image', mode, event, item.config, index);
   }
 
   startQuestionImageTransform(index: number, mode: TransformMode, event: MouseEvent): void {
@@ -1632,17 +1756,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
     event.preventDefault();
     event.stopPropagation();
-    this.activeTransform = {
-      kind: 'question-image',
-      index,
-      mode,
-      startX: event.clientX,
-      startY: event.clientY,
-      initialX: question.imageConfig.x,
-      initialY: question.imageConfig.y,
-      initialWidth: question.imageConfig.width,
-      initialHeight: question.imageConfig.height
-    };
+    this.activeTransform = this.createActiveTransform('question-image', mode, event, question.imageConfig, index);
   }
 
   async publish(): Promise<void> {
@@ -1747,36 +1861,6 @@ export class EditorPage implements OnInit, OnDestroy {
     this.showPublishChecklist.set(false);
   }
 
-  setDesignCanvasMode(mode: 'functional' | 'free'): void {
-    this.designCanvasMode = mode;
-    this.selectedElementIds.set([]);
-  }
-
-  applyFunctionalDesignToCurrentFreeScreen(): void {
-    this.resetCurrentFreeLayout();
-  }
-
-  resetCurrentFreeLayout(): void {
-    this.survey.update((survey) => {
-      if (!survey) return survey;
-      const normalized = this.normalizeSurvey({
-        ...survey,
-        metadata: {
-          ...this.ensureMetadata(survey.metadata),
-          canvas: {
-            screens: (survey.metadata?.canvas?.screens ?? []).filter((screen) => {
-              const target = this.activeSection() === 'questions' ? `question-${this.activeQuestionIndex()}` : this.activeSection();
-              return screen.id !== target;
-            })
-          }
-        }
-      });
-      return normalized;
-    });
-    this.selectedElementIds.set([]);
-    this.queueSave();
-  }
-
   goToAnalytics(): void {
     const survey = this.survey();
     if (survey) {
@@ -1874,6 +1958,18 @@ export class EditorPage implements OnInit, OnDestroy {
       case 'welcome-cta': config = metadata.welcomeCtaConfig; break;
       case 'welcome-kicker': config = metadata.welcomeKickerConfig; break;
       case 'welcome-meta': config = metadata.welcomeMetaConfig; break;
+      case 'welcome-preview': config = metadata.welcomePreviewConfig; break;
+      case 'end-rule': config = metadata.endRuleConfig; break;
+      case 'end-icon': config = metadata.endIconConfig; break;
+      case 'end-title': config = metadata.endTitleConfig; break;
+      case 'end-desc': config = metadata.endDescConfig; break;
+      case 'end-summary': config = metadata.endSummaryConfig; break;
+      case 'end-brand': config = metadata.endBrandConfig; break;
+      case 'question-meta': config = survey.questions[index ?? 0]?.metaConfig; break;
+      case 'question-title': config = survey.questions[index ?? 0]?.titleConfig; break;
+      case 'question-help': config = survey.questions[index ?? 0]?.helpConfig; break;
+      case 'question-answer': config = survey.questions[index ?? 0]?.answerConfig; break;
+      case 'question-image': config = survey.questions[index ?? 0]?.imageConfig; break;
     }
 
     if (!config) return {};
@@ -1888,15 +1984,19 @@ export class EditorPage implements OnInit, OnDestroy {
     };
   }
 
-  startTransform(event: MouseEvent, kind: AssetKind, mode: TransformMode, index?: number): void {
+  startTransform(event: MouseEvent, kind: AssetKind, mode: TransformMode, index?: number, frame?: SurveyElementConfig, frames?: LayoutFrameMap): void {
     event.preventDefault();
     event.stopPropagation();
+
+    if (frames) {
+      this.initializeMeasuredLayout(kind, frames, index);
+    }
 
     const survey = this.survey();
     if (!survey) return;
     const metadata = this.ensureMetadata(survey.metadata);
 
-    let config: { x: number; y: number; width: number; height: number } | undefined;
+    let config: SurveyElementConfig | undefined;
 
     switch (kind) {
       case 'logo': config = metadata.brand?.logoConfig ?? this.defaultLogoConfig(); break;
@@ -1906,21 +2006,35 @@ export class EditorPage implements OnInit, OnDestroy {
       case 'welcome-cta': config = metadata.welcomeCtaConfig ?? { x: 44, y: 400, width: 220, height: 60 }; break;
       case 'welcome-kicker': config = metadata.welcomeKickerConfig ?? { x: 44, y: 140, width: 200, height: 30 }; break;
       case 'welcome-meta': config = metadata.welcomeMetaConfig ?? { x: 44, y: 480, width: 300, height: 40 }; break;
+      case 'welcome-preview': config = metadata.welcomePreviewConfig ?? { x: 0, y: 0, width: 280, height: 360 }; break;
+      case 'end-rule': config = metadata.endRuleConfig ?? { x: 64, y: 0, width: 420, height: 8 }; break;
+      case 'end-icon': config = metadata.endIconConfig ?? { x: 233, y: 130, width: 82, height: 52 }; break;
+      case 'end-title': config = metadata.endTitleConfig ?? { x: 34, y: 212, width: 480, height: 120 }; break;
+      case 'end-desc': config = metadata.endDescConfig ?? { x: 54, y: 356, width: 440, height: 84 }; break;
+      case 'end-summary': config = metadata.endSummaryConfig ?? { x: 94, y: 468, width: 360, height: 48 }; break;
+      case 'end-brand': config = metadata.endBrandConfig ?? { x: 64, y: 548, width: 420, height: 54 }; break;
+      case 'question-meta': config = survey.questions[index ?? 0]?.metaConfig ?? { x: 0, y: 0, width: 360, height: 42 }; break;
+      case 'question-title': config = survey.questions[index ?? 0]?.titleConfig ?? { x: 0, y: 72, width: 708, height: 112 }; break;
+      case 'question-help': config = survey.questions[index ?? 0]?.helpConfig ?? { x: 0, y: 202, width: 620, height: 54 }; break;
+      case 'question-image': config = survey.questions[index ?? 0]?.imageConfig ?? { x: 0, y: 276, width: 260, height: 180 }; break;
+      case 'question-answer': config = survey.questions[index ?? 0]?.answerConfig ?? { x: 0, y: 486, width: 708, height: 150 }; break;
+    }
+
+    if (frame) {
+      config = {
+        ...(config ?? frame),
+        x: frame.x,
+        y: frame.y,
+        width: frame.width,
+        height: frame.height,
+        originX: config?.originX ?? frame.x,
+        originY: config?.originY ?? frame.y
+      };
     }
 
     if (!config) return;
 
-    this.activeTransform = {
-      kind,
-      index,
-      mode,
-      startX: event.clientX,
-      startY: event.clientY,
-      initialX: config.x,
-      initialY: config.y,
-      initialWidth: config.width,
-      initialHeight: config.height
-    };
+    this.activeTransform = this.createActiveTransform(kind, mode, event, config, index);
   }
 
   responseThemeStyle(): Record<string, string> {
@@ -2273,6 +2387,13 @@ export class EditorPage implements OnInit, OnDestroy {
       welcomeCtaConfig: metadata?.welcomeCtaConfig,
       welcomeKickerConfig: metadata?.welcomeKickerConfig,
       welcomeMetaConfig: metadata?.welcomeMetaConfig,
+      welcomePreviewConfig: metadata?.welcomePreviewConfig,
+      endRuleConfig: metadata?.endRuleConfig,
+      endIconConfig: metadata?.endIconConfig,
+      endTitleConfig: metadata?.endTitleConfig,
+      endDescConfig: metadata?.endDescConfig,
+      endSummaryConfig: metadata?.endSummaryConfig,
+      endBrandConfig: metadata?.endBrandConfig,
       ctaText: metadata?.ctaText ?? 'Comenzar encuesta',
       paginationMode: metadata?.paginationMode ?? 'one-by-one',
       questionsPerPage: metadata?.questionsPerPage ?? 3,
@@ -2311,7 +2432,7 @@ export class EditorPage implements OnInit, OnDestroy {
     };
   }
 
-  private defaultLogoConfig(): { x: number; y: number; width: number; height: number } {
+  private defaultLogoConfig(): SurveyElementConfig {
     return { x: 36, y: 24, width: 120, height: 56 };
   }
 
@@ -3042,6 +3163,135 @@ export class EditorPage implements OnInit, OnDestroy {
 
   private clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
+  }
+
+  private createActiveTransform(
+    kind: AssetKind,
+    mode: TransformMode,
+    event: MouseEvent,
+    config: SurveyElementConfig,
+    index?: number
+  ): ActiveTransform {
+    return {
+      kind,
+      index,
+      mode,
+      startX: event.clientX,
+      startY: event.clientY,
+      initialX: config.x,
+      initialY: config.y,
+      initialWidth: config.width,
+      initialHeight: config.height,
+      originX: config.originX ?? config.x,
+      originY: config.originY ?? config.y
+    };
+  }
+
+  private initializeMeasuredLayout(kind: AssetKind, frames: LayoutFrameMap, index?: number): void {
+    if (!Object.keys(frames).length) return;
+
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+
+      if (kind.startsWith('welcome-') || !!frames['welcome-title'] || !!frames['welcome-kicker'] || !!frames['welcome-preview']) {
+        const metadata = this.ensureMetadata(survey.metadata);
+        const brand = this.ensureBrand(metadata.brand);
+        this.applyMeasuredFrameToBrandLogo(brand, frames['logo']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomeKickerConfig', frames['welcome-kicker']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomeTitleConfig', frames['welcome-title']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomeDescConfig', frames['welcome-desc']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomeMetaConfig', frames['welcome-meta']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomeCtaConfig', frames['welcome-cta']);
+        this.applyMeasuredFrameToMetadata(metadata, 'welcomePreviewConfig', frames['welcome-preview']);
+        metadata.brand = brand;
+        return { ...survey, metadata };
+      }
+
+      if (kind.startsWith('question-') && index !== undefined) {
+        const questions = [...survey.questions];
+        const question = { ...questions[index] };
+        if (!question) return survey;
+        this.applyMeasuredFrameToQuestion(question, 'metaConfig', frames['question-meta']);
+        this.applyMeasuredFrameToQuestion(question, 'titleConfig', frames['question-title']);
+        this.applyMeasuredFrameToQuestion(question, 'helpConfig', frames['question-help']);
+        this.applyMeasuredFrameToQuestion(question, 'imageConfig', frames['question-image']);
+        this.applyMeasuredFrameToQuestion(question, 'answerConfig', frames['question-answer']);
+        questions[index] = question;
+        return { ...survey, questions };
+      }
+
+      if (kind.startsWith('end-') || !!frames['end-title'] || !!frames['end-rule']) {
+        const metadata = this.ensureMetadata(survey.metadata);
+        const brand = this.ensureBrand(metadata.brand);
+        this.applyMeasuredFrameToBrandLogo(brand, frames['logo']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endRuleConfig', frames['end-rule']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endIconConfig', frames['end-icon']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endTitleConfig', frames['end-title']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endDescConfig', frames['end-desc']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endSummaryConfig', frames['end-summary']);
+        this.applyMeasuredFrameToMetadata(metadata, 'endBrandConfig', frames['end-brand']);
+        metadata.brand = brand;
+        return { ...survey, metadata };
+      }
+
+      return survey;
+    });
+  }
+
+  private applyMeasuredFrameToMetadata(
+    metadata: SurveyMetadata,
+    key: keyof Pick<SurveyMetadata,
+      'welcomeKickerConfig' | 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeMetaConfig' | 'welcomeCtaConfig' | 'welcomePreviewConfig'
+      | 'endRuleConfig' | 'endIconConfig' | 'endTitleConfig' | 'endDescConfig' | 'endSummaryConfig' | 'endBrandConfig'>,
+    frame: SurveyElementConfig | undefined
+  ): void {
+    if (!frame || metadata[key]?.positioned) return;
+    metadata[key] = this.frameToPositionedConfig(frame);
+  }
+
+  private applyMeasuredFrameToQuestion(
+    question: Question,
+    key: keyof Pick<Question, 'metaConfig' | 'titleConfig' | 'helpConfig' | 'imageConfig' | 'answerConfig'>,
+    frame: SurveyElementConfig | undefined
+  ): void {
+    const existing = question[key] as SurveyElementConfig | undefined;
+    if (!frame || existing?.positioned) return;
+    question[key] = this.frameToPositionedConfig(frame) as never;
+  }
+
+  private applyMeasuredFrameToBrandLogo(brand: SurveyBrand, frame: SurveyElementConfig | undefined): void {
+    if (!frame || brand.logoConfig?.positioned) return;
+    brand.logoConfig = this.frameToPositionedConfig(frame);
+  }
+
+  private frameToPositionedConfig(frame: SurveyElementConfig): SurveyElementConfig {
+    return {
+      ...frame,
+      originX: frame.x,
+      originY: frame.y,
+      positioned: true
+    };
+  }
+
+  private resizeWithAspectRatio(
+    transform: ActiveTransform,
+    dx: number,
+    dy: number,
+    minWidth: number,
+    maxWidth: number,
+    minHeight: number,
+    maxHeight: number
+  ): { width: number; height: number } {
+    const ratio = transform.initialWidth / Math.max(1, transform.initialHeight);
+    const widthFromDrag = transform.initialWidth + dx;
+    const heightFromDrag = transform.initialHeight + dy;
+    const widthFromHeight = heightFromDrag * ratio;
+    const targetWidth = Math.abs(dy) > Math.abs(dx) ? widthFromHeight : widthFromDrag;
+    let width = this.clamp(targetWidth, minWidth, maxWidth);
+    let height = this.clamp(width / ratio, minHeight, maxHeight);
+    width = this.clamp(height * ratio, minWidth, maxWidth);
+    height = this.clamp(width / ratio, minHeight, maxHeight);
+    return { width: Math.round(width), height: Math.round(height) };
   }
 
   private createLocalId(prefix: string): string {

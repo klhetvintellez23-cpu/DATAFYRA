@@ -19,6 +19,7 @@ interface TemplateData {
   title: string;
   category: string;
   popularity: string;
+  image: string;
   description: string;
   idealFor: string[];
   fullDescription: string;
@@ -50,6 +51,7 @@ export class TemplateDetailsPage implements OnInit {
       title: 'Satisfacción del cliente',
       category: 'Feedback del usuario',
       popularity: '14742',
+      image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=1200',
       description: 'Midiendo la satisfacción de los clientes conocerá su opinión sobre la empresa y el nivel de los servicios ofertados.',
       idealFor: ['empresas productoras', 'sociedades mercantiles', 'autónomos', 'agencias de marketing'],
       fullDescription: 'Verifique qué artículos son más solicitados, cómo reaccionan los clientes a sus precios en comparación con la competencia o cuál es la opinión sobre la calidad de atención.',
@@ -85,6 +87,7 @@ export class TemplateDetailsPage implements OnInit {
       title: 'Portfolio Showcase',
       category: 'Diseño y Creatividad',
       popularity: '8532',
+      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200',
       description: 'Evalúa la percepción de tu portafolio personal. Ideal para creativos.',
       idealFor: ['diseñadores', 'desarrolladores', 'freelancers'],
       fullDescription: 'Analiza la navegación, la calidad visual y la claridad de tus proyectos presentados.',
@@ -115,6 +118,7 @@ export class TemplateDetailsPage implements OnInit {
       title: 'Business Growth Survey',
       category: 'Corporativo',
       popularity: '12400',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=1200',
       description: 'Mide la salud de tu negocio con esta plantilla integral. Analiza el mercado y la satisfacción interna.',
       idealFor: ['startups', 'pymes', 'corporaciones'],
       fullDescription: 'Perfecta para planes trimestrales. Recopila datos sobre la cultura organizacional, eficiencia de procesos y visión de mercado.',
@@ -142,6 +146,161 @@ export class TemplateDetailsPage implements OnInit {
           text: '¿Cómo calificaría el liderazgo del equipo directivo?',
           type: 'choice',
           options: ['Inspirador', 'Efectivo', 'Neutral', 'Ineficaz']
+        }
+      ]
+    },
+    'clima-laboral': {
+      id: 'clima-laboral',
+      title: 'Clima laboral',
+      category: 'Recursos humanos',
+      popularity: '18640',
+      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1200',
+      description: 'Evalúa bienestar, comunicación y motivación dentro del equipo.',
+      idealFor: ['recursos humanos', 'líderes de equipo', 'operaciones'],
+      fullDescription: 'Identifica señales de desgaste, claridad de objetivos y oportunidades para mejorar la experiencia interna de tus colaboradores.',
+      questions: [
+        {
+          text: '¿Qué tan satisfecho estás con el ambiente laboral actual?',
+          type: 'rating'
+        },
+        {
+          text: '¿Sientes que tus objetivos están claramente definidos?',
+          type: 'choice',
+          options: ['Totalmente', 'En su mayoría', 'Parcialmente', 'Poco claros', 'Nada claros']
+        },
+        {
+          text: '¿Cómo calificarías la comunicación con tu equipo?',
+          type: 'choice',
+          options: ['Excelente', 'Buena', 'Regular', 'Deficiente']
+        },
+        {
+          text: '¿Qué cambio tendría mayor impacto en tu trabajo diario?',
+          type: 'text',
+          placeholder: 'Comparte una mejora concreta...'
+        }
+      ]
+    },
+    'evaluacion-evento': {
+      id: 'evaluacion-evento',
+      title: 'Evaluación de evento',
+      category: 'Eventos',
+      popularity: '11284',
+      image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1200',
+      description: 'Recopila feedback de asistentes después de una conferencia, taller o activación.',
+      idealFor: ['organizadores', 'marketing', 'comunidades', 'eventos corporativos'],
+      fullDescription: 'Mide satisfacción, contenido, logística y probabilidad de asistencia futura para mejorar tus próximos eventos.',
+      questions: [
+        {
+          text: '¿Cómo calificarías tu experiencia general en el evento?',
+          type: 'rating'
+        },
+        {
+          text: '¿Qué aspecto fue más valioso para ti?',
+          type: 'choice',
+          options: ['Contenido', 'Networking', 'Organización', 'Lugar', 'Dinámicas']
+        },
+        {
+          text: '¿Qué tan probable es que asistas a otro evento nuestro?',
+          type: 'choice',
+          options: ['Muy probable', 'Probable', 'No estoy seguro', 'Poco probable']
+        },
+        {
+          text: '¿Qué mejorarías para la próxima edición?',
+          type: 'text',
+          placeholder: 'Cuéntanos tu recomendación...'
+        }
+      ]
+    },
+    'satisfaccion-estudiantes': {
+      id: 'satisfaccion-estudiantes',
+      title: 'Satisfacción de estudiantes',
+      category: 'Educación',
+      popularity: '16902',
+      image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&q=80&w=1200',
+      description: 'Evalúa clases, recursos, docentes y experiencia académica.',
+      idealFor: ['instituciones educativas', 'docentes', 'academias', 'cursos online'],
+      fullDescription: 'Obtén información clara sobre calidad del contenido, ritmo de aprendizaje y soporte para mejorar la experiencia educativa.',
+      questions: [
+        {
+          text: '¿Qué tan satisfecho estás con el curso o programa?',
+          type: 'rating'
+        },
+        {
+          text: '¿El contenido fue claro y fácil de seguir?',
+          type: 'choice',
+          options: ['Muy claro', 'Claro', 'Regular', 'Confuso']
+        },
+        {
+          text: '¿Cómo valorarías el apoyo del docente o facilitador?',
+          type: 'choice',
+          options: ['Excelente', 'Bueno', 'Aceptable', 'Insuficiente']
+        },
+        {
+          text: '¿Qué tema te gustaría reforzar?',
+          type: 'text',
+          placeholder: 'Escribe el tema o recurso que necesitas...'
+        }
+      ]
+    },
+    'impacto-comunitario': {
+      id: 'impacto-comunitario',
+      title: 'Impacto comunitario',
+      category: 'Comunidad y sin fines de lucro',
+      popularity: '9476',
+      image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&q=80&w=1200',
+      description: 'Mide percepción, necesidades y resultados de programas comunitarios.',
+      idealFor: ['ONG', 'fundaciones', 'comunidades', 'programas sociales'],
+      fullDescription: 'Comprende el impacto percibido por beneficiarios y voluntarios para priorizar iniciativas con mayor valor social.',
+      questions: [
+        {
+          text: '¿Qué tan útil fue el programa para tu comunidad?',
+          type: 'rating'
+        },
+        {
+          text: '¿Qué necesidad debería priorizarse?',
+          type: 'choice',
+          options: ['Educación', 'Salud', 'Empleo', 'Seguridad', 'Espacios comunitarios']
+        },
+        {
+          text: '¿Cómo te enteraste de esta iniciativa?',
+          type: 'choice',
+          options: ['Redes sociales', 'Vecinos', 'Organización local', 'Correo', 'Otro']
+        },
+        {
+          text: '¿Qué recomendación harías al equipo organizador?',
+          type: 'text',
+          placeholder: 'Comparte tu sugerencia...'
+        }
+      ]
+    },
+    'experiencia-paciente': {
+      id: 'experiencia-paciente',
+      title: 'Experiencia del paciente',
+      category: 'Cuidado de salud',
+      popularity: '13708',
+      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200',
+      description: 'Evalúa atención, tiempos de espera y claridad de la comunicación médica.',
+      idealFor: ['clínicas', 'consultorios', 'hospitales', 'centros de salud'],
+      fullDescription: 'Recopila feedback sensible sobre la atención recibida para mejorar procesos, comunicación y confianza del paciente.',
+      questions: [
+        {
+          text: '¿Cómo calificarías la atención recibida?',
+          type: 'rating'
+        },
+        {
+          text: '¿El personal explicó claramente los siguientes pasos?',
+          type: 'choice',
+          options: ['Sí, completamente', 'Sí, parcialmente', 'No estoy seguro', 'No']
+        },
+        {
+          text: '¿Cómo valorarías el tiempo de espera?',
+          type: 'choice',
+          options: ['Muy rápido', 'Adecuado', 'Largo', 'Muy largo']
+        },
+        {
+          text: '¿Qué podríamos mejorar en tu próxima visita?',
+          type: 'text',
+          placeholder: 'Escribe tu comentario...'
         }
       ]
     }
