@@ -1,217 +1,160 @@
-<app-navbar />
-
-<main class="dashboard-page Stitch-Light">
-  <div class="vp-container">
-    <header class="dash-header vp-animate-fade-in">
-      <div class="dash-greeting">
-        <h1>Bienvenido de nuevo, <span class="highlight">{{ userName() }}</span></h1>
-        <p>Gestiona tus encuestas, comparte enlaces y revisa senales recientes.</p>
-      </div>
-      <button class="vp-btn vp-btn-primary" (click)="createNew()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Crear nueva encuesta
-      </button>
-    </header>
-
-    <div class="dash-metrics-grid vp-animate-fade-in-delay-1">
-      <div class="dash-metric-card metric-surveys">
-        <div class="metric-topline">
-          <span class="metric-label">Encuestas</span>
-          <span class="metric-chip">{{ activeSurveys() }} activas</span>
-        </div>
-        <div class="metric-main">
-          <span class="dm-value">{{ surveys().length }}</span>
-          <div class="dm-icon bg-gradient-purple">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-          </div>
-        </div>
-        <p>{{ surveys().length ? 'Biblioteca lista para editar y compartir.' : 'Crea tu primera encuesta.' }}</p>
-      </div>
-
-      <div class="dash-metric-card metric-active">
-        <div class="metric-topline">
-          <span class="metric-label">Publicadas</span>
-          <span class="metric-chip">En vivo</span>
-        </div>
-        <div class="metric-main">
-          <span class="dm-value">{{ activeSurveys() }}</span>
-          <div class="dm-icon bg-gradient-blue">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          </div>
-        </div>
-        <p>{{ activeSurveys() }} encuesta{{ activeSurveys() === 1 ? '' : 's' }} lista{{ activeSurveys() === 1 ? '' : 's' }} para recibir respuestas.</p>
-      </div>
-
-      <div class="dash-metric-card metric-responses">
-        <div class="metric-topline">
-          <span class="metric-label">Actividad</span>
-          <span class="metric-chip">7 dias</span>
-        </div>
-        <div class="metric-main">
-          <span class="dm-value">{{ lastSevenDayResponses() | number }}</span>
-          <div class="dm-icon bg-gradient-orange">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          </div>
-        </div>
-        <p>{{ totalResponses() | number }} respuestas historicas registradas.</p>
-      </div>
-
-      <div class="dash-metric-card metric-completion">
-        <div class="metric-topline">
-          <span class="metric-label">Calidad</span>
-          <span class="metric-chip">Promedio</span>
-        </div>
-        <div class="metric-main">
-          <span class="dm-value">{{ averageCompletionRate() }}%</span>
-          <div class="dm-icon bg-gradient-green">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-          </div>
-        </div>
-        <p>Tasa de completado en encuestas con respuestas.</p>
-      </div>
+<main class="dashboard-shell" (click)="closeCardMenu()">
+  <aside class="dashboard-sidebar">
+    <div class="brand-space" aria-hidden="true">
+      <span class="brand-check">✓</span>
     </div>
 
-    <section class="dash-control-panel vp-animate-fade-in-delay-2">
-      <div class="dash-search">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-        <input type="search" [ngModel]="searchTerm()" (ngModelChange)="setSearchTerm($event)" placeholder="Buscar encuesta..." />
-      </div>
+    <nav class="side-nav" aria-label="Principal">
+      <button class="side-nav-item active" type="button">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8.5Z" />
+          </svg>
+        </span>
+        Inicio
+      </button>
+      <button class="side-nav-item" type="button">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z" />
+            <path d="M3 21a7 7 0 0 1 14 0" />
+            <path d="M17 8.5a3 3 0 0 1 0 5" />
+            <path d="M20 21a5.5 5.5 0 0 0-3-4.9" />
+          </svg>
+        </span>
+        Compartido conmigo
+      </button>
+    </nav>
 
-      <div class="dash-filter-row" role="tablist" aria-label="Filtros de encuestas">
-        @for (filter of filters; track filter) {
-          <button class="dash-filter-chip" type="button" [class.active]="activeFilter() === filter" (click)="setFilter(filter)">
-            {{ filterLabel(filter) }}
-          </button>
-        }
+    <section class="folders-block">
+      <div class="folders-head">
+        <span>Carpetas</span>
+        <button class="folder-add" type="button" aria-label="Agregar carpeta">+</button>
       </div>
-
-      <label class="dash-sort">
-        <span>Orden</span>
-        <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($event)">
-          <option value="updated">Ultima actualizacion</option>
-          <option value="responses">Mas respuestas</option>
-          <option value="created">Fecha de creacion</option>
-          <option value="status">Estado</option>
-        </select>
-      </label>
     </section>
 
-    <div class="dash-layout vp-animate-fade-in-delay-2">
-      <div class="dash-surveys-col">
-        <div class="dash-surveys-header">
-          <h2>Encuestas</h2>
-          <span class="ds-total">{{ filteredSurveys().length }} de {{ surveys().length }}</span>
+    <section class="plan-card" aria-label="Estado del plan">
+      <h2>Plan Free</h2>
+      <p>Limite mensual de respuestas</p>
+      <div class="plan-progress-row">
+        <div class="plan-progress">
+          <span [style.width.%]="planUsagePercent()"></span>
         </div>
+        <strong>{{ planUsageLabel() }}</strong>
+      </div>
+      <span class="renewal">Renovacion en 19 dias</span>
+      <button class="limit-btn" type="button">Aumentar el limite</button>
+    </section>
+  </aside>
 
-        <div class="recent-grid">
-          @for (survey of filteredSurveys(); track survey.id) {
-            <div class="recent-card" (click)="router.navigate(['/editor', survey.id])">
-              <div class="rc-thumbnail" [class.bg-draft]="survey.status === 'borrador'" [class.bg-closed]="survey.status === 'cerrado'" [style.--survey-accent]="survey.metadata?.brand?.primaryColor || '#7c3aed'">
-                <div class="floating-badge" [class.bg-live-badge]="survey.status === 'activo'" [class.bg-draft-badge]="survey.status === 'borrador'" [class.bg-closed-badge]="survey.status === 'cerrado'">
-                  {{ statusLabel(survey) | titlecase }}
-                </div>
-                <div class="thumb-paper">
-                  <div class="thumb-title">{{ survey.title }}</div>
-                  <div class="thumb-line"></div>
-                  <div class="thumb-line"></div>
-                  <div class="thumb-activity" [style.width.%]="responseCount(survey) ? 72 : 22"></div>
-                </div>
-              </div>
+  <section class="dashboard-workspace">
+    <header class="dashboard-topbar">
+      <div></div>
+      <div class="topbar-actions">
+        <button class="search-btn" type="button" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.6-3.6" />
+          </svg>
+        </button>
+        <div class="user-avatar" aria-label="Usuario">{{ userInitial() }}</div>
+      </div>
+    </header>
 
-              <div class="rc-info">
-                <h3>{{ survey.title }}</h3>
-                <p>{{ survey.description || 'Sin descripcion' | slice:0:70 }}{{ survey.description.length > 70 ? '...' : '' }}</p>
-
-                <div class="rc-badges">
-                  @if (closesAtLabel(survey)) {
-                    <span class="rc-mini-badge">Cierra {{ closesAtLabel(survey) }}</span>
-                  }
-                  @if (hasContactCollection(survey)) {
-                    <span class="rc-mini-badge muted">Contacto</span>
-                  }
-                </div>
-
-                <div class="rc-stats">
-                  <span class="stat-strong">{{ responseCount(survey) }}</span>
-                  <span>respuestas</span>
-                  <span>{{ getTimeSince(survey.updatedAt) }}</span>
-                </div>
-
-                <div class="rc-meta-footer">
-                  <span class="meta-resp">{{ questionCount(survey) }} preguntas · {{ lastResponseLabel(survey) }}</span>
-                  <div class="rc-actions">
-                    <button class="icon-btn" (click)="router.navigate(['/editor', survey.id]); $event.stopPropagation()" aria-label="Editar">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
-                    </button>
-                    <button class="icon-btn" (click)="router.navigate(['/analytics', survey.id]); $event.stopPropagation()" aria-label="Analiticas">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-                    </button>
-                    <button class="icon-btn more" (click)="toggleCardMenu(survey.id, $event)" aria-label="Mas opciones">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                    </button>
-                    @if (openMenuId() === survey.id) {
-                      <div class="card-menu" (click)="$event.stopPropagation()">
-                        <button type="button" (click)="openPublicSurvey(survey.id, $event)">Abrir publica</button>
-                        <button type="button" (click)="copyLink(survey.id, $event)">{{ copiedId() === survey.id ? 'Copiado' : 'Copiar enlace' }}</button>
-                        <button type="button" (click)="downloadQr(survey.id, $event)">Descargar QR</button>
-                        <button type="button" (click)="duplicateSurvey(survey, $event)">Duplicar</button>
-                        <button type="button" (click)="toggleSurveyStatus(survey, $event)">{{ survey.status === 'activo' ? 'Cerrar' : 'Reabrir' }}</button>
-                        <button class="danger-menu" type="button" (click)="deleteSurvey(survey.id, $event)">Eliminar</button>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-
-          @empty {
-            <div class="dashboard-empty">
-              <div class="empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
-              </div>
-              <h3>No hay encuestas para este filtro</h3>
-              <p>Crea una nueva, usa una plantilla o revisa ejemplos para empezar mas rapido.</p>
-              <div class="empty-actions">
-                <button class="vp-btn vp-btn-primary" type="button" (click)="createNew()">Crear desde cero</button>
-                <button class="vp-btn vp-btn-ghost" type="button" (click)="goTemplates()">Usar plantilla</button>
-                <button class="vp-btn vp-btn-ghost" type="button" (click)="goShowcase()">Ver ejemplos</button>
-              </div>
-            </div>
-          }
-        </div>
+    <div class="workspace-inner">
+      <div class="workspace-title-row">
+        <h1>Inicio</h1>
       </div>
 
-      <div class="dash-sidebar-col">
-        <div class="dash-sidebar-card flat-card">
-          <div class="dash-sidebar-header">
-            <h3>Insights recientes</h3>
-            <span class="dsh-subtitle">Respuestas ultimos 7 dias</span>
+      <section class="workspace-actions" aria-label="Acciones de encuestas">
+        <button class="create-survey-btn" type="button" (click)="createNew()">
+          <span>+</span>
+          Crear una encuesta
+        </button>
+
+        <div class="view-controls">
+          <label class="soft-select">
+            <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($event)">
+              <option value="created">Fecha de creacion</option>
+              <option value="updated">Ultima actualizacion</option>
+              <option value="responses">Mas respuestas</option>
+              <option value="status">Estado</option>
+            </select>
+          </label>
+
+          <label class="soft-select tiles-select">
+            <select aria-label="Vista">
+              <option>Losas</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="search-row" aria-label="Buscar encuestas">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.6-3.6" />
+        </svg>
+        <input type="search" [ngModel]="searchTerm()" (ngModelChange)="setSearchTerm($event)"
+          placeholder="Buscar encuesta..." />
+      </section>
+
+      <section class="survey-tiles" aria-label="Encuestas">
+        @for (survey of filteredSurveys(); track survey.id) {
+        <article class="survey-tile" (click)="router.navigate(['/editor', survey.id])">
+          <div class="tile-cover" [style.--tile-accent]="survey.metadata?.brand?.primaryColor || coverColor(survey.id)">
+            <div class="cover-preview">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
 
-          <div class="dash-bar-chart">
-            @for (day of recentInsights(); track day.label) {
-              <div class="bar-col">
-                <div class="bar-fill" [class.active]="day.active" [style.height]="((day.count / maxInsight()) * 100 || 10) + '%'"></div>
-                <span class="bar-label">{{ day.label }}</span>
-                <span class="bar-val" [class.active]="day.active">{{ day.count }}</span>
+          <div class="tile-body">
+            <div class="tile-title-row">
+              <h2>{{ survey.title }}</h2>
+              <div class="tile-actions">
+                <button class="tile-menu-btn" type="button" (click)="toggleCardMenu(survey.id, $event)"
+                  aria-label="Opciones">
+                  ...
+                </button>
+                @if (openMenuId() === survey.id) {
+                <div class="tile-menu" (click)="$event.stopPropagation()">
+                  <button type="button"
+                    (click)="router.navigate(['/editor', survey.id]); $event.stopPropagation()">Editar</button>
+                  <button type="button"
+                    (click)="router.navigate(['/analytics', survey.id]); $event.stopPropagation()">Resultados</button>
+                  <button type="button" (click)="openPublicSurvey(survey.id, $event)">Abrir publica</button>
+                  <button type="button" (click)="copyLink(survey.id, $event)">{{ copiedId() === survey.id ? 'Copiado' :
+                    'Copiar enlace' }}</button>
+                  <button type="button" (click)="duplicateSurvey(survey, $event)">Duplicar</button>
+                  <button type="button" (click)="toggleSurveyStatus(survey, $event)">{{ survey.status === 'activo' ?
+                    'Cerrar' : 'Reabrir' }}</button>
+                  <button class="danger-menu" type="button" (click)="deleteSurvey(survey.id, $event)">Eliminar</button>
+                </div>
+                }
               </div>
-            }
+            </div>
+            <p>{{ responseCountLabel(survey) }}</p>
           </div>
-        </div>
+        </article>
+        }
 
-        <div class="dash-sidebar-card flat-card">
-          <div class="dash-sidebar-header">
-            <h3>Accesos rapidos</h3>
-            <span class="dsh-subtitle">Flujos comunes</span>
-          </div>
-          <div class="quick-actions">
-            <button type="button" (click)="createNew()">Crear desde cero</button>
-            <button type="button" (click)="goTemplates()">Explorar plantillas</button>
-            <button type="button" (click)="goShowcase()">Ver ejemplos</button>
-          </div>
+        @empty {
+        <div class="empty-state">
+          <h2>No hay encuestas todavia</h2>
+          <p>Crea tu primera encuesta para empezar a recopilar respuestas.</p>
+          <button class="create-survey-btn" type="button" (click)="createNew()">
+            <span>+</span>
+            Crear una encuesta
+          </button>
         </div>
-      </div>
+        }
+      </section>
     </div>
-  </div>
+
+    <footer class="dashboard-footer"></footer>
+  </section>
+
+  <button class="help-fab" type="button" aria-label="Ayuda">?</button>
 </main>
