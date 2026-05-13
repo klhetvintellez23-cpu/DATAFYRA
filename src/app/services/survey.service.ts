@@ -147,6 +147,10 @@ export interface SurveyMetadata {
   paginationMode?: 'one-by-one' | 'paged' | 'all-at-once';
   questionsPerPage?: number;
   progressMode?: 'percentage' | 'steps' | 'hidden';
+  closesAt?: string;
+  maxResponses?: number;
+  privacyMode?: 'anonymous' | 'collect-contact';
+  responsePolicy?: 'multiple' | 'once-per-browser';
 }
 
 export interface Answer {

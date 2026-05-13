@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar';
+import { FooterComponent } from '../../components/footer/footer';
 import { AuthModalService } from '../../services/auth-modal.service';
 
 @Component({
   selector: 'app-api-docs',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, FooterComponent],
   templateUrl: './api-docs.html',
   styles: [`
     .code-block {

@@ -2,26 +2,50 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
+import { FooterComponent } from '../../components/footer/footer';
 import { AuthModalService } from '../../services/auth-modal.service';
 
 @Component({
   selector: 'app-showcase',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, FooterComponent, RouterLink],
   templateUrl: './showcase.html',
   styles: [`
+    .showcase-hero {
+      background:
+        linear-gradient(135deg, rgba(249, 245, 255, 0.98), rgba(255, 255, 255, 0.72)),
+        radial-gradient(circle at 80% 10%, rgba(127, 0, 255, 0.16), transparent 34%);
+      border-bottom: 1px solid #e7e0ec;
+    }
+
+    .showcase-hero h1 span {
+      color: #7F00FF;
+    }
+
     .showcase-panel {
       background: #fff;
-      border: 1px solid #f3f4f6;
+      border: 1px solid #e7e0ec;
       border-radius: 32px;
       padding: 2rem;
+      box-shadow: 0 30px 80px rgba(64, 36, 102, 0.14);
+    }
+
+    .showcase-cases-section {
+      background: #fff;
+    }
+
+    .showcase-cases-inner {
+      padding: 2rem;
+      border-radius: 36px;
+      background: #fbf8ff;
+      border: 1px solid #eee6f7;
     }
 
     .showcase-card {
       display: block;
       min-height: 100%;
       background: #fff;
-      border: 1px solid #f3f4f6;
+      border: 1px solid #e7e0ec;
       border-radius: 28px;
       padding: 2rem;
       transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -31,6 +55,31 @@ import { AuthModalService } from '../../services/auth-modal.service';
       transform: translateY(-4px);
       border-color: #e9d5ff;
       box-shadow: 0 18px 45px rgba(124, 58, 237, 0.08);
+    }
+
+    .showcase-learn-section {
+      background: #1d1b20;
+      border-block: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .learn-grid-card {
+      background: #fff;
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.2);
+    }
+
+    .showcase-cta {
+      background: #f9f5ff;
+      border-bottom: 1px solid #e7e0ec;
+    }
+
+    @media (max-width: 640px) {
+      .showcase-cases-inner {
+        padding: 1rem;
+        border-radius: 28px;
+      }
     }
   `]
 })

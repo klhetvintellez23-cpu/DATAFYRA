@@ -1,14 +1,14 @@
 <app-navbar />
 
 <main class="flex-grow vp-animate-fade-in font-body text-[#1d1b20]" style="font-family: 'Epilogue', sans-serif;">
-  <section class="relative pt-32 pb-32 overflow-hidden bg-[#F9F5FF]">
-    <div class="max-w-[90rem] mx-auto px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-      <div class="z-10">
-        <h1 class="text-6xl lg:text-[5.5rem] font-bold text-[#1d1b20] leading-[1.05] tracking-tighter mb-8">
+  <section class="hero-section relative overflow-hidden bg-[#F9F5FF]">
+    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+      <div class="z-10 hero-copy">
+        <h1 class="text-5xl sm:text-6xl lg:text-[5.25rem] font-bold text-[#1d1b20] leading-[1.05] mb-8">
           <app-lustre-text text="Crea encuestas gratis" [speed]="6"></app-lustre-text>
         </h1>
 
-        <div class="ag-checklist mb-12 text-[#49454e] font-light text-xl space-y-4">
+        <div class="ag-checklist mb-10 text-[#49454e] font-light text-lg sm:text-xl space-y-4">
           <div class="ag-checklist-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -26,8 +26,7 @@
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
             </svg>
-            <app-typing-text text="Comparte encuestas por WhatsApp, email y redes sociales"
-              [delay]="1300"></app-typing-text>
+            <app-typing-text text="Comparte encuestas por WhatsApp, email y redes sociales" [delay]="1300"></app-typing-text>
           </div>
           <div class="ag-checklist-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
@@ -36,87 +35,103 @@
               <line x1="12" y1="20" x2="12" y2="4"></line>
               <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
-            <app-typing-text text="Resultados en tiempo real con gráficos automáticos"
-              [delay]="2600"></app-typing-text>
+            <app-typing-text text="Resultados en tiempo real con gráficos automáticos" [delay]="2600"></app-typing-text>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 mt-10">
-          <app-wavy-button (click)="openAuth('register', $event)" className="px-20 py-8 editorial-gradient text-white font-bold rounded-[2.5rem] shadow-2xl hover:shadow-primary/40 transition-all text-3xl tracking-wide" text="Crea una encuesta"></app-wavy-button>
+        <div class="flex flex-wrap gap-4 mt-8">
+          <app-wavy-button
+            (click)="openAuth('register', $event)"
+            className="px-12 sm:px-16 py-6 editorial-gradient text-white font-bold rounded-[2.25rem] shadow-2xl hover:shadow-primary/40 transition-all text-xl sm:text-2xl tracking-wide"
+            text="Crea una encuesta">
+          </app-wavy-button>
+          <a routerLink="/templates" class="hero-secondary-link">
+            Ver plantillas
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="hero-trust-row" aria-label="Indicadores de producto">
+          <span>Sin tarjeta</span>
+          <span>Plantillas editables</span>
+          <span>Resultados en vivo</span>
         </div>
       </div>
-      <div class="relative">
-        <div class="relative flex flex-col md:flex-row gap-6 items-center">
-          <div class="flex flex-col gap-6">
-            <img alt="Laptop Mockup" class="rounded-3xl shadow-xl w-64 md:w-80 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsLoJPfFAPrW3dY6u90dVSPrfc8H3PwY1IKE_mS56TEoN97eOjBm2a0OwudXU-9PMq5eMMJRrKxxcWL8YMT7dSeTE8wm_n6ErSuD6KSkPWitjY1YRQDk1ZGWCcp8C_CWCeP1Xn_oR-DVSAD5c237pD2z6iYZ3Pe7nYR3n3R8yApIq6ZlUGhNWgJhudjY5ngzlBsMaRcOrrmmoF87R6NAvMMRiV8ToEwoESkdNkwFrERK-GBQFJ4FP9iVKAM4tADvjIf-7FxF9DO4C7" />
-            <img alt="Mobile User" class="rounded-3xl shadow-xl w-64 md:w-80 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4Q_GqTaDxX6rlkhAqWSocnKKxHs3Sya5fwj0a1TZsx_RcHtd_DDRkxDzHiBhgF5hlmWnys7mQei1D8jS3JVpfcmvhSw92pwGRO--mbEwnYgCx24kVCQJECduaTGHl9VeypoT5MTR6da3P-uTVxVCEqr-D5wmGIRfM5o-ojtpT5Ez3lhqTdxVTAdb9QsmFTKSDkOEO-HnunVCfzfzcGTQ_RQk6GITqVXnmhSFWYCg74xpdkH054KvVlvwSwBAU3-iM_RVm_ptk2EaV" />
-          </div>
-          <img alt="Desktop User" class="rounded-3xl shadow-xl w-64 md:w-80 h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkbd20_Kitx26uJex5Le6qOXeMNh1aUoIpGHf-Qlr48hYDVgge340jLknf-JTm0ESYzpi5lkcEQhOScFtQxdyNPWKymEphO9j4UX1aUPqsF5FJqG6MsrL8znVYcgxXShCq1pbVEtmROtuEcH7msIo7LrZ09j0nsjc0r7tyQvKJIkPfWxoMqVttTMoK7hwh9guY06hUxKQ2N9amEt9yUlDfKKw3GZINW4WlAQUdkCRe6XKmpjRZhKuwpToJGbUKKQsc29Prz4wSzMgY" />
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-4 shadow-2xl flex flex-col items-center justify-center text-center w-32 h-32 border border-surface-variant">
-            <span class="material-symbols-outlined text-[#7f00ff] text-3xl mb-1">verified</span>
-            <div class="text-xs font-bold text-[#1d1b20] uppercase tracking-wider"></div>
-            <div class="text-[10px] text-[#49454e] mt-1"></div>
-          </div>
+
+      <div class="hero-gallery" aria-label="Vista previa del flujo de encuestas">
+        <figure class="hero-image-card hero-image-card-primary">
+          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=85&w=1000" alt="Persona trabajando en una encuesta desde un portatil" />
+        </figure>
+        <figure class="hero-image-card hero-image-card-share">
+          <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=85&w=900" alt="Equipo revisando respuestas de clientes" />
+        </figure>
+        <figure class="hero-image-card hero-image-card-analytics">
+          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=85&w=1000" alt="Equipo analizando informacion de negocio" />
+        </figure>
+        <div class="hero-proof-card">
+          <span class="material-symbols-outlined">verified</span>
+          <strong>Encuestas listas</strong>
+          <small>Crear, compartir y analizar</small>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="py-28 bg-white">
+  <section class="py-24 lg:py-28 bg-white">
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
-      <h2 class="text-4xl md:text-6xl font-bold text-center mb-20 text-[#1d1b20]">Crea encuestas y obtén respuestas en 3 pasos</h2>
+      <div class="section-heading">
+        <p class="section-kicker">Flujo simple</p>
+        <h2>Crea encuestas y obtén respuestas en 3 pasos</h2>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 items-start">
         <div class="space-y-6">
           <div class="step-visual">
-            <span class="material-symbols-outlined">dynamic_form</span>
-            <div class="step-lines"><i></i><i></i><i></i></div>
+            <img src="https://images.unsplash.com/photo-1762340275877-32d64414d8aa?auto=format&fit=crop&q=80&w=900" alt="Formulario digital con opciones de respuesta en pantalla" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">01</div>
-          <h3 class="text-3xl font-bold text-[#1d1b20]">Crea un cuestionario</h3>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Diseña tu formulario</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Diseña preguntas, opciones, escalas y formularios desde un editor claro y rápido.
+            Crea preguntas, escalas y opciones con una estructura clara desde el primer minuto.
           </p>
         </div>
         <div class="space-y-6">
           <div class="step-visual">
-            <span class="material-symbols-outlined">share</span>
-            <div class="share-dots"><i></i><i></i><i></i></div>
+            <img src="https://images.unsplash.com/photo-1759932021109-ffbec9251f9b?auto=format&fit=crop&q=80&w=900" alt="Telefono mostrando aplicaciones sociales para compartir contenido" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">02</div>
-          <h3 class="text-3xl font-bold text-[#1d1b20]">Comparte tu encuesta</h3>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Comparte el enlace</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Publica un enlace y distribúyelo por los canales donde ya está tu audiencia.
+            Distribuye tu encuesta por los canales donde ya está tu audiencia.
           </p>
         </div>
         <div class="space-y-6">
           <div class="step-visual">
-            <span class="material-symbols-outlined">analytics</span>
-            <div class="mini-bars"><i></i><i></i><i></i><i></i></div>
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900" alt="Panel de analiticas con graficos y metricas" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">03</div>
-          <h3 class="text-3xl font-bold text-[#1d1b20]">Analiza resultados</h3>
+          <h3 class="text-3xl font-bold text-[#1d1b20]">Lee resultados</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Visualiza respuestas, detecta patrones y toma decisiones con datos frescos.
+            Detecta patrones, mide satisfacción y toma decisiones con datos frescos.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="py-28 bg-[#F9F5FF]">
+  <section class="py-24 lg:py-28 bg-[#F9F5FF]">
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-14 items-start">
         <div>
-          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20]">¿Por qué Datafyra es adecuado para ti?</h2>
+          <p class="section-kicker">Por qué Datafyra</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] leading-tight">Todo lo que necesitas para lanzar encuestas sin fricción</h2>
         </div>
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
           @for (feature of featureList; track feature.title) {
-            <div class="flex gap-5">
-              <span class="material-symbols-outlined text-[#7f00ff] text-4xl">{{ feature.icon }}</span>
-              <div>
-                <h4 class="text-xl font-bold mb-3 text-[#1d1b20]">{{ feature.title }}</h4>
-                <p class="text-[#49454e] font-light leading-relaxed">{{ feature.description }}</p>
-              </div>
+            <div class="feature-card">
+              <span class="material-symbols-outlined">{{ feature.icon }}</span>
+              <h4>{{ feature.title }}</h4>
+              <p>{{ feature.description }}</p>
             </div>
           }
         </div>
@@ -124,13 +139,14 @@
     </div>
   </section>
 
-  <section class="py-16 bg-white">
+  <section class="py-20 bg-white">
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8">
       <div class="decision-panel">
         <div class="decision-copy">
-          <h2 class="text-4xl md:text-6xl font-bold text-[#1d1b20] leading-tight">Toma decisiones eficaces y basadas en datos</h2>
+          <p class="section-kicker">Análisis integrado</p>
+          <h2 class="text-4xl md:text-6xl font-bold text-[#1d1b20] leading-tight">Toma decisiones basadas en datos, no en hojas sueltas</h2>
           <p class="text-lg text-[#49454e] font-light leading-relaxed max-w-xl">
-            Centraliza la creación, distribución y lectura de tus encuestas sin depender de hojas de cálculo manuales.
+            Centraliza la creación, distribución y lectura de tus encuestas sin preparar reportes manuales.
           </p>
           <app-wavy-button
             (click)="openAuth('register', $event)"
@@ -160,12 +176,14 @@
     </div>
   </section>
 
-  <section class="py-28 bg-white border-t border-gray-100">
+  <section class="py-24 lg:py-28 bg-white border-t border-gray-100">
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
       <div class="text-center max-w-4xl mx-auto mb-16">
+        <p class="section-kicker justify-center">Plantillas</p>
         <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] mb-6">Plantillas listas para usar</h2>
         <p class="text-xl text-[#49454e] font-light">Empieza con estructuras diseñadas para investigación, feedback y operaciones.</p>
       </div>
+
       <div class="mb-12">
         <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-8">
           <div>
@@ -188,10 +206,13 @@
           }
         </div>
       </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @for (template of popularTemplates; track template.id) {
           <a [routerLink]="['/templates', template.id]" class="group block text-[#1d1b20]">
             <div class="template-preview mb-6">
+              <img [src]="template.image" [alt]="template.alt" loading="lazy" />
+              <div class="template-overlay"></div>
               <span class="template-badge">{{ template.badge }}</span>
               <div class="template-window">
                 <div class="template-window-bar"><i></i><i></i><i></i></div>
@@ -208,20 +229,20 @@
     </div>
   </section>
 
-  <footer class="w-full py-12 border-t border-[#E0E0E0] mt-auto font-['Epilogue'] bg-white">
-    <div class="max-w-[1200px] mx-auto px-6 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex flex-col items-center md:items-start space-y-3">
-        <div class="text-xl font-black text-black">Datafyra</div>
-        <p class="text-gray-500 text-sm">
-          © 2026 Datafyra. Encuestas simples, respuestas claras.
-        </p>
-      </div>
-      <div class="flex flex-wrap justify-center gap-6">
-        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/templates">Plantillas</a>
-        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/tour">Guía</a>
-        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" routerLink="/api-docs">API y seguridad</a>
-        <a class="text-gray-500 hover:text-[#7F00FF] hover:underline transition-all text-sm" href="mailto:hola@datafyra.com">Contacto</a>
+  <section class="final-cta-section">
+    <div class="final-cta-inner">
+      <p class="section-kicker justify-center">Empieza hoy</p>
+      <h2>Convierte respuestas en mejores decisiones</h2>
+      <p>Crea tu primera encuesta gratis, compártela en minutos y empieza a leer resultados sin configurar nada complejo.</p>
+      <div class="final-cta-actions">
+        <app-wavy-button
+          (click)="openAuth('register', $event)"
+          className="px-10 sm:px-14 py-5 bg-white text-[#7f00ff] font-bold rounded-[2rem] shadow-xl transition-all text-xl"
+          text="Crear encuesta gratis">
+        </app-wavy-button>
+        <a routerLink="/templates">Explorar plantillas</a>
       </div>
     </div>
-  </footer>
+  </section>
+  <app-footer />
 </main>

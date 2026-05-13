@@ -2,11 +2,10 @@
 
 <main class="dashboard-page Stitch-Light">
   <div class="vp-container">
-    <!-- Header -->
     <header class="dash-header vp-animate-fade-in">
       <div class="dash-greeting">
-        <h1>¡Bienvenido de nuevo, <span class="highlight">{{ userName() }}!</span></h1>
-        <p>Gestiona tus encuestas y analiza los resultados en tiempo real.</p>
+        <h1>Bienvenido de nuevo, <span class="highlight">{{ userName() }}</span></h1>
+        <p>Gestiona tus encuestas, comparte enlaces y revisa senales recientes.</p>
       </div>
       <button class="vp-btn vp-btn-primary" (click)="createNew()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -14,105 +13,182 @@
       </button>
     </header>
 
-    <!-- Top Metrics -->
     <div class="dash-metrics-grid vp-animate-fade-in-delay-1">
-      <div class="dash-metric-card">
-        <div class="dm-icon bg-gradient-purple">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <div class="dash-metric-card metric-surveys">
+        <div class="metric-topline">
+          <span class="metric-label">Encuestas</span>
+          <span class="metric-chip">{{ activeSurveys() }} activas</span>
         </div>
-        <div class="dm-data">
+        <div class="metric-main">
           <span class="dm-value">{{ surveys().length }}</span>
-          <span class="dm-label">Encuestas Creadas</span>
+          <div class="dm-icon bg-gradient-purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          </div>
         </div>
-      </div>
-      
-      <div class="dash-metric-card">
-        <div class="dm-icon bg-gradient-blue">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        </div>
-        <div class="dm-data">
-          <span class="dm-value">{{ totalResponses() | number }}</span>
-          <span class="dm-label">Respuestas Totales</span>
-        </div>
+        <p>{{ surveys().length ? 'Biblioteca lista para editar y compartir.' : 'Crea tu primera encuesta.' }}</p>
       </div>
 
-      <div class="dash-metric-card">
-        <div class="dm-icon bg-gradient-orange">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      <div class="dash-metric-card metric-active">
+        <div class="metric-topline">
+          <span class="metric-label">Publicadas</span>
+          <span class="metric-chip">En vivo</span>
         </div>
-        <div class="dm-data">
+        <div class="metric-main">
           <span class="dm-value">{{ activeSurveys() }}</span>
-          <span class="dm-label">Encuestas Activas</span>
+          <div class="dm-icon bg-gradient-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
         </div>
+        <p>{{ activeSurveys() }} encuesta{{ activeSurveys() === 1 ? '' : 's' }} lista{{ activeSurveys() === 1 ? '' : 's' }} para recibir respuestas.</p>
+      </div>
+
+      <div class="dash-metric-card metric-responses">
+        <div class="metric-topline">
+          <span class="metric-label">Actividad</span>
+          <span class="metric-chip">7 dias</span>
+        </div>
+        <div class="metric-main">
+          <span class="dm-value">{{ lastSevenDayResponses() | number }}</span>
+          <div class="dm-icon bg-gradient-orange">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+        </div>
+        <p>{{ totalResponses() | number }} respuestas historicas registradas.</p>
+      </div>
+
+      <div class="dash-metric-card metric-completion">
+        <div class="metric-topline">
+          <span class="metric-label">Calidad</span>
+          <span class="metric-chip">Promedio</span>
+        </div>
+        <div class="metric-main">
+          <span class="dm-value">{{ averageCompletionRate() }}%</span>
+          <div class="dm-icon bg-gradient-green">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+          </div>
+        </div>
+        <p>Tasa de completado en encuestas con respuestas.</p>
       </div>
     </div>
 
-    <!-- Main Layout Grid -->
+    <section class="dash-control-panel vp-animate-fade-in-delay-2">
+      <div class="dash-search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input type="search" [ngModel]="searchTerm()" (ngModelChange)="setSearchTerm($event)" placeholder="Buscar encuesta..." />
+      </div>
+
+      <div class="dash-filter-row" role="tablist" aria-label="Filtros de encuestas">
+        @for (filter of filters; track filter) {
+          <button class="dash-filter-chip" type="button" [class.active]="activeFilter() === filter" (click)="setFilter(filter)">
+            {{ filterLabel(filter) }}
+          </button>
+        }
+      </div>
+
+      <label class="dash-sort">
+        <span>Orden</span>
+        <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($event)">
+          <option value="updated">Ultima actualizacion</option>
+          <option value="responses">Mas respuestas</option>
+          <option value="created">Fecha de creacion</option>
+          <option value="status">Estado</option>
+        </select>
+      </label>
+    </section>
+
     <div class="dash-layout vp-animate-fade-in-delay-2">
-      <!-- Left Column: Survey List -->
       <div class="dash-surveys-col">
         <div class="dash-surveys-header">
-          <h2>Recientes</h2>
-          <span class="ds-total">{{ surveys().length }} total</span>
+          <h2>Encuestas</h2>
+          <span class="ds-total">{{ filteredSurveys().length }} de {{ surveys().length }}</span>
         </div>
-        
+
         <div class="recent-grid">
-          @for (survey of surveys(); track survey.id) {
+          @for (survey of filteredSurveys(); track survey.id) {
             <div class="recent-card" (click)="router.navigate(['/editor', survey.id])">
-              <div class="rc-thumbnail" [class.bg-draft]="survey.status === 'borrador'">
+              <div class="rc-thumbnail" [class.bg-draft]="survey.status === 'borrador'" [class.bg-closed]="survey.status === 'cerrado'" [style.--survey-accent]="survey.metadata?.brand?.primaryColor || '#7c3aed'">
+                <div class="floating-badge" [class.bg-live-badge]="survey.status === 'activo'" [class.bg-draft-badge]="survey.status === 'borrador'" [class.bg-closed-badge]="survey.status === 'cerrado'">
+                  {{ statusLabel(survey) | titlecase }}
+                </div>
                 <div class="thumb-paper">
-                  <div class="thumb-title">{{ survey.status === 'borrador' ? '✎' : '✓' }}</div>
+                  <div class="thumb-title">{{ survey.title }}</div>
+                  <div class="thumb-line"></div>
+                  <div class="thumb-line"></div>
+                  <div class="thumb-activity" [style.width.%]="responseCount(survey) ? 72 : 22"></div>
                 </div>
               </div>
+
               <div class="rc-info">
                 <h3>{{ survey.title }}</h3>
-                <p>{{ survey.description | slice:0:60 }}{{ survey.description.length > 60 ? '...' : '' }}</p>
-                <div class="rc-metadata">
-                  <span class="rc-status" [class.bg-live-badge]="survey.status === 'activo'" [class.bg-draft-badge]="survey.status === 'borrador'">
-                    {{ survey.status | titlecase }}
-                  </span>
+                <p>{{ survey.description || 'Sin descripcion' | slice:0:70 }}{{ survey.description.length > 70 ? '...' : '' }}</p>
+
+                <div class="rc-badges">
+                  @if (closesAtLabel(survey)) {
+                    <span class="rc-mini-badge">Cierra {{ closesAtLabel(survey) }}</span>
+                  }
+                  @if (hasContactCollection(survey)) {
+                    <span class="rc-mini-badge muted">Contacto</span>
+                  }
                 </div>
+
+                <div class="rc-stats">
+                  <span class="stat-strong">{{ responseCount(survey) }}</span>
+                  <span>respuestas</span>
+                  <span>{{ getTimeSince(survey.updatedAt) }}</span>
+                </div>
+
                 <div class="rc-meta-footer">
-                  <span class="meta-resp">{{ survey.responses_count }} respuestas</span>
+                  <span class="meta-resp">{{ questionCount(survey) }} preguntas · {{ lastResponseLabel(survey) }}</span>
                   <div class="rc-actions">
-                    <button class="icon-btn" (click)="router.navigate(['/analytics', survey.id]); $event.stopPropagation()" aria-label="Analíticas">
+                    <button class="icon-btn" (click)="router.navigate(['/editor', survey.id]); $event.stopPropagation()" aria-label="Editar">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                    </button>
+                    <button class="icon-btn" (click)="router.navigate(['/analytics', survey.id]); $event.stopPropagation()" aria-label="Analiticas">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
                     </button>
-                    <button class="icon-btn" (click)="copyLink(survey.id, $event); $event.stopPropagation()" aria-label="Copiar link">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <button class="icon-btn more" (click)="toggleCardMenu(survey.id, $event)" aria-label="Mas opciones">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
                     </button>
-                    <button class="icon-btn danger" (click)="deleteSurvey(survey.id, $event); $event.stopPropagation()" aria-label="Eliminar">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
+                    @if (openMenuId() === survey.id) {
+                      <div class="card-menu" (click)="$event.stopPropagation()">
+                        <button type="button" (click)="openPublicSurvey(survey.id, $event)">Abrir publica</button>
+                        <button type="button" (click)="copyLink(survey.id, $event)">{{ copiedId() === survey.id ? 'Copiado' : 'Copiar enlace' }}</button>
+                        <button type="button" (click)="downloadQr(survey.id, $event)">Descargar QR</button>
+                        <button type="button" (click)="duplicateSurvey(survey, $event)">Duplicar</button>
+                        <button type="button" (click)="toggleSurveyStatus(survey, $event)">{{ survey.status === 'activo' ? 'Cerrar' : 'Reabrir' }}</button>
+                        <button class="danger-menu" type="button" (click)="deleteSurvey(survey.id, $event)">Eliminar</button>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
             </div>
           }
+
           @empty {
-            <div class="recent-card empty-state" (click)="createNew()">
-              <div class="rc-thumbnail empty-thumb">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <div class="dashboard-empty">
+              <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
               </div>
-              <div class="rc-info">
-                <h4>Comenzar de cero</h4>
-                <p>Crear encuesta</p>
+              <h3>No hay encuestas para este filtro</h3>
+              <p>Crea una nueva, usa una plantilla o revisa ejemplos para empezar mas rapido.</p>
+              <div class="empty-actions">
+                <button class="vp-btn vp-btn-primary" type="button" (click)="createNew()">Crear desde cero</button>
+                <button class="vp-btn vp-btn-ghost" type="button" (click)="goTemplates()">Usar plantilla</button>
+                <button class="vp-btn vp-btn-ghost" type="button" (click)="goShowcase()">Ver ejemplos</button>
               </div>
             </div>
           }
         </div>
       </div>
 
-      <!-- Right Column: Sidebar Insights -->
       <div class="dash-sidebar-col">
-        
-        <!-- Insights Chart -->
         <div class="dash-sidebar-card flat-card">
           <div class="dash-sidebar-header">
             <h3>Insights recientes</h3>
-            <span class="dsh-subtitle">Respuestas últimos 7 días</span>
+            <span class="dsh-subtitle">Respuestas ultimos 7 dias</span>
           </div>
-          
+
           <div class="dash-bar-chart">
             @for (day of recentInsights(); track day.label) {
               <div class="bar-col">
@@ -124,6 +200,17 @@
           </div>
         </div>
 
+        <div class="dash-sidebar-card flat-card">
+          <div class="dash-sidebar-header">
+            <h3>Accesos rapidos</h3>
+            <span class="dsh-subtitle">Flujos comunes</span>
+          </div>
+          <div class="quick-actions">
+            <button type="button" (click)="createNew()">Crear desde cero</button>
+            <button type="button" (click)="goTemplates()">Explorar plantillas</button>
+            <button type="button" (click)="goShowcase()">Ver ejemplos</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

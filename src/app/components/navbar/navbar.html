@@ -1,244 +1,147 @@
-<nav class="fixed w-full bg-white z-50 border-b border-gray-100 transition-all duration-300" id="navbar" [class.bg-transparent]="transparent()" [class.border-transparent]="transparent()">
-  <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
-      <div class="flex justify-between items-center h-20">
-          <!-- Logo -->
-          <a routerLink="/" class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-[#7F00FF] rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-purple-200">
-                  D
-              </div>
-              <span class="font-bold text-3xl tracking-tight text-[#1d1b20]">Datafyra</span>
+<nav class="site-navbar" [class.site-navbar-transparent]="transparent()">
+  <div class="site-navbar-inner">
+    <a routerLink="/" class="site-brand" (click)="closeMobileMenu()">
+      <span class="site-brand-mark">D</span>
+      <span class="site-brand-name">Datafyra</span>
+    </a>
+
+    <div class="site-nav-links">
+      <div class="site-nav-item">
+        <button type="button" class="site-nav-link">
+          Soluciones
+          <span class="material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="site-dropdown">
+          <a routerLink="/editor/new">
+            <span class="material-symbols-outlined">edit_square</span>
+            <span>
+              <strong>Editor visual</strong>
+              <small>Crea formularios sin fricción</small>
+            </span>
           </a>
-          
-          <!-- Desktop Menu -->
-          <div class="hidden md:flex items-center space-x-1">
-               <!-- Soluciones Dropdown -->
-               <div class="group relative px-3 py-4">
-                   <button class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
-                       Soluciones
-                       <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                   </button>
-                   
-                   <!-- Dropdown Content -->
-                   <div class="absolute top-full left-0 mt-1 w-80 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
-                       <div class="p-3 bg-white rounded-[32px] shadow-[0_25px_60px_rgba(0,0,0,0.1)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
-                           <div class="flex flex-col gap-1">
-                               <a routerLink="/editor/new" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-pencil-line text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Editor Visual</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Lógica y diseño fluido</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/dashboard" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-chart-pie-slice text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Analítica</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Reportes en tiempo real</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/showcase" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-lightning text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Integraciones</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Automatiza tus flujos</div>
-                                   </div>
-                               </a>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-
-               <!-- Plantillas Dropdown -->
-               <div class="group relative px-3 py-4">
-                   <button routerLink="/templates" class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
-                       Plantillas
-                       <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                   </button>
-                   <div class="absolute top-full left-[-40px] mt-1 w-80 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
-                       <div class="p-3 bg-white rounded-[32px] shadow-[0_25px_60px_rgba(0,0,0,0.1)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
-                           <div class="flex flex-col gap-1">
-                               <a routerLink="/templates" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-briefcase text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Negocios</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Corporativo y startups</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/templates" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-heart text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Satisfacción</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Feedback de clientes</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/templates" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-rocket-launch text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Marketing</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Lead gen y landings</div>
-                                   </div>
-                               </a>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-
-               <!-- Recursos Dropdown -->
-               <div class="group relative px-3 py-4">
-                   <button class="flex items-center gap-1.5 px-4 py-2 rounded-full text-[#625b71] group-hover:text-[#7F00FF] group-hover:bg-purple-50/50 text-sm font-bold transition-all duration-300">
-                       Recursos
-                       <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                   </button>
-                   <div class="absolute top-full right-[-80px] w-80 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50">
-                       <div class="p-3 bg-white rounded-[32px] shadow-[0_25px_60px_rgba(0,0,0,0.1)] border border-gray-100 ring-1 ring-black/5 overflow-hidden">
-                           <div class="flex flex-col gap-1">
-                               <a routerLink="/tour" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-book-open text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Guías de inicio</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Conceptos básicos</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/showcase" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-eye text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">Showcase</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Ejemplos reales</div>
-                                   </div>
-                               </a>
-                               <a routerLink="/api-docs" class="group/item flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-all duration-200 no-underline">
-                                   <div class="w-11 h-11 rounded-xl bg-gray-50 group-hover/item:bg-[#7F00FF] flex items-center justify-center text-gray-400 group-hover/item:text-white transition-all duration-300 shadow-sm">
-                                       <i class="ph-bold ph-code text-xl"></i>
-                                   </div>
-                                   <div>
-                                       <div class="text-[13px] font-black text-[#1d1b20]">API Docs</div>
-                                       <div class="text-[11px] text-gray-500 font-bold mt-0.5">Para desarrolladores</div>
-                                   </div>
-                               </a>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-          </div>
-
-          <!-- Acciones -->
-          <div class="hidden md:flex items-center gap-6">
-              @if (!isOverlayOpen()) {
-                  @if (auth.isLoggedIn()) {
-                      <div class="flex items-center gap-4 pl-6 border-l border-gray-100">
-                          @if (isInternalRoute) {
-                              <app-wavy-button 
-                                  routerLink="/"
-                                  colorScheme="secondary"
-                                  className="px-6 py-2.5" 
-                                  text="Volver al inicio">
-                              </app-wavy-button>
-                          } @else {
-                              <app-wavy-button 
-                                  routerLink="/dashboard"
-                                  colorScheme="primary"
-                                  className="px-6 py-2.5 shadow-md shadow-purple-100" 
-                                  text="Ir al Panel">
-                              </app-wavy-button>
-                          }
-                          
-                          <button (click)="logout()" 
-                                  class="group/logout flex items-center gap-2.5 px-4 py-2.5 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all duration-300" 
-                                  title="Cerrar sesión">
-                              <span class="text-xs font-bold max-w-0 overflow-hidden group-hover/logout:max-w-[100px] transition-all duration-500 whitespace-nowrap">Cerrar sesión</span>
-                              <svg class="w-5 h-5 transition-transform duration-300 group-hover/logout:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                  <polyline points="16 17 21 12 16 7"></polyline>
-                                  <line x1="21" y1="12" x2="9" y2="12"></line>
-                              </svg>
-                          </button>
-                      </div>
-                  } @else {
-                      <div class="flex items-center gap-6">
-                        <app-wavy-button 
-                          (click)="triggerAuth(false, $event)"
-                          className="px-8 py-3.5 editorial-gradient text-white font-bold rounded-full shadow-lg hover:shadow-primary/30 transition-all text-base" 
-                          text="Crear cuenta">
-                        </app-wavy-button>
-                        <a 
-                          (click)="triggerAuth(true, $event)"
-                          class="text-[#1d1b20] font-bold hover:text-[#7F00FF] transition-colors text-base cursor-pointer no-underline">
-                          Acceder
-                        </a>
-                      </div>
-                  }
-              }
-          </div>
-
-          <button
-            type="button"
-            class="md:hidden w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center text-[#1d1b20] hover:text-[#7F00FF] hover:bg-purple-50 transition-colors"
-            (click)="toggleMobileMenu()"
-            [attr.aria-expanded]="mobileMenuOpen()"
-            aria-label="Abrir menú de navegación">
-              <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
-          </button>
+          <a routerLink="/dashboard">
+            <span class="material-symbols-outlined">monitoring</span>
+            <span>
+              <strong>Analítica</strong>
+              <small>Lee resultados en tiempo real</small>
+            </span>
+          </a>
+        </div>
       </div>
 
-      @if (mobileMenuOpen()) {
-          <div class="md:hidden pb-6">
-              <div class="rounded-3xl border border-gray-100 bg-white shadow-xl shadow-purple-100/40 p-3">
-                  <a routerLink="/editor/new" (click)="closeMobileMenu()" class="mobile-nav-link">
-                      <span class="material-symbols-outlined">edit_square</span>
-                      Editor visual
-                  </a>
-                  <a routerLink="/templates" (click)="closeMobileMenu()" class="mobile-nav-link">
-                      <span class="material-symbols-outlined">dashboard_customize</span>
-                      Plantillas
-                  </a>
-                  <a routerLink="/tour" (click)="closeMobileMenu()" class="mobile-nav-link">
-                      <span class="material-symbols-outlined">school</span>
-                      Guía
-                  </a>
-                  <a routerLink="/showcase" (click)="closeMobileMenu()" class="mobile-nav-link">
-                      <span class="material-symbols-outlined">visibility</span>
-                      Showcase
-                  </a>
-                  <a routerLink="/api-docs" (click)="closeMobileMenu()" class="mobile-nav-link">
-                      <span class="material-symbols-outlined">code</span>
-                      API Docs
-                  </a>
+      <div class="site-nav-item">
+        <button type="button" class="site-nav-link">
+          Plantillas
+          <span class="material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="site-dropdown">
+          <a routerLink="/templates">
+            <span class="material-symbols-outlined">favorite</span>
+            <span>
+              <strong>Satisfacción</strong>
+              <small>NPS y feedback de clientes</small>
+            </span>
+          </a>
+          <a routerLink="/templates">
+            <span class="material-symbols-outlined">business_center</span>
+            <span>
+              <strong>Negocios</strong>
+              <small>Producto, mercado y operaciones</small>
+            </span>
+          </a>
+        </div>
+      </div>
 
-                  <div class="border-t border-gray-100 mt-3 pt-3">
-                      @if (auth.isLoggedIn()) {
-                          <a routerLink="/dashboard" (click)="closeMobileMenu()" class="mobile-nav-primary">
-                              Ir al panel
-                          </a>
-                          <button type="button" (click)="logout()" class="mobile-nav-secondary">
-                              Cerrar sesión
-                          </button>
-                      } @else {
-                          <button type="button" (click)="triggerAuth(false, $event)" class="mobile-nav-primary">
-                              Crear cuenta
-                          </button>
-                          <button type="button" (click)="triggerAuth(true, $event)" class="mobile-nav-secondary">
-                              Acceder
-                          </button>
-                      }
-                  </div>
-              </div>
-          </div>
+      <div class="site-nav-item">
+        <button type="button" class="site-nav-link">
+          Recursos
+          <span class="material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="site-dropdown">
+          <a routerLink="/tour">
+            <span class="material-symbols-outlined">school</span>
+            <span>
+              <strong>Guía</strong>
+              <small>Primeros pasos</small>
+            </span>
+          </a>
+          <a routerLink="/showcase">
+            <span class="material-symbols-outlined">visibility</span>
+            <span>
+              <strong>Ejemplos</strong>
+              <small>Encuestas listas para inspirarte</small>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-nav-actions">
+      @if (!isOverlayOpen()) {
+        @if (auth.isLoggedIn()) {
+          @if (isInternalRoute) {
+            <app-wavy-button
+              routerLink="/"
+              colorScheme="secondary"
+              className="px-6 py-2.5"
+              text="Inicio">
+            </app-wavy-button>
+          } @else {
+            <app-wavy-button
+              routerLink="/dashboard"
+              colorScheme="primary"
+              className="px-6 py-2.5 shadow-md shadow-purple-100"
+              text="Panel">
+            </app-wavy-button>
+          }
+          <button type="button" (click)="logout()" class="site-nav-logout" title="Cerrar sesión">
+            <span class="material-symbols-outlined">logout</span>
+          </button>
+        } @else {
+          <button type="button" (click)="triggerAuth(true, $event)" class="site-nav-login">Acceder</button>
+          <app-wavy-button
+            (click)="triggerAuth(false, $event)"
+            className="px-7 py-3 editorial-gradient text-white font-bold rounded-full shadow-lg hover:shadow-primary/30 transition-all text-sm"
+            text="Crear cuenta">
+          </app-wavy-button>
+        }
       }
+    </div>
+
+    <button
+      type="button"
+      class="site-mobile-toggle"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-label="Abrir menú de navegación">
+      <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+    </button>
   </div>
+
+  @if (mobileMenuOpen()) {
+    <div class="site-mobile-menu">
+      <a routerLink="/templates" (click)="closeMobileMenu()" class="mobile-nav-link">
+        <span class="material-symbols-outlined">dashboard_customize</span>
+        Plantillas
+      </a>
+      <a routerLink="/tour" (click)="closeMobileMenu()" class="mobile-nav-link">
+        <span class="material-symbols-outlined">school</span>
+        Guía
+      </a>
+      <a routerLink="/showcase" (click)="closeMobileMenu()" class="mobile-nav-link">
+        <span class="material-symbols-outlined">visibility</span>
+        Ejemplos
+      </a>
+
+      <div class="site-mobile-actions">
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/dashboard" (click)="closeMobileMenu()" class="mobile-nav-primary">Ir al panel</a>
+          <button type="button" (click)="logout()" class="mobile-nav-secondary">Cerrar sesión</button>
+        } @else {
+          <button type="button" (click)="triggerAuth(false, $event)" class="mobile-nav-primary">Crear cuenta</button>
+          <button type="button" (click)="triggerAuth(true, $event)" class="mobile-nav-secondary">Acceder</button>
+        }
+      </div>
+    </div>
+  }
 </nav>

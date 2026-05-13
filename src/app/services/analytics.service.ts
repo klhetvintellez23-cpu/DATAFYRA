@@ -51,7 +51,7 @@ export class AnalyticsService {
     const secs = Math.floor(avgDuration % 60);
 
     // NPS: based on scale/rating questions (simplified)
-    const scaleQuestions = survey.questions.filter(q => q.type === 'scale' || q.type === 'rating');
+    const scaleQuestions = survey.questions.filter(q => q.type === 'scale' || q.type === 'rating' || q.type === 'nps');
     let nps = 0;
     if (scaleQuestions.length > 0) {
       const firstScaleQ = scaleQuestions[0];
@@ -102,12 +102,17 @@ export class AnalyticsService {
       .map(r => r.answers.find(a => a.questionId === questionId))
       .filter(a => a !== undefined);
 
-    if (question.type === 'multiple-choice') {
+    if (question.type === 'multiple-choice' || question.type === 'multi-select') {
       const counts: Record<string, number> = {};
       question.options.forEach(o => counts[o.texto] = 0);
       answers.forEach(a => {
         if (typeof a.value === 'string' && counts[a.value] !== undefined) {
           counts[a.value]++;
+        }
+        if (Array.isArray(a.value)) {
+          a.value.forEach((value) => {
+            if (counts[value] !== undefined) counts[value]++;
+          });
         }
       });
       const total = answers.length || 1;
@@ -116,7 +121,7 @@ export class AnalyticsService {
       }));
     }
 
-    if (question.type === 'rating' || question.type === 'scale') {
+    if (question.type === 'rating' || question.type === 'scale' || question.type === 'nps') {
       const min = question.min || 1;
       const max = question.max || 10;
       const counts: Record<number, number> = {};
