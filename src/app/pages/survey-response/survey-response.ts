@@ -63,6 +63,13 @@ export class SurveyResponsePage implements OnInit {
     const metadata = s.metadata;
     const mode = metadata?.paginationMode ?? 'one-by-one';
 
+    if (metadata?.questionPageBreaks && metadata.questionPageBreaks.length > 1) {
+      const breaks = this.normalizedPageBreaks(questions.length, metadata.questionPageBreaks);
+      return breaks
+        .map((start, index) => questions.slice(start, breaks[index + 1] ?? questions.length))
+        .filter((page) => page.length > 0);
+    }
+
     if (mode === 'all-at-once') {
       return questions.length ? [questions] : [];
     }
@@ -249,6 +256,10 @@ export class SurveyResponsePage implements OnInit {
     return this.survey()?.metadata?.brand ?? {};
   }
 
+  questionStyle(): NonNullable<SurveyBrand['questionStyle']> {
+    return this.brand().questionStyle ?? 'classic';
+  }
+
   progressMode(): NonNullable<Survey['metadata']>['progressMode'] {
     return this.survey()?.metadata?.progressMode ?? 'percentage';
   }
@@ -272,7 +283,7 @@ export class SurveyResponsePage implements OnInit {
     const surface = this.safeColor(brand.surfaceColor, fallback.surface);
     const text = this.safeColor(brand.textColor, fallback.text);
     const metadata = this.survey()?.metadata as any;
-    const backgroundImage = metadata?.theme?.backgroundImage || metadata?.backgroundImage || '';
+    const backgroundImage = brand.backgroundImageUrl || metadata?.theme?.backgroundImage || metadata?.backgroundImage || '';
     const buttonColor = this.safeColor(brand.buttonColor, primary);
     const buttonText = this.safeColor(brand.buttonTextColor, '#ffffff');
     const cardRadius = this.clampNumber(brand.cardRadius, 16, 36, 28);
@@ -430,6 +441,15 @@ export class SurveyResponsePage implements OnInit {
     }
 
     return Math.max(min, Math.min(max, value));
+  }
+
+  private normalizedPageBreaks(total: number, breaks: number[]): number[] {
+    const values = breaks.length ? [...breaks] : [0];
+    if (values[0] !== 0) values.unshift(0);
+    return values
+      .map((value) => Math.max(0, Math.min(total, Math.round(Number(value) || 0))))
+      .filter((value) => value >= 0 && value <= total)
+      .sort((a, b) => a - b);
   }
 
   private mixMuted(textColor: string): string {

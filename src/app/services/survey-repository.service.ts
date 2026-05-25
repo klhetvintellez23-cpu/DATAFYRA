@@ -72,6 +72,7 @@ export interface SurveyQuestionRow {
   es_obligatoria: boolean;
   metadatos?: {
     questionType?: QuestionType;
+    description?: string;
     min?: number;
     max?: number;
     imageUrl?: string;
@@ -172,23 +173,41 @@ export class SurveyRepositoryService {
     return data as SurveyRow;
   }
 
-  async createSurvey(userId: string, title: string, description: string): Promise<SurveyRow | null> {
+  async createSurvey(userId: string, title: string, description: string, metadatos?: any): Promise<SurveyRow | null> {
     if (!this.supabase) {
       return null;
     }
 
-    const { data, error } = await this.supabase
+    const payload: Record<string, any> = {
+      usuario_id: userId,
+      titulo: title,
+      descripcion: description,
+      estado: 'borrador'
+    };
+
+    if (metadatos) {
+      payload['metadatos'] = metadatos;
+    }
+
+    let { data, error } = await this.supabase
       .from('encuestas')
-      .insert({
-        usuario_id: userId,
-        titulo: title,
-        descripcion: description,
-        estado: 'borrador'
-      })
+      .insert(payload)
       .select()
       .single();
 
+    if (error && this.isMissingMetadataColumnError(error)) {
+      delete payload['metadatos'];
+      const retry = await this.supabase
+        .from('encuestas')
+        .insert(payload)
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
+
     if (error) {
+      console.error('Error creating survey:', error);
       return null;
     }
 

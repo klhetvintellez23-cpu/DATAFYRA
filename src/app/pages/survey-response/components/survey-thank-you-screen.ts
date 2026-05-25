@@ -10,7 +10,16 @@ type TransformMode = 'move' | 'resize';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="thanks-shell">
+    <section
+      class="thanks-shell"
+      [class.layout-centered]="endLayout() === 'centered'"
+      [class.layout-receipt]="endLayout() === 'receipt'"
+      [class.layout-split]="endLayout() === 'split'"
+      [class.layout-celebration]="endLayout() === 'celebration'"
+      [class.layout-spotlight]="endLayout() === 'spotlight'"
+      [class.layout-certificate]="endLayout() === 'certificate'"
+      [class.layout-timeline]="endLayout() === 'timeline'"
+      [class.layout-compact]="endLayout() === 'compact'">
       <div class="thanks-card positioning-root" [class.positioned-layout]="usesPositionedLayout()" [style.min-height.px]="positionedHeight()">
         <div class="design-box" data-design-kind="end-rule" [class.design-active]="designMode" [class.design-selected]="isSelected('end-rule')" [ngStyle]="boxStyle('end-rule')" (mousedown)="selectBox($event, 'end-rule')">
           <button class="move-handle" type="button" aria-label="Mover linea" (mousedown)="beginTransform($event, 'end-rule', 'move')"></button>
@@ -35,6 +44,7 @@ type TransformMode = 'move' | 'resize';
         <div class="design-box" data-design-kind="end-title" [class.design-active]="designMode" [class.design-selected]="isSelected('end-title')" [ngStyle]="boxStyle('end-title')" (mousedown)="selectBox($event, 'end-title')">
           <button class="move-handle" type="button" aria-label="Mover titulo final" (mousedown)="beginTransform($event, 'end-title', 'move')"></button>
           <h1
+            [style.font-size.px]="fontSize('end-title')"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (keydown)="designMode && preventEditableEnter($event)"
@@ -47,6 +57,7 @@ type TransformMode = 'move' | 'resize';
         <div class="design-box" data-design-kind="end-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('end-desc')" [ngStyle]="boxStyle('end-desc')" (mousedown)="selectBox($event, 'end-desc')">
           <button class="move-handle" type="button" aria-label="Mover descripcion final" (mousedown)="beginTransform($event, 'end-desc', 'move')"></button>
           <p
+            [style.font-size.px]="fontSize('end-desc')"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (blur)="designMode && emitEditable($event, descriptionChange)">
@@ -57,7 +68,7 @@ type TransformMode = 'move' | 'resize';
 
         <div class="design-box" data-design-kind="end-summary" [class.design-active]="designMode" [class.design-selected]="isSelected('end-summary')" [ngStyle]="boxStyle('end-summary')" (mousedown)="selectBox($event, 'end-summary')">
           <button class="move-handle" type="button" aria-label="Mover resumen" (mousedown)="beginTransform($event, 'end-summary', 'move')"></button>
-          <div class="thanks-summary">
+          <div class="thanks-summary" [style.font-size.px]="fontSize('end-summary')">
             <span>Respuesta recibida</span>
             <span>Envio seguro</span>
           </div>
@@ -66,7 +77,7 @@ type TransformMode = 'move' | 'resize';
 
         <div class="design-box" data-design-kind="end-brand" [class.design-active]="designMode" [class.design-selected]="isSelected('end-brand')" [ngStyle]="boxStyle('end-brand')" (mousedown)="selectBox($event, 'end-brand')">
           <button class="move-handle" type="button" aria-label="Mover marca" (mousedown)="beginTransform($event, 'end-brand', 'move')"></button>
-          <div class="thanks-brand">Powered by Datafyra</div>
+          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by Datafyra</div>
           <button class="resize-handle" type="button" aria-label="Redimensionar marca" (mousedown)="beginTransform($event, 'end-brand', 'resize')"></button>
         </div>
       </div>
@@ -88,6 +99,7 @@ type TransformMode = 'move' | 'resize';
     }
 
     .thanks-card {
+      position: relative;
       width: min(680px, 100%);
       padding: clamp(32px, 6vw, 64px);
       border-radius: var(--response-card-radius, 28px);
@@ -252,6 +264,286 @@ type TransformMode = 'move' | 'resize';
       margin: 0 auto;
     }
 
+    .layout-receipt .thanks-card {
+      width: min(560px, 100%);
+      padding: clamp(30px, 5vw, 54px);
+      border-radius: 12px;
+      background:
+        linear-gradient(90deg, transparent 0 10px, rgba(15,23,42,0.05) 10px 12px, transparent 12px) top left / 22px 1px repeat-x,
+        linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--response-bg, #f5f3ff) 24%, #ffffff));
+      box-shadow: 0 20px 58px rgba(15, 23, 42, 0.12);
+      text-align: left;
+    }
+
+    .layout-receipt .thanks-rule {
+      height: 1px;
+      margin-bottom: 28px;
+      background: repeating-linear-gradient(90deg, var(--response-primary, #7c3aed) 0 10px, transparent 10px 18px);
+    }
+
+    .layout-receipt .thanks-icon {
+      margin-left: 0;
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+    }
+
+    .layout-receipt p {
+      margin-left: 0;
+    }
+
+    .layout-receipt .thanks-summary {
+      justify-content: flex-start;
+      border-top: 1px dashed var(--response-border, #e2e8f0);
+      padding-top: 20px;
+    }
+
+    .layout-split .thanks-card {
+      width: min(920px, 100%);
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      column-gap: clamp(26px, 5vw, 54px);
+      align-items: center;
+      text-align: left;
+    }
+
+    .layout-split .thanks-rule,
+    .layout-split [data-design-kind="logo"],
+    .layout-split [data-design-kind="end-icon"] {
+      grid-column: 1;
+    }
+
+    .layout-split [data-design-kind="end-title"],
+    .layout-split [data-design-kind="end-desc"],
+    .layout-split [data-design-kind="end-summary"],
+    .layout-split [data-design-kind="end-brand"] {
+      grid-column: 2;
+    }
+
+    .layout-split .thanks-icon {
+      width: 136px;
+      height: 136px;
+      font-size: 48px;
+      margin: 0;
+    }
+
+    .layout-split p {
+      margin-left: 0;
+    }
+
+    .layout-split .thanks-summary {
+      justify-content: flex-start;
+    }
+
+    .layout-celebration .thanks-card {
+      width: min(760px, 100%);
+      padding-top: clamp(48px, 8vw, 88px);
+      background:
+        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--response-secondary, #06b6d4) 22%, transparent), transparent 30%),
+        radial-gradient(circle at 84% 6%, color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88)),
+        var(--response-surface, #ffffff);
+    }
+
+    .layout-celebration .thanks-rule {
+      width: 96px;
+      height: 96px;
+      margin-bottom: -72px;
+      border-radius: 50%;
+      opacity: 0.12;
+    }
+
+    .layout-celebration .thanks-icon {
+      width: 104px;
+      height: 104px;
+      font-size: 42px;
+      box-shadow: 0 20px 56px color-mix(in srgb, var(--response-primary, #7c3aed) 22%, transparent);
+    }
+
+    .layout-celebration h1 {
+      font-size: clamp(38px, 6vw, 68px);
+    }
+
+    .layout-spotlight .thanks-card {
+      width: min(760px, 100%);
+      padding-top: clamp(54px, 8vw, 92px);
+      background:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86)),
+        var(--response-surface, #ffffff);
+    }
+
+    .layout-spotlight .thanks-card::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -120px;
+      width: 360px;
+      height: 360px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--response-secondary, #06b6d4) 26%, transparent), transparent 62%);
+      pointer-events: none;
+    }
+
+    .layout-spotlight .thanks-icon {
+      width: 112px;
+      height: 112px;
+      font-size: 44px;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+      box-shadow: 0 26px 70px color-mix(in srgb, var(--response-primary, #7c3aed) 32%, transparent);
+    }
+
+    .layout-certificate .thanks-card {
+      width: min(820px, 100%);
+      padding: clamp(40px, 6vw, 78px);
+      border-radius: 8px;
+      background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        linear-gradient(135deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4)) border-box;
+      border: 8px solid transparent;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+    }
+
+    .layout-certificate .thanks-rule {
+      width: 180px;
+      height: 2px;
+      margin-bottom: 34px;
+    }
+
+    .layout-certificate .thanks-icon {
+      width: 78px;
+      height: 78px;
+      border-radius: 16px;
+      transform: rotate(45deg);
+    }
+
+    .layout-certificate .thanks-icon::first-letter {
+      display: inline-block;
+      transform: rotate(-45deg);
+    }
+
+    .layout-certificate h1 {
+      font-family: var(--response-title-font, Georgia, serif);
+      font-size: clamp(36px, 6vw, 64px);
+    }
+
+    .layout-timeline .thanks-card {
+      width: min(860px, 100%);
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr);
+      column-gap: 28px;
+      text-align: left;
+    }
+
+    .layout-timeline .thanks-rule {
+      grid-row: 1 / span 5;
+      width: 4px;
+      height: 100%;
+      margin: 0 auto;
+      background: linear-gradient(180deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+    }
+
+    .layout-timeline [data-design-kind="end-icon"] {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+    }
+
+    .layout-timeline [data-design-kind="end-title"],
+    .layout-timeline [data-design-kind="end-desc"],
+    .layout-timeline [data-design-kind="end-summary"],
+    .layout-timeline [data-design-kind="end-brand"] {
+      grid-column: 2;
+    }
+
+    .layout-timeline .thanks-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0;
+      border-radius: 18px;
+    }
+
+    .layout-timeline p {
+      margin-left: 0;
+    }
+
+    .layout-timeline .thanks-summary {
+      justify-content: flex-start;
+    }
+
+    .layout-compact .thanks-card {
+      width: min(520px, 100%);
+      padding: 28px;
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 16px;
+      text-align: left;
+      box-shadow: 0 16px 42px rgba(15, 23, 42, 0.1);
+    }
+
+    .layout-compact .thanks-rule,
+    .layout-compact [data-design-kind="logo"],
+    .layout-compact [data-design-kind="end-summary"],
+    .layout-compact [data-design-kind="end-brand"] {
+      display: none;
+    }
+
+    .layout-compact [data-design-kind="end-icon"] {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .layout-compact [data-design-kind="end-title"],
+    .layout-compact [data-design-kind="end-desc"] {
+      grid-column: 2;
+    }
+
+    .layout-compact .thanks-icon {
+      width: 54px;
+      height: 54px;
+      margin: 0;
+      border-radius: 14px;
+      font-size: 24px;
+    }
+
+    .layout-compact h1 {
+      font-size: 28px;
+    }
+
+    .layout-compact p {
+      margin: 6px 0 0;
+      font-size: 15px;
+    }
+
+    @media (max-width: 640px) {
+      .layout-split .thanks-card,
+      .layout-timeline .thanks-card,
+      .layout-compact .thanks-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .layout-split [data-design-kind],
+      .layout-timeline [data-design-kind],
+      .layout-compact [data-design-kind] {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .layout-split .thanks-icon,
+      .layout-timeline .thanks-icon,
+      .layout-compact .thanks-icon {
+        margin: 0 auto 16px;
+      }
+
+      .layout-timeline .thanks-rule {
+        display: none;
+      }
+    }
+
     .design-editable {
       outline: 2px dashed transparent;
       outline-offset: 6px;
@@ -275,6 +567,10 @@ export class SurveyThankYouScreenComponent {
   @Output() descriptionChange = new EventEmitter<string>();
   @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: EndDesignKind; mode: TransformMode; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
   selectedKind: EndDesignKind | null = null;
+
+  endLayout(): NonNullable<Survey['metadata']>['endLayout'] {
+    return this.survey.metadata?.endLayout ?? 'centered';
+  }
 
   private readonly defaults: Record<EndDesignKind, SurveyElementConfig> = {
     'end-rule': { x: 64, y: 0, width: 420, height: 8 },
@@ -310,6 +606,10 @@ export class SurveyThankYouScreenComponent {
 
   isSelected(kind: EndDesignKind): boolean {
     return this.designMode && this.selectedKind === kind;
+  }
+
+  fontSize(kind: EndDesignKind): number | null {
+    return this.configFor(kind).fontSize ?? null;
   }
 
   boxStyle(kind: EndDesignKind): Record<string, string> {

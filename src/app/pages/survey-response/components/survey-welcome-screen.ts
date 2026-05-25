@@ -10,7 +10,16 @@ type TransformMode = 'move' | 'resize';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="welcome-shell">
+    <section
+      class="welcome-shell"
+      [class.layout-split]="welcomeLayout() === 'split'"
+      [class.layout-centered]="welcomeLayout() === 'centered'"
+      [class.layout-poster]="welcomeLayout() === 'poster'"
+      [class.layout-minimal]="welcomeLayout() === 'minimal'"
+      [class.layout-editorial]="welcomeLayout() === 'editorial'"
+      [class.layout-orbit]="welcomeLayout() === 'orbit'"
+      [class.layout-showcase]="welcomeLayout() === 'showcase'"
+      [class.layout-diagonal]="welcomeLayout() === 'diagonal'">
       <div class="welcome-card">
         <div class="welcome-content positioning-root" [class.positioned-layout]="usesPositionedLayout()" [style.min-height.px]="positionedContentHeight()">
           @if (brand.logoUrl) {
@@ -30,6 +39,7 @@ type TransformMode = 'move' | 'resize';
           <div class="design-box" data-design-kind="welcome-title" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-title')" [ngStyle]="boxStyle('welcome-title')" (mousedown)="selectBox($event, 'welcome-title')">
             <button class="move-handle" type="button" aria-label="Mover titulo" (mousedown)="beginTransform($event, 'welcome-title', 'move')"></button>
             <h1
+              [style.font-size.px]="fontSize('welcome-title')"
               [attr.contenteditable]="designMode ? 'true' : null"
               [class.design-editable]="designMode"
               (keydown)="designMode && preventEditableEnter($event)"
@@ -42,6 +52,7 @@ type TransformMode = 'move' | 'resize';
           <div class="design-box" data-design-kind="welcome-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-desc')" [ngStyle]="boxStyle('welcome-desc')" (mousedown)="selectBox($event, 'welcome-desc')">
             <button class="move-handle" type="button" aria-label="Mover descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'move')"></button>
             <p
+              [style.font-size.px]="fontSize('welcome-desc')"
               [attr.contenteditable]="designMode ? 'true' : null"
               [class.design-editable]="designMode"
               (blur)="designMode && emitEditable($event, descriptionChange)">
@@ -66,14 +77,15 @@ type TransformMode = 'move' | 'resize';
                 <span
                   contenteditable="true"
                   class="button-editable"
+                  [style.font-size.px]="fontSize('welcome-cta')"
                   (click)="$event.stopPropagation()"
                   (mousedown)="$event.stopPropagation()"
                   (keydown)="preventEditableEnter($event)"
                   (blur)="emitEditable($event, ctaTextChange)">
-                  {{ survey.metadata?.ctaText || 'Comenzar encuesta' }}
+                  {{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}
                 </span>
               } @else {
-              {{ survey.metadata?.ctaText || 'Comenzar encuesta' }}
+                <span [style.font-size.px]="fontSize('welcome-cta')">{{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}</span>
               }
             </button>
             <button class="resize-handle" type="button" aria-label="Redimensionar boton" (mousedown)="beginTransform($event, 'welcome-cta', 'resize')"></button>
@@ -116,6 +128,7 @@ type TransformMode = 'move' | 'resize';
     }
 
     .welcome-card {
+      position: relative;
       width: min(980px, 100%);
       padding: clamp(32px, 6vw, 72px);
       border-radius: var(--response-card-radius, 28px);
@@ -284,6 +297,34 @@ type TransformMode = 'move' | 'resize';
       transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
     }
 
+    .welcome-enter-hint {
+      margin-left: 14px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.22);
+      color: inherit;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .welcome-security-note {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--response-muted, #64748b);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .welcome-security-note span {
+      font-family: "Material Symbols Outlined";
+      font-size: 16px;
+      line-height: 1;
+    }
+
     .welcome-preview {
       min-height: 360px;
       height: 100%;
@@ -359,6 +400,265 @@ type TransformMode = 'move' | 'resize';
       transform: translateY(0);
     }
 
+    .layout-centered .welcome-card {
+      width: min(760px, 100%);
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+      min-height: auto;
+    }
+
+    .layout-centered .welcome-content {
+      text-align: center;
+    }
+
+    .layout-centered .welcome-kicker,
+    .layout-centered .welcome-logo {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .layout-centered p {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .layout-centered .welcome-meta {
+      justify-content: center;
+    }
+
+    .layout-centered .preview-zone {
+      width: min(420px, 100%);
+    }
+
+    .layout-centered .welcome-preview {
+      min-height: 180px;
+      padding: 18px;
+    }
+
+    .layout-centered .preview-options {
+      grid-template-columns: repeat(3, 1fr);
+      margin-top: 24px;
+    }
+
+    .layout-centered .preview-options span {
+      height: 34px;
+    }
+
+    .welcome-shell.layout-poster {
+      place-items: stretch;
+    }
+
+    .layout-poster .welcome-card {
+      width: min(1120px, 100%);
+      min-height: min(760px, calc(100svh - 48px));
+      grid-template-columns: minmax(0, 0.72fr) minmax(360px, 1.28fr);
+      padding: clamp(26px, 4vw, 48px);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 42%, rgba(255,255,255,0.18) 100%),
+        var(--response-background-image),
+        linear-gradient(135deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .layout-poster .preview-zone {
+      min-height: 100%;
+      order: 2;
+    }
+
+    .layout-poster .welcome-preview {
+      min-height: 520px;
+      border-radius: 32px;
+      background: rgba(15, 23, 42, 0.22);
+      border-color: rgba(255, 255, 255, 0.32);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 34px 80px rgba(15,23,42,0.22);
+    }
+
+    .welcome-shell.layout-minimal {
+      place-items: start center;
+    }
+
+    .layout-minimal .welcome-card {
+      width: min(820px, 100%);
+      min-height: auto;
+      grid-template-columns: 1fr;
+      padding: clamp(28px, 7vw, 78px) 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .layout-minimal .welcome-kicker,
+    .layout-minimal .welcome-meta,
+    .layout-minimal .preview-zone {
+      display: none;
+    }
+
+    .layout-minimal h1 {
+      max-width: 760px;
+      font-size: clamp(40px, 8vw, 82px);
+    }
+
+    .layout-minimal p {
+      max-width: 680px;
+      font-size: clamp(17px, 2.2vw, 22px);
+    }
+
+    .layout-minimal .welcome-button {
+      min-width: 0;
+      border-radius: 0;
+      padding-inline: 0;
+      color: var(--response-primary, #7c3aed);
+      background: transparent;
+      box-shadow: inset 0 -2px 0 currentColor;
+    }
+
+    .layout-editorial .welcome-card {
+      width: min(1080px, 100%);
+      grid-template-columns: minmax(0, 0.78fr) minmax(280px, 0.72fr);
+      align-items: stretch;
+      padding: 0;
+      overflow: hidden;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 34px 90px rgba(15, 23, 42, 0.14);
+    }
+
+    .layout-editorial .welcome-content {
+      padding: clamp(34px, 6vw, 76px);
+      border-right: 1px solid var(--response-border, rgba(15,23,42,0.12));
+    }
+
+    .layout-editorial .welcome-kicker {
+      border-radius: 0;
+      padding-left: 0;
+      background: transparent;
+      box-shadow: inset 0 -2px 0 currentColor;
+    }
+
+    .layout-editorial h1 {
+      max-width: 700px;
+      font-size: clamp(44px, 7vw, 86px);
+      line-height: 0.96;
+    }
+
+    .layout-editorial .preview-zone {
+      display: grid;
+      align-items: stretch;
+      padding: clamp(24px, 4vw, 44px);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--response-primary, #7c3aed) 12%, #ffffff), #ffffff);
+    }
+
+    .layout-editorial .welcome-preview {
+      min-height: 100%;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .layout-orbit .welcome-card {
+      width: min(1060px, 100%);
+      grid-template-columns: minmax(0, 1fr) 340px;
+      background:
+        radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--response-secondary, #06b6d4) 28%, transparent), transparent 28%),
+        radial-gradient(circle at 24% 88%, color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent), transparent 34%),
+        color-mix(in srgb, var(--response-bg, #f5f3ff) 76%, #ffffff);
+      overflow: hidden;
+    }
+
+    .layout-orbit .welcome-card::before,
+    .layout-orbit .welcome-card::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .layout-orbit .welcome-card::before {
+      width: 420px;
+      height: 420px;
+      right: -130px;
+      top: -120px;
+      border: 1px solid color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent);
+    }
+
+    .layout-orbit .welcome-card::after {
+      width: 220px;
+      height: 220px;
+      right: 120px;
+      bottom: 48px;
+      border: 1px solid color-mix(in srgb, var(--response-secondary, #06b6d4) 34%, transparent);
+    }
+
+    .layout-orbit .welcome-preview {
+      transform: rotate(3deg);
+      min-height: 420px;
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.32);
+      backdrop-filter: blur(20px);
+    }
+
+    .layout-showcase .welcome-card {
+      width: min(1120px, 100%);
+      grid-template-columns: minmax(340px, 0.9fr) minmax(0, 1fr);
+      padding: clamp(24px, 4vw, 44px);
+      background:
+        linear-gradient(110deg, rgba(255,255,255,0.94) 0 46%, rgba(255,255,255,0.26) 46% 100%),
+        var(--response-background-image),
+        linear-gradient(135deg, var(--response-bg, #f5f3ff), var(--response-secondary, #06b6d4));
+      background-size: cover;
+      background-position: center;
+    }
+
+    .layout-showcase .welcome-content {
+      order: 2;
+      align-self: end;
+      padding: clamp(20px, 4vw, 46px);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .layout-showcase .preview-zone {
+      order: 1;
+      align-self: stretch;
+    }
+
+    .layout-showcase .welcome-preview {
+      min-height: 520px;
+      background: rgba(15, 23, 42, 0.18);
+    }
+
+    .layout-diagonal .welcome-card {
+      width: min(1040px, 100%);
+      grid-template-columns: minmax(0, 1fr) 320px;
+      padding: clamp(30px, 5vw, 64px);
+      background:
+        linear-gradient(124deg, #ffffff 0 57%, color-mix(in srgb, var(--response-primary, #7c3aed) 14%, #ffffff) 57% 100%);
+      overflow: hidden;
+    }
+
+    .layout-diagonal .welcome-content {
+      transform: translateY(10px);
+    }
+
+    .layout-diagonal .welcome-kicker {
+      border-radius: 8px;
+      transform: skewX(-10deg);
+    }
+
+    .layout-diagonal .welcome-preview {
+      min-height: 420px;
+      transform: skewY(-5deg);
+      border-radius: 18px;
+    }
+
     .design-editable,
     .button-editable {
       outline: 2px dashed transparent;
@@ -421,6 +721,32 @@ type TransformMode = 'move' | 'resize';
       .welcome-button {
         width: 100%;
       }
+
+      .layout-editorial .welcome-card,
+      .layout-orbit .welcome-card,
+      .layout-showcase .welcome-card,
+      .layout-diagonal .welcome-card {
+        grid-template-columns: 1fr;
+        padding: 28px;
+      }
+
+      .layout-editorial .welcome-content,
+      .layout-showcase .welcome-content {
+        padding: 0;
+        border-right: 0;
+        background: transparent;
+      }
+
+      .layout-showcase .welcome-content,
+      .layout-showcase .preview-zone {
+        order: initial;
+      }
+
+      .layout-orbit .welcome-preview,
+      .layout-showcase .welcome-preview,
+      .layout-diagonal .welcome-preview {
+        display: none;
+      }
     }
   `]
 })
@@ -435,6 +761,14 @@ export class SurveyWelcomeScreenComponent {
   @Output() ctaTextChange = new EventEmitter<string>();
   @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: WelcomeDesignKind; mode: TransformMode; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
   selectedKind: WelcomeDesignKind | null = null;
+
+  welcomeLayout(): NonNullable<Survey['metadata']>['welcomeLayout'] {
+    return this.survey.metadata?.welcomeLayout ?? 'split';
+  }
+
+  fontSize(kind: WelcomeDesignKind): number | null {
+    return this.configFor(kind).fontSize ?? null;
+  }
 
   private readonly defaults: Record<WelcomeDesignKind, SurveyElementConfig> = {
     logo: { x: 0, y: 0, width: 160, height: 72 },

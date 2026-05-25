@@ -4,7 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { AuthModalService } from '../../services/auth-modal.service';
 import { AuthService } from '../../services/auth.service';
-import { SurveyService } from '../../services/survey.service';
+import { SurveySimulatorComponent } from '../../components/survey-simulator/survey-simulator';
+import { Question, Survey, SurveyMetadata, SurveyService } from '../../services/survey.service';
 import { QuestionType } from '../../services/survey-repository.service';
 
 interface TemplateQuestion {
@@ -29,7 +30,7 @@ interface TemplateData {
 @Component({
   selector: 'app-template-details',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink, SurveySimulatorComponent],
   templateUrl: './template-details.html',
   styleUrl: './template-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -44,6 +45,7 @@ export class TemplateDetailsPage implements OnInit {
   templateId: string | null = null;
   template: TemplateData | undefined;
   isCreating = signal(false);
+  private readonly previewSurveyCache = new Map<string, Survey>();
 
   templates: Record<string, TemplateData> = {
     'satisfaccion-cliente': {
@@ -331,37 +333,21 @@ export class TemplateDetailsPage implements OnInit {
     this.isCreating.set(true);
 
     try {
-      // 1. Create a blank survey with the template's title + description
+      const questions = this.templateQuestions(this.template, true);
+
+      const metadata = this.templateMetadata(this.template);
+
+      // 2. Create the survey with questions in a single operation
       const survey = await this.surveyService.createSurvey(
         userId,
         this.template.title,
-        this.template.description
+        this.template.description,
+        metadata,
+        questions
       );
 
-      if (!survey) {
-        this.isCreating.set(false);
-        return;
-      }
-
-      // 2. Map template questions to the SurveyService Question format
-      const questions = this.template.questions.map((q, index) => ({
-        id: `q-tmpl-${Date.now()}-${index}`,
-        type: this.toQuestionType(q.type),
-        text: q.text,
-        required: false,
-        options: (q.options ?? []).map((opt, i) => ({ id: `opt-${index}-${i}`, texto: opt })),
-        min: q.type === 'rating' ? 1 : undefined,
-        max: q.type === 'rating' ? 5 : undefined,
-      }));
-
-      // 3. Save the survey with populated questions
-      const populated = await this.surveyService.saveSurvey({
-        ...survey,
-        questions,
-      });
-
-      if (populated) {
-        this.router.navigate(['/editor', populated.id]);
+      if (survey) {
+        this.router.navigate(['/editor', survey.id]);
       }
     } catch (e) {
       console.error('Error creating survey from template:', e);
@@ -379,6 +365,247 @@ export class TemplateDetailsPage implements OnInit {
       case 'choice':   return 'multiple-choice';
       default:         return 'text';
     }
+  }
+
+  previewSurvey(template: TemplateData): Survey {
+    const cached = this.previewSurveyCache.get(template.id);
+    if (cached) return cached;
+    const metadata = this.templateMetadata(template);
+
+    const survey: Survey = {
+      id: `preview-${template.id}`,
+      userId: 'preview',
+      title: template.title,
+      description: template.description,
+      questions: this.templateQuestions(template),
+      status: 'borrador',
+      metadata: {
+        ...metadata,
+        brand: {
+          ...metadata.brand,
+          primaryColor: '#111111',
+          secondaryColor: '#4b5563',
+          textColor: '#111111',
+          buttonColor: '#111111',
+          buttonTextColor: '#ffffff',
+          questionStyle: 'minimal',
+          shadowPreset: 'none',
+          cardRadius: 18
+        }
+      },
+      createdAt: '',
+      updatedAt: '',
+      responses: []
+    };
+
+    this.previewSurveyCache.set(template.id, survey);
+    return survey;
+  }
+
+  private templateQuestions(template: TemplateData, uniqueIds = false): Question[] {
+    return template.questions.map((q, index) => ({
+      id: uniqueIds ? `q-tmpl-${crypto.randomUUID()}` : `preview-${template.id}-${index}`,
+      type: this.toQuestionType(q.type),
+      text: q.text,
+      description: q.placeholder,
+      required: index === 0,
+      options: (q.options ?? []).map((opt, i) => ({
+        id: uniqueIds ? `opt-${crypto.randomUUID()}` : `preview-${template.id}-${index}-${i}`,
+        texto: opt
+      })),
+      min: q.type === 'rating' ? 1 : undefined,
+      max: q.type === 'rating' ? 5 : undefined,
+    }));
+  }
+
+  private templateMetadata(template: TemplateData): SurveyMetadata {
+    type TemplateBrand = NonNullable<SurveyMetadata['brand']>;
+    type TemplateStyle = Omit<SurveyMetadata, 'brand'> & { brand: TemplateBrand };
+
+    const base: TemplateStyle = {
+      ctaText: 'Comenzar encuesta',
+      thankYouTitle: 'Gracias por participar',
+      thankYouDescription: 'Tus respuestas han sido registradas correctamente.',
+      endTitle: 'Gracias por participar',
+      endDescription: 'Tus respuestas han sido registradas correctamente.',
+      paginationMode: 'one-by-one',
+      progressMode: 'percentage',
+      welcomeLayout: 'split',
+      endLayout: 'compact',
+      brand: {
+        primaryColor: '#2563eb',
+        secondaryColor: '#14b8a6',
+        backgroundColor: '#f8fafc',
+        surfaceColor: '#ffffff',
+        textColor: '#172554',
+        buttonStyle: 'rounded',
+        buttonTextColor: '#ffffff',
+        cardRadius: 22,
+        fontTitle: 'Inter',
+        fontBody: 'Inter',
+        fontButton: 'Inter',
+        shadowPreset: 'soft',
+        questionStyle: 'soft',
+        entryAnimation: 'fadeUp',
+        progressBar: {
+          enabled: true,
+          style: 'line'
+        }
+      }
+    };
+
+    const styles: Record<string, TemplateStyle> = {
+      'satisfaccion-cliente': {
+        ...base,
+        welcomeLayout: 'split',
+        endLayout: 'compact',
+        brand: {
+          ...base.brand,
+          primaryColor: '#0f766e',
+          secondaryColor: '#f59e0b',
+          backgroundColor: '#ecfdf5',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#134e4a',
+          buttonStyle: 'pill',
+          cardRadius: 26,
+          fontTitle: 'Manrope',
+          questionStyle: 'soft'
+        }
+      },
+      business: {
+        ...base,
+        welcomeLayout: 'editorial',
+        endLayout: 'receipt',
+        brand: {
+          ...base.brand,
+          primaryColor: '#2563eb',
+          secondaryColor: '#14b8a6',
+          backgroundColor: '#eff6ff',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#172554',
+          buttonStyle: 'rounded',
+          cardRadius: 20,
+          fontTitle: 'Plus Jakarta Sans',
+          questionStyle: 'outlined',
+          shadowPreset: 'medium'
+        }
+      },
+      portfolio: {
+        ...base,
+        welcomeLayout: 'showcase',
+        endLayout: 'spotlight',
+        brand: {
+          ...base.brand,
+          primaryColor: '#7c3aed',
+          secondaryColor: '#f97316',
+          backgroundColor: '#f5f3ff',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#2e1065',
+          buttonStyle: 'pill',
+          cardRadius: 24,
+          fontTitle: 'Space Grotesk',
+          questionStyle: 'boxed',
+          shadowPreset: 'float'
+        }
+      },
+      'clima-laboral': {
+        ...base,
+        welcomeLayout: 'minimal',
+        endLayout: 'compact',
+        brand: {
+          ...base.brand,
+          primaryColor: '#4f46e5',
+          secondaryColor: '#10b981',
+          backgroundColor: '#f8fafc',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#1e293b',
+          buttonStyle: 'rounded',
+          cardRadius: 18,
+          fontTitle: 'Nunito Sans',
+          questionStyle: 'compact'
+        }
+      },
+      'evaluacion-evento': {
+        ...base,
+        welcomeLayout: 'diagonal',
+        endLayout: 'celebration',
+        brand: {
+          ...base.brand,
+          primaryColor: '#db2777',
+          secondaryColor: '#f59e0b',
+          backgroundColor: '#fff1f2',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#500724',
+          buttonStyle: 'pill',
+          cardRadius: 28,
+          fontTitle: 'Montserrat',
+          questionStyle: 'boxed',
+          shadowPreset: 'medium'
+        }
+      },
+      'satisfaccion-estudiantes': {
+        ...base,
+        welcomeLayout: 'editorial',
+        endLayout: 'certificate',
+        brand: {
+          ...base.brand,
+          primaryColor: '#1d4ed8',
+          secondaryColor: '#64748b',
+          backgroundColor: '#f8fafc',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#111827',
+          buttonStyle: 'square',
+          cardRadius: 14,
+          fontTitle: 'Merriweather',
+          fontBody: 'Source Sans 3',
+          fontButton: 'Source Sans 3',
+          questionStyle: 'outlined',
+          shadowPreset: 'none'
+        }
+      },
+      'impacto-comunitario': {
+        ...base,
+        welcomeLayout: 'orbit',
+        endLayout: 'timeline',
+        brand: {
+          ...base.brand,
+          primaryColor: '#15803d',
+          secondaryColor: '#0ea5e9',
+          backgroundColor: '#f0fdf4',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#14532d',
+          buttonStyle: 'pill',
+          cardRadius: 24,
+          fontTitle: 'DM Sans',
+          questionStyle: 'soft'
+        }
+      },
+      'experiencia-paciente': {
+        ...base,
+        welcomeLayout: 'split',
+        endLayout: 'centered',
+        brand: {
+          ...base.brand,
+          primaryColor: '#0f766e',
+          secondaryColor: '#38bdf8',
+          backgroundColor: '#ecfeff',
+          backgroundImageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1400',
+          textColor: '#164e63',
+          buttonStyle: 'rounded',
+          cardRadius: 24,
+          fontTitle: 'DM Sans',
+          questionStyle: 'soft'
+        }
+      }
+    };
+
+    return styles[template.id] ?? {
+      ...base,
+      brand: {
+        ...base.brand,
+        backgroundImageUrl: template.image
+      }
+    };
   }
 
   openAuth(mode: 'login' | 'register', event: Event) {

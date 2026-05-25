@@ -37,6 +37,7 @@ export class SurveyMapperService {
       id: question.id,
       type: this.mapQuestionType(question.tipo, question.metadatos?.questionType),
       text: question.enunciado,
+      description: question.metadatos?.description,
       required: question.es_obligatoria,
       min: question.metadatos?.min,
       max: question.metadatos?.max,

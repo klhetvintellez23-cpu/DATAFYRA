@@ -1,5 +1,5 @@
 import '@angular/compiler';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Survey } from '../../services/survey.service';
 import { SurveyResponsePage } from './survey-response';
 
@@ -42,6 +42,10 @@ const sampleSurvey: Survey = {
 };
 
 describe('SurveyResponsePage public flow', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   function createPage() {
     const route = {
       snapshot: {

@@ -41,6 +41,7 @@ type TransformMode = 'move' | 'resize';
         <div class="design-box" data-design-kind="question-title" [class.design-active]="designMode" [class.design-selected]="isSelected('question-title')" [ngStyle]="boxStyle('question-title')" (mousedown)="selectBox($event, 'question-title')">
           <button class="move-handle" type="button" aria-label="Mover titulo de pregunta" (mousedown)="beginTransform($event, 'question-title', 'move')"></button>
           <h2
+            [style.font-size.px]="fontSize('question-title')"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (keydown)="designMode && preventEditableEnter($event)"
@@ -52,7 +53,7 @@ type TransformMode = 'move' | 'resize';
 
         <div class="design-box" data-design-kind="question-help" [class.design-active]="designMode" [class.design-selected]="isSelected('question-help')" [ngStyle]="boxStyle('question-help')" (mousedown)="selectBox($event, 'question-help')">
           <button class="move-handle" type="button" aria-label="Mover ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'move')"></button>
-          <p class="question-help">{{ helperText }}</p>
+          <p class="question-help" [style.font-size.px]="fontSize('question-help')">{{ helperText }}</p>
           <button class="resize-handle" type="button" aria-label="Redimensionar ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'resize')"></button>
         </div>
 
@@ -66,7 +67,7 @@ type TransformMode = 'move' | 'resize';
 
         <div class="design-box" data-design-kind="question-answer" [class.design-active]="designMode" [class.design-selected]="isSelected('question-answer')" [ngStyle]="boxStyle('question-answer')" (mousedown)="selectBox($event, 'question-answer')">
           <button class="move-handle" type="button" aria-label="Mover respuestas" (mousedown)="beginTransform($event, 'question-answer', 'move')"></button>
-          <div class="answer-area">
+          <div class="answer-area" [style.font-size.px]="fontSize('question-answer')">
             @switch (questionType) {
               @case ('multiple-choice') {
                 <app-survey-option-input
@@ -411,6 +412,18 @@ type TransformMode = 'move' | 'resize';
     :host-context(.multi-question-page) h2 {
       font-size: clamp(24px, 3.5vw, 34px);
     }
+
+    :host-context(.simulator-question-page) .question-shell,
+    :host-context(.response-question-page) .question-shell {
+      min-height: auto;
+      padding: 0;
+      display: block;
+    }
+
+    :host-context(.simulator-question-page) .question-card,
+    :host-context(.response-question-page) .question-card {
+      width: 100%;
+    }
   `]
 })
 export class SurveyQuestionCardComponent {
@@ -420,6 +433,7 @@ export class SurveyQuestionCardComponent {
   @Input() answer: AnswerValue | string[] | undefined;
   @Input() error = '';
   @Input() designMode = false;
+  @Input() staticLayout = false;
   @Output() answerChange = new EventEmitter<AnswerValue | string[]>();
   @Output() questionTextChange = new EventEmitter<string>();
   @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: QuestionDesignKind; mode: TransformMode; index: number; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
@@ -459,6 +473,10 @@ export class SurveyQuestionCardComponent {
     return this.designMode && this.selectedKind === kind;
   }
 
+  fontSize(kind: QuestionDesignKind): number | null {
+    return this.configFor(kind).fontSize ?? null;
+  }
+
   boxStyle(kind: QuestionDesignKind): Record<string, string> {
     const config = this.configFor(kind);
     if (!this.usesPositionedLayout()) return {};
@@ -473,6 +491,7 @@ export class SurveyQuestionCardComponent {
   }
 
   usesPositionedLayout(): boolean {
+    if (this.staticLayout) return false;
     return this.hasStoredConfig('question-meta')
       || this.hasStoredConfig('question-title')
       || this.hasStoredConfig('question-help')
@@ -585,6 +604,7 @@ export class SurveyQuestionCardComponent {
   }
 
   get helperText(): string {
+    if (this.question.description?.trim()) return this.question.description.trim();
     if (this.questionType === 'multiple-choice') return 'Selecciona una opcion para continuar.';
     if (this.questionType === 'multi-select') return 'Puedes seleccionar una o varias opciones.';
     if (this.questionType === 'rating') return 'Elige una calificacion de 1 a 5 estrellas.';

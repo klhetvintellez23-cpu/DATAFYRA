@@ -70,14 +70,145 @@
 .response-question-page {
   position: relative;
   z-index: 1;
-}
-
-.response-question-page.multi-question-page {
   width: min(900px, 100%);
   margin: 0 auto;
   padding: clamp(22px, 5vw, 56px) clamp(18px, 4vw, 32px) 24px;
   display: grid;
   gap: 20px;
+}
+
+.response-question-page.multi-question-page {
+  padding-bottom: 24px;
+}
+
+.response-page.question-style-compact ::ng-deep app-survey-question-card .question-card {
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.response-page.question-style-compact ::ng-deep app-survey-question-card .question-meta {
+  display: none;
+}
+
+.response-page.question-style-soft ::ng-deep app-survey-question-card .question-card {
+  text-align: center;
+  border-top: 5px solid var(--response-primary, #4f46e5);
+}
+
+.response-page.question-style-soft ::ng-deep app-survey-question-card .question-meta {
+  justify-content: center;
+}
+
+.response-page.question-style-soft ::ng-deep app-survey-question-card .answer-area {
+  width: min(620px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.response-page.question-style-outlined ::ng-deep app-survey-question-card .question-card {
+  background: #ffffff;
+  border: 1.5px solid color-mix(in srgb, var(--response-primary, #4f46e5) 22%, #d1d5db);
+  box-shadow: none;
+}
+
+.response-page.question-style-outlined ::ng-deep app-survey-question-card .question-card:not(.positioned-layout) {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(280px, 1.12fr);
+  column-gap: 28px;
+  align-items: start;
+}
+
+.response-page.question-style-outlined ::ng-deep app-survey-question-card .question-meta {
+  display: none;
+}
+
+.response-page.question-style-outlined ::ng-deep app-survey-question-card [data-design-kind="question-title"],
+.response-page.question-style-outlined ::ng-deep app-survey-question-card [data-design-kind="question-help"],
+.response-page.question-style-outlined ::ng-deep app-survey-question-card [data-design-kind="question-image"] {
+  grid-column: 1;
+}
+
+.response-page.question-style-outlined ::ng-deep app-survey-question-card [data-design-kind="question-answer"] {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+}
+
+.response-page.question-style-minimal ::ng-deep app-survey-question-card .question-card {
+  padding: 18px 0 28px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.response-page.question-style-minimal ::ng-deep app-survey-question-card .question-meta {
+  display: none;
+}
+
+.response-page.question-style-boxed ::ng-deep app-survey-question-card .question-card {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--response-primary, #4f46e5) 18%, #e5e7eb);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+}
+
+.response-page.question-style-boxed ::ng-deep app-survey-question-card .question-meta {
+  display: none;
+}
+
+.response-page.question-style-boxed ::ng-deep app-survey-question-card .option-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.response-page.question-style-boxed ::ng-deep app-survey-question-card .option-button {
+  min-height: 86px;
+  align-items: start;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--response-primary, #4f46e5) 6%, #ffffff);
+}
+
+.response-page.question-style-glass ::ng-deep app-survey-question-card .question-card {
+  background: color-mix(in srgb, var(--response-surface, #ffffff) 68%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 32px 90px rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(22px);
+}
+
+.response-page.question-style-glass ::ng-deep app-survey-question-card .survey-field,
+.response-page.question-style-glass ::ng-deep app-survey-question-card .option-button {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.response-page.question-style-solid ::ng-deep app-survey-question-card .question-card {
+  background: var(--response-surface, #111827);
+  border: 0;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.response-page.question-style-solid ::ng-deep app-survey-question-card .question-pill,
+.response-page.question-style-solid ::ng-deep app-survey-question-card .required-pill {
+  background: color-mix(in srgb, var(--response-primary, #4f46e5) 18%, transparent);
+}
+
+.response-page.question-style-underline ::ng-deep app-survey-question-card .question-card {
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--response-primary, #111827) 48%, transparent);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.response-page.question-style-underline ::ng-deep app-survey-question-card .question-meta {
+  display: none;
+}
+
+.response-page.question-style-underline ::ng-deep app-survey-question-card .survey-field,
+.response-page.question-style-underline ::ng-deep app-survey-question-card .option-button {
+  border-radius: 0;
+  border-width: 0 0 1px;
+  box-shadow: none;
 }
 
 .response-center {
@@ -140,6 +271,19 @@
 @media (max-width: 640px) {
   .response-background {
     background-size: 30px 30px;
+  }
+
+  .response-page.question-style-outlined ::ng-deep app-survey-question-card .question-card:not(.positioned-layout) {
+    grid-template-columns: 1fr;
+  }
+
+  .response-page.question-style-outlined ::ng-deep app-survey-question-card [data-design-kind="question-answer"] {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .response-page.question-style-boxed ::ng-deep app-survey-question-card .option-list {
+    grid-template-columns: 1fr;
   }
 
   .not-found-card {

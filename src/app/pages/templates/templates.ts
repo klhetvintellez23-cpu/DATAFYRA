@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
 
 interface TemplateCard {
@@ -20,10 +20,12 @@ interface TemplateCard {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TemplatesPage {
+  private readonly route = inject(ActivatedRoute);
+  readonly returnTo = signal(this.safeReturnTo(this.route.snapshot.queryParamMap.get('returnTo')));
+
   categories = [
     'Todas las plantillas',
     'Estudio de mercado',
-    'Servicios',
     'Feedback del usuario',
     'Recursos humanos',
     'Eventos',
@@ -37,24 +39,17 @@ export class TemplatesPage {
   templates: TemplateCard[] = [
     {
       id: 'satisfaccion-cliente',
-      title: 'Evaluación del producto',
-      category: 'Estudio de mercado',
+      title: 'Satisfacción del cliente',
+      category: 'Feedback del usuario',
       popularity: '38,273',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900'
+      image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=900'
     },
     {
       id: 'business',
-      title: 'Las tendencias del consumo',
+      title: 'Crecimiento del negocio',
       category: 'Estudio de mercado',
       popularity: '21,305',
       image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=900'
-    },
-    {
-      id: 'satisfaccion-cliente',
-      title: 'Evaluación de la calidad del servicio',
-      category: 'Servicios',
-      popularity: '19,831',
-      image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=900'
     },
     {
       id: 'portfolio',
@@ -62,20 +57,6 @@ export class TemplatesPage {
       category: 'Estudio de mercado',
       popularity: '15,200',
       image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=900'
-    },
-    {
-      id: 'satisfaccion-cliente',
-      title: 'La moda y sus consumidores',
-      category: 'Estudio de mercado',
-      popularity: '12,900',
-      image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=900'
-    },
-    {
-      id: 'business',
-      title: 'Experiencia de compra',
-      category: 'Feedback del usuario',
-      popularity: '42,100',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=900'
     },
     {
       id: 'clima-laboral',
@@ -123,5 +104,10 @@ export class TemplatesPage {
     } else {
       this.filteredTemplates.set(this.templates.filter(t => t.category === cat));
     }
+  }
+
+  private safeReturnTo(value: string | null): string {
+    if (!value) return '/dashboard';
+    return value.startsWith('/editor/') || value === '/dashboard' ? value : '/dashboard';
   }
 }

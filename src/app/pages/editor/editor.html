@@ -1,98 +1,126 @@
 <div class="editor-root" (click)="hideContextMenu()">
-  <nav class="editor-topbar">
+  <nav class="editor-topbar survey-builder-topbar">
     <div class="editor-topbar-left">
       <a routerLink="/dashboard" class="editor-logo" title="Volver al Dashboard">
         <div class="editor-logo-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
         </div>
-        <span class="editor-logo-text">Datafyra</span>
+        <span class="editor-logo-text">Volver</span>
       </a>
+      @if (survey(); as topSurvey) {
+        <input
+          class="topbar-survey-title-input"
+          type="text"
+          [ngModel]="topSurvey.title"
+          (ngModelChange)="updateTitle($event)"
+          placeholder="Nombre de tu encuesta..."
+          aria-label="Nombre de la encuesta"
+        />
+      }
     </div>
-    <div class="editor-topbar-tabs">
-      <button class="editor-tab" [class.active]="currentTab === 'design'" (click)="setCurrentTab('design')">Diseñar encuesta</button>
-      <button class="editor-tab" [class.active]="currentTab === 'preview'" (click)="setCurrentTab('preview')">Vista previa</button>
-      <button class="editor-tab" [class.active]="currentTab === 'collect'" (click)="setCurrentTab('collect')">Recopilar</button>
-      <button class="editor-tab" [class.active]="currentTab === 'analyze'" (click)="setCurrentTab('analyze')">Analizar</button>
+    <div class="editor-topbar-tabs builder-stepper">
+      <button class="editor-tab" [class.active]="currentTab === 'design'" (click)="setCurrentTab('design')"><span>1</span> Crear</button>
+      <button class="editor-tab" [class.active]="currentTab === 'preview'" (click)="setCurrentTab('preview')"><span>2</span> Vista previa</button>
+      <button class="editor-tab" [class.active]="currentTab === 'collect'" (click)="setCurrentTab('collect')"><span>3</span> Compartir</button>
+      <button class="editor-tab" [class.active]="currentTab === 'analyze'" (click)="setCurrentTab('analyze')"><span>4</span> Resultados y análisis</button>
     </div>
     <div class="editor-topbar-right">
-      <div class="history-actions">
+      <div class="history-actions" aria-label="Historial de cambios">
         <button class="history-btn" type="button" (click)="undo()" [disabled]="!canUndo()" title="Deshacer">
           <span class="material-symbols-outlined">undo</span>
         </button>
         <button class="history-btn" type="button" (click)="redo()" [disabled]="!canRedo()" title="Rehacer">
           <span class="material-symbols-outlined">redo</span>
         </button>
-      </div>
-      <div class="device-preview-toggles">
-        <button class="device-btn" [class.active]="previewDevice === 'desktop'" type="button" (click)="setPreviewDevice('desktop')" title="Escritorio">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </button>
-        <button class="device-btn" [class.active]="previewDevice === 'tablet'" type="button" (click)="setPreviewDevice('tablet')" title="Tablet">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        </button>
-        <button class="device-btn" [class.active]="previewDevice === 'mobile'" type="button" (click)="setPreviewDevice('mobile')" title="Móvil">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <button class="history-btn" type="button" (click)="saveNow()" [disabled]="isSaving()" title="Guardar">
+          <span class="material-symbols-outlined">save</span>
         </button>
       </div>
       <span class="editor-autosave">
         <span class="autosave-dot" [class.saved]="saved()"></span>
-        {{ isSaving() ? 'Guardando...' : saved() ? 'Guardado' : 'Auto guardado' }}
+        {{ isSaving() ? 'Guardando cambios' : saved() ? 'Cambios guardados' : 'Pendiente de guardar' }}
       </span>
     </div>
   </nav>
 
   @if (survey(); as s) {
-    <div class="editor-subheader">
-      <div class="editor-subheader-left">
-        <input
-          class="editor-survey-title-input"
-          type="text"
-          [ngModel]="s.title"
-          (ngModelChange)="updateTitle($event)"
-          placeholder="Nombre de tu encuesta..."
-        />
-      </div>
-      <div class="editor-subheader-actions">
-        <button class="editor-action-btn" (click)="saveNow()" [disabled]="isSaving()">Guardar</button>
-        <button class="editor-action-btn" (click)="copyShareLink()">{{ copied() ? 'Copiado' : 'Compartir' }}</button>
-        <button class="editor-publish-btn" (click)="publish()" [disabled]="isSaving()">
-          {{ s.status === 'activo' ? 'Actualizar publicada' : 'Publicar' }}
-        </button>
-      </div>
-    </div>
-
-    @if (saveError() || infoMessage()) {
-      <div class="editor-notice-wrap">
-        @if (saveError()) {
-          <div class="editor-notice editor-notice-error">{{ saveError() }}</div>
-        }
-        @if (infoMessage()) {
-          <div class="editor-notice editor-notice-info">{{ infoMessage() }}</div>
-        }
-      </div>
-    }
-
     @if (currentTab === 'design') {
       <div class="editor-body" [style.--sidebar-right-width.px]="effectiveRightSidebarWidth()">
-        <aside class="editor-sidebar-left">
-          <div class="sidebar-section-label">ESTRUCTURA</div>
-          <ul class="structure-list">
-            <li class="structure-item" [class.active]="activeSection() === 'welcome'" (click)="activeSection.set('welcome')">
-              <span class="structure-item-label">Bienvenida</span>
+        <aside class="editor-sidebar-left builder-pages-sidebar">
+          <div class="builder-sidebar-heading">
+            <h2>Páginas de encuesta</h2>
+            <span>{{ getSurveyPageCount() }}</span>
+          </div>
+          <ul class="structure-list builder-page-list">
+            <li class="structure-item builder-page-item" [class.active]="activeSection() === 'welcome'" (click)="activeSection.set('welcome')">
+              <div class="page-thumb page-thumb-welcome">
+                <span class="material-symbols-outlined">flag</span>
+              </div>
+              <div class="page-row-meta">
+                <span class="structure-item-label">Página de inicio</span>
+                <small>Bienvenida</small>
+              </div>
             </li>
-            @for (q of s.questions; track q.id; let qi = $index) {
-              <li class="structure-item" [class.active]="activeSection() === 'questions' && activeQuestionIndex() === qi" (click)="activeQuestionIndex.set(qi); activeSection.set('questions')">
-                <span class="structure-item-label">{{ q.text || 'Pregunta ' + (qi + 1) }}</span>
-                <span class="struct-badge">Q{{ qi + 1 }}</span>
-              </li>
+            @for (page of questionPageSummaries(); track page.index) {
+            <li class="structure-item builder-page-item builder-question-page" [class.active]="activeSection() === 'questions' && activeQuestionPageIndex() === page.index" (click)="selectQuestionPage(page)">
+              <div class="page-thumb">
+                <div class="page-thumb-line short"></div>
+                <div class="page-thumb-line"></div>
+                <div class="page-thumb-block"></div>
+              </div>
+              <div class="page-row-meta">
+                <span class="structure-item-label">{{ pageTitle(page.index) }}</span>
+                <small>{{ page.count }} pregunta{{ page.count === 1 ? '' : 's' }}</small>
+              </div>
+              <div class="page-row-actions">
+                <button class="page-menu-trigger" type="button" title="Opciones de página" (click)="togglePageMenu(page.index, $event)">
+                  <span class="material-symbols-outlined">more_horiz</span>
+                </button>
+              </div>
+              @if (isPageMenuOpen(page.index)) {
+                <div class="page-actions-menu" (click)="$event.stopPropagation()">
+                  <button type="button" (click)="editQuestionPageName(page.index, $event)">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar nombre
+                  </button>
+                  <button type="button" (click)="moveQuestionPage(page.index, -1, $event)" [disabled]="page.index === 0">
+                    <span class="material-symbols-outlined">keyboard_arrow_up</span>
+                    Mover arriba
+                  </button>
+                  <button type="button" (click)="moveQuestionPage(page.index, 1, $event)" [disabled]="page.index === questionPageSummaries().length - 1">
+                    <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                    Mover abajo
+                  </button>
+                  <button type="button" (click)="duplicateQuestionPage(page.index, $event)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    Duplicar página
+                  </button>
+                  <button class="page-action-danger" type="button" (click)="removeQuestionPage(page.index, $event)" [disabled]="questionPageSummaries().length <= 1">
+                    <span class="material-symbols-outlined">delete</span>
+                    Borrar página
+                  </button>
+                </div>
+              }
+            </li>
+            <li class="page-insert-row">
+              <button class="page-insert-btn" type="button" (click)="addSurveyPage()">
+                <span class="material-symbols-outlined">add</span>
+              </button>
+            </li>
             }
-            <li class="structure-item" [class.active]="activeSection() === 'end'" (click)="activeSection.set('end')">
-              <span class="structure-item-label">Finalización</span>
+            <li class="structure-item builder-page-item" [class.active]="activeSection() === 'end'" (click)="activeSection.set('end')">
+              <div class="page-thumb page-thumb-end">
+                <span class="material-symbols-outlined">check_circle</span>
+              </div>
+              <div class="page-row-meta">
+                <span class="structure-item-label">Página de salida</span>
+                <small>Finalización</small>
+              </div>
             </li>
           </ul>
 
           <div class="sidebar-add-actions">
-            <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="addQuestionPanel = true">Agregar pregunta</button>
+            <button class="sidebar-add-btn sidebar-add-btn-primary" (click)="openAddQuestionAfter(s.questions.length - 1)">Agregar pregunta</button>
             <button class="sidebar-add-btn sidebar-template-btn" (click)="showTemplateModal = true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
               Usar plantilla
@@ -100,22 +128,43 @@
           </div>
         </aside>
 
-        <main class="editor-canvas" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
+        <main class="editor-canvas">
           <div class="canvas-scroll">
+            <div class="builder-canvas-toolbar">
+              <div>
+                <span class="builder-canvas-kicker">Lienzo</span>
+                <strong>
+                  @if (activeSection() === 'welcome') { Página de inicio }
+                  @else if (activeSection() === 'end') { Página de salida }
+                  @else { Página {{ activeQuestionPageIndex() + 1 }} }
+                </strong>
+              </div>
+              <div class="builder-canvas-actions">
+                @if (activeSection() === 'questions') {
+                  <button type="button" (click)="duplicateQuestion(activeQuestionIndex())" title="Duplicar"><span class="material-symbols-outlined">content_copy</span></button>
+                  <button class="canvas-action-danger" type="button" (click)="removeQuestion(activeQuestionIndex())" title="Eliminar pregunta" [disabled]="s.questions.length <= 1"><span class="material-symbols-outlined">delete</span></button>
+                }
+                <button type="button" (click)="openAddQuestionAfter(activeQuestionIndex())" title="Agregar pregunta"><span class="material-symbols-outlined">add</span></button>
+              </div>
+            </div>
             <div class="design-workspace">
               <div class="design-live-wrap">
-                <div class="design-live-frame" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
+                <div class="design-live-frame" [class.question-only-frame]="activeSection() === 'questions'">
                   <app-survey-simulator
                     [survey]="s"
                     [designMode]="true"
                     [designSection]="activeSection()"
                     [designQuestionIndex]="activeQuestionIndex()"
+                    [designPageIndex]="activeQuestionPageIndex()"
                     (welcomeTitleChange)="updateTitle($event)"
                     (welcomeDescriptionChange)="updateDescription($event)"
                     (ctaTextChange)="updateCtaText($event)"
                     (questionTextChange)="updateQuestionText($event.index, $event.text)"
                     (endTitleChange)="updateEndTitle($event)"
                     (endDescriptionChange)="updateEndDescription($event)"
+                    (addQuestionAfter)="openAddQuestionAfter($event)"
+                    (editQuestion)="openQuestionEditor($event)"
+                    (editQuestionLogic)="openQuestionLogic($event)"
                     (transformStart)="startTransform($event.event, $any($event.kind), $event.mode, $event.index, $event.frame, $event.frames)">
                   </app-survey-simulator>
                 </div>
@@ -141,36 +190,37 @@
         <aside [class]="sidebarClass()">
           <!-- Resize Handle -->
           <div class="sidebar-resizer" (mousedown)="startResizing($event)" [class.active]="isResizing"></div>
-          <!-- Canva-style Icon Navigation Bar -->
-          <div class="custom-nav-bar">
-            <button class="custom-nav-btn" [class.active]="customTab === 'content'" (click)="openCustomTab('content')" title="Contenido">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div class="custom-nav-bar" aria-label="Herramientas del editor">
+            <div class="tools-menu-header">
+              <h2>Herramientas</h2>
+              <p>Diseño y estilo</p>
+            </div>
+            <div class="tools-menu-grid">
+            <button class="custom-nav-btn" [class.active]="customTab === 'content'" (click)="openCustomTab('content')" title="Editar preguntas, textos y opciones">
+              <span class="material-symbols-outlined custom-nav-icon">edit_note</span>
               <span>Contenido</span>
             </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'palettes'" (click)="openCustomTab('palettes')" title="Paletas">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2"/><circle cx="19" cy="13.5" r="2"/><circle cx="7" cy="13" r="2"/><circle cx="12" cy="19" r="2"/><path d="M12 2a10 10 0 0 0-1 19.8c.5.1 1-.2 1-.7v-1a1 1 0 0 1 1-1h1.6a2 2 0 0 0 2-1.6 10 10 0 0 0-4.6-16.5Z"/></svg>
-              <span>Paletas</span>
-            </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'colors'" (click)="openCustomTab('colors')" title="Colores">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9"/></svg>
-              <span>Colores</span>
-            </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'buttons'" (click)="openCustomTab('buttons')" title="Botón">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="4"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-              <span>Botón</span>
-            </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'typography'" (click)="openCustomTab('typography')" title="Tipografía">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-              <span>Texto</span>
-            </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'effects'" (click)="openCustomTab('effects')" title="Efectos">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span>Efectos</span>
-            </button>
-            <button class="custom-nav-btn" [class.active]="customTab === 'media'" (click)="openCustomTab('media')" title="Medios">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <button class="custom-nav-btn" [class.active]="customTab === 'media'" (click)="openCustomTab('media')" title="Subir logo, imágenes y decoración">
+              <span class="material-symbols-outlined custom-nav-icon">image</span>
               <span>Medios</span>
             </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'colors'" (click)="openCustomTab('colors')" title="Cambiar paleta de colores">
+              <span class="material-symbols-outlined custom-nav-icon">palette</span>
+              <span>Colores</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'typography'" (click)="openCustomTab('typography')" title="Cambiar tipografías">
+              <span class="material-symbols-outlined custom-nav-icon">title</span>
+              <span>Texto</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'buttons'" (click)="openCustomTab('buttons')" title="Personalizar botón principal">
+              <span class="material-symbols-outlined custom-nav-icon">smart_button</span>
+              <span>Botón</span>
+            </button>
+            <button class="custom-nav-btn" [class.active]="customTab === 'effects'" (click)="openCustomTab('effects')" title="Animaciones, progreso y efectos">
+              <span class="material-symbols-outlined custom-nav-icon">auto_fix_high</span>
+              <span>Efectos</span>
+            </button>
+            </div>
           </div>
 
           <!-- Canva-style Configuration Panel -->
@@ -189,146 +239,75 @@
             <div class="custom-panel-content">
               @if (customTab === 'content') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Propiedades de encuesta</h4>
-                  <p class="subtab-desc">Edita el texto principal de tu encuesta.</p>
-                  
-                  <div class="right-section">
-                    <div class="right-section-label">DESCRIPCIÓN GENERAL</div>
-                    <textarea
-                      class="right-textarea"
-                      [ngModel]="s.description"
-                      (ngModelChange)="updateDescription($event)"
-                      rows="4"
-                      placeholder="Describe el propósito de la encuesta..."
-                    ></textarea>
-                  </div>
-
-                  <div class="right-section">
-                    <div class="right-section-label">PREGUNTAS POR PAGINA</div>
-                    <div class="button-style-grid pagination-mode-grid">
-                      <button class="button-style-card" [class.active]="paginationMode() === 'one-by-one'" type="button" (click)="updatePaginationMode('one-by-one')">Una</button>
-                      <button class="button-style-card" [class.active]="paginationMode() === 'paged'" type="button" (click)="updatePaginationMode('paged')">Varias</button>
-                      <button class="button-style-card" [class.active]="paginationMode() === 'all-at-once'" type="button" (click)="updatePaginationMode('all-at-once')">Todas</button>
-                    </div>
-                    @if (paginationMode() === 'paged') {
-                      <label class="slider-control">
-                        <span>Cantidad: {{ questionsPerPage() }}</span>
-                        <input type="range" min="2" max="12" [ngModel]="questionsPerPage()" (ngModelChange)="updateQuestionsPerPage($event)" />
-                      </label>
-                      <input class="right-select" type="number" min="2" max="50" [ngModel]="questionsPerPage()" (ngModelChange)="updateQuestionsPerPage($event)" />
-                    }
-                    <div class="right-section-label">PROGRESO PUBLICO</div>
-                    <div class="button-style-grid">
-                      <button class="button-style-card" [class.active]="progressMode() === 'percentage'" type="button" (click)="updateProgressMode('percentage')">Porcentaje</button>
-                      <button class="button-style-card" [class.active]="progressMode() === 'steps'" type="button" (click)="updateProgressMode('steps')">Pasos</button>
-                      <button class="button-style-card" [class.active]="progressMode() === 'hidden'" type="button" (click)="updateProgressMode('hidden')">Oculto</button>
-                    </div>
-                  </div>
-
                   @if (activeSection() === 'questions' && currentQuestion(); as q) {
-                    <div class="right-section">
-                      <div class="right-section-label">PREGUNTA</div>
-                      <textarea
-                        class="right-textarea"
-                        [ngModel]="q.text"
-                        (ngModelChange)="updateQuestionText(activeQuestionIndex(), $event)"
-                        rows="3"
-                        placeholder="Escribe el enunciado de la pregunta..."
-                      ></textarea>
-                    </div>
+                    <div class="question-pro-editor">
+                      <section class="question-pro-main">
+                        <label class="question-pro-field">
+                          <span>Pregunta</span>
+                          <textarea [ngModel]="q.text" (ngModelChange)="updateQuestionText(activeQuestionIndex(), $event)" rows="3" placeholder="Escribe tu pregunta..."></textarea>
+                          @if (!q.text.trim()) {
+                            <small class="question-inline-warning">Esta pregunta necesita un enunciado antes de publicar.</small>
+                          }
+                        </label>
+                        <label class="question-pro-field">
+                          <span>Descripción extra</span>
+                          <textarea [ngModel]="q.description" (ngModelChange)="updateQuestionDescription(activeQuestionIndex(), $event)" rows="2" placeholder="Texto de ayuda opcional..."></textarea>
+                        </label>
 
-                    <div class="right-section">
-                      <div class="right-section-label">TIPO DE PREGUNTA</div>
-                      <select class="right-select" [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex(), $event)">
-                        @for (qt of questionTypes; track qt.type) {
-                          <option [value]="qt.type">{{ qt.label }}</option>
-                        }
-                      </select>
-                      <button class="editor-action-btn" type="button" (click)="toggleRequired(activeQuestionIndex())">
-                        {{ q.required ? 'Marcar opcional' : 'Marcar obligatoria' }}
-                      </button>
-                    </div>
-
-                    @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
-                      <div class="right-section">
-                        <div class="right-section-label">OPCIONES</div>
-                        <div class="editor-option-list">
-                          @for (option of q.options; track option.id; let oi = $index) {
-                            <div class="editor-option-row">
-                              <input
-                                class="right-select"
-                                type="text"
-                                [ngModel]="option.texto"
-                                (ngModelChange)="updateOption(activeQuestionIndex(), oi, $event)"
-                                placeholder="Opcion..."
-                              />
-                              <button class="canvas-option-remove" type="button" (click)="removeOption(activeQuestionIndex(), oi)" [disabled]="q.options.length <= 2">×</button>
+                        <div class="question-pro-answers">
+                          <div class="question-pro-label">Respuestas</div>
+                          @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+                            @for (option of q.options; track option.id; let oi = $index) {
+                              <div class="question-pro-option">
+                                <input type="text" [ngModel]="option.texto" (ngModelChange)="updateOption(activeQuestionIndex(), oi, $event)" placeholder="Respuesta..." />
+                                <button type="button" title="Eliminar respuesta" (click)="removeOption(activeQuestionIndex(), oi)" [disabled]="q.options.length <= 2">
+                                  <span class="material-symbols-outlined">more_horiz</span>
+                                </button>
+                              </div>
+                            }
+                            @if (choiceOptionCount(q) < 2) {
+                              <small class="question-inline-warning">Agrega al menos dos respuestas válidas.</small>
+                            }
+                            <div class="question-pro-actions">
+                              <button type="button" (click)="addOption(activeQuestionIndex())">Añadir respuesta</button>
+                              <button type="button" (click)="addOtherOption(activeQuestionIndex())">Añadir "Otra" respuesta</button>
+                            </div>
+                          } @else {
+                            <div class="question-pro-option muted">
+                              <span>{{ q.type === 'long-text' ? 'Respuesta abierta larga' : 'Respuesta abierta' }}</span>
+                              <span class="material-symbols-outlined">more_horiz</span>
                             </div>
                           }
                         </div>
-                        <button class="canvas-add-option" type="button" (click)="addOption(activeQuestionIndex())">Agregar opcion</button>
-                        <label class="effect-toggle compact-toggle">
-                          <input type="checkbox" [checked]="q.randomizeOptions" (change)="toggleRandomizeOptions(activeQuestionIndex())" />
-                          <span class="effect-toggle-label">Orden aleatorio al responder</span>
-                        </label>
-                      </div>
-                    }
+                      </section>
 
-                    <div class="right-section">
-                      <div class="right-section-label">VALIDACIONES</div>
-                      @if (q.type === 'text' || q.type === 'long-text' || q.type === 'email' || q.type === 'phone') {
-                        <div class="control-row-pair">
-                          <label class="font-control">
-                            <span>Min. caracteres</span>
-                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.minLength" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { minLength: +$event || undefined })" />
-                          </label>
-                          <label class="font-control">
-                            <span>Max. caracteres</span>
-                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.maxLength" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { maxLength: +$event || undefined })" />
-                          </label>
-                        </div>
-                      }
-                      @if (q.type === 'multi-select') {
-                        <div class="control-row-pair">
-                          <label class="font-control">
-                            <span>Min. seleccion</span>
-                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.minSelections" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { minSelections: +$event || undefined })" />
-                          </label>
-                          <label class="font-control">
-                            <span>Max. seleccion</span>
-                            <input class="right-select" type="number" min="0" [ngModel]="q.validation?.maxSelections" (ngModelChange)="updateQuestionValidation(activeQuestionIndex(), { maxSelections: +$event || undefined })" />
-                          </label>
-                        </div>
-                      }
+                      <aside class="question-pro-preferences">
+                        <button class="question-delete-inline" type="button" (click)="removeQuestion(activeQuestionIndex())" [disabled]="s.questions.length <= 1">
+                          <span class="material-symbols-outlined">delete</span>
+                          Eliminar pregunta
+                        </button>
+                        <label class="question-pref-control">
+                          <span>Tipo de pregunta</span>
+                          <div class="question-select-wrap">
+                            <span class="material-symbols-outlined">tune</span>
+                            <select [ngModel]="q.type" (ngModelChange)="changeQuestionType(activeQuestionIndex(), $event)">
+                              @for (qt of questionTypes; track qt.type) {
+                                <option [value]="qt.type">{{ qt.label }}</option>
+                              }
+                            </select>
+                          </div>
+                        </label>
+                        <label class="question-switch-row">
+                          <span>Pregunta obligatoria</span>
+                          <input type="checkbox" [checked]="q.required" (change)="toggleRequired(activeQuestionIndex())" />
+                        </label>
+                        <button class="question-logic-inline" type="button" (click)="openQuestionLogic(activeQuestionIndex())">
+                          <span class="material-symbols-outlined">account_tree</span>
+                          Saltos y lógica
+                          <strong>{{ q.logic?.length || 0 }}</strong>
+                        </button>
+                      </aside>
                     </div>
-
-                    @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
-                      <div class="right-section">
-                        <div class="right-section-label">LOGICA CONDICIONAL</div>
-                        <label class="font-control">
-                          <span>Si responde</span>
-                          <select class="right-select" [ngModel]="logicAnswerValue(q)" (ngModelChange)="updateQuestionLogic(activeQuestionIndex(), q.type === 'multi-select' ? { answerIncludes: $event } : { answerEquals: $event })">
-                            <option value="">Sin condicion</option>
-                            @for (option of q.options; track option.id) {
-                              <option [value]="option.texto">{{ option.texto }}</option>
-                            }
-                          </select>
-                        </label>
-                        <label class="font-control">
-                          <span>Ir a</span>
-                          <select class="right-select" [ngModel]="logicTargetValue(q)" (ngModelChange)="updateQuestionLogic(activeQuestionIndex(), { goTo: $event })">
-                            <option value="">Siguiente normal</option>
-                            @for (target of logicTargetQuestions(activeQuestionIndex()); track target.id; let ti = $index) {
-                              <option [value]="target.id">Pregunta {{ activeQuestionIndex() + ti + 2 }}</option>
-                            }
-                            <option value="end">Pantalla final</option>
-                          </select>
-                        </label>
-                        @if (q.logic?.length) {
-                          <button class="editor-action-btn" type="button" (click)="clearQuestionLogic(activeQuestionIndex())">Quitar regla</button>
-                        }
-                      </div>
-                    }
                   }
 
                   @if (activeSection() === 'end') {
@@ -353,58 +332,70 @@
                 </div>
               }
 
-              @if (customTab === 'palettes') {
+              @if (customTab === 'colors') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Paletas de color</h4>
-                  <p class="subtab-desc">Elige un esquema visual predefinido.</p>
-                  <div class="palette-grid">
-                    @for (palette of palettePresets; track palette.name) {
-                      <button class="palette-card" [class.active]="isPaletteActive(palette)" type="button" (click)="applyPalette(palette)">
-                        <div class="palette-swatches">
-                          <span class="palette-swatch" [style.background]="palette.primaryColor"></span>
-                          <span class="palette-swatch" [style.background]="palette.secondaryColor"></span>
-                          <span class="palette-swatch" [style.background]="palette.backgroundColor"></span>
-                        </div>
-                        <span class="palette-name">{{ palette.name }}</span>
+                  <div class="visual-design-list">
+                    @for (preset of visualDesignPresets; track preset.name) {
+                      <button class="visual-design-card" [class.active]="isVisualDesignActive(preset)" type="button" (click)="applyVisualDesign(preset)">
+                        <span class="visual-design-thumb" [style.background-image]="'linear-gradient(rgba(15,23,42,0.12), rgba(15,23,42,0.28)), url(' + preset.image + ')'">
+                          <i [style.background]="preset.brand.primaryColor"></i>
+                        </span>
+                        <span>
+                          <strong>{{ preset.name }}</strong>
+                          <small>{{ preset.description }}</small>
+                        </span>
                       </button>
                     }
                   </div>
-                </div>
-              }
-
-              @if (customTab === 'colors') {
-                <div class="subtab-panel">
-                  <h4 class="subtab-title">Colores personalizados</h4>
-                  <p class="subtab-desc">Ajusta cada color manualmente.</p>
-                  <div class="color-grid-full">
-                    <label class="color-control-row">
-                      <span>Principal</span>
+                  <div class="design-palette-list color-palette-list">
+                    @for (palette of palettePresets; track palette.name) {
+                      <button class="design-palette-card" [class.active]="isPaletteActive(palette)" type="button" (click)="applyPalette(palette)">
+                        <span class="design-palette-swatches">
+                          <i [style.background]="palette.primaryColor"></i>
+                          <i [style.background]="palette.secondaryColor"></i>
+                          <i [style.background]="palette.backgroundColor"></i>
+                        </span>
+                        <strong>{{ palette.name }}</strong>
+                      </button>
+                    }
+                  </div>
+                  <div class="right-section">
+                    <div class="right-section-label">Ajustes finos</div>
+                    <label class="design-color-picker">
+                      <span>Título de pregunta</span>
+                      <input type="color" [ngModel]="brand().textColor" (ngModelChange)="updateBrandColor('textColor', $event)" />
+                    </label>
+                    <label class="design-color-picker">
+                      <span>Respuesta</span>
+                      <input type="color" [ngModel]="brand().surfaceColor" (ngModelChange)="updateBrandColor('surfaceColor', $event)" />
+                    </label>
+                    <label class="design-color-picker">
+                      <span>Selección</span>
                       <input type="color" [ngModel]="brand().primaryColor" (ngModelChange)="updateBrandColor('primaryColor', $event)" />
                     </label>
-                    <label class="color-control-row">
-                      <span>Secundario</span>
-                      <input type="color" [ngModel]="brand().secondaryColor" (ngModelChange)="updateBrandColor('secondaryColor', $event)" />
-                    </label>
-                    <label class="color-control-row">
+                    <label class="design-color-picker">
                       <span>Fondo</span>
                       <input type="color" [ngModel]="brand().backgroundColor" (ngModelChange)="updateBrandColor('backgroundColor', $event)" />
                     </label>
-                    <label class="color-control-row">
-                      <span>Tarjetas</span>
-                      <input type="color" [ngModel]="brand().surfaceColor" (ngModelChange)="updateBrandColor('surfaceColor', $event)" />
-                    </label>
-                    <label class="color-control-row">
-                      <span>Texto</span>
-                      <input type="color" [ngModel]="brand().textColor" (ngModelChange)="updateBrandColor('textColor', $event)" />
-                    </label>
+                  </div>
+                  <div class="right-section">
+                    <div class="right-section-label">Fondo</div>
+                    <div class="design-image-row">
+                      <span>Imagen de fondo</span>
+                      <input type="file" id="upload-background-image" accept="image/*" (change)="onBackgroundImageSelected($event)" style="display:none" />
+                      <button type="button" (click)="triggerFileInput('upload-background-image')" aria-label="Agregar imagen de fondo">
+                        <span class="material-symbols-outlined">add</span>
+                      </button>
+                    </div>
+                    @if (brand().backgroundImageUrl) {
+                      <button class="design-remove-image" type="button" (click)="removeBackgroundImage()">Quitar imagen de fondo</button>
+                    }
                   </div>
                 </div>
               }
 
               @if (customTab === 'buttons') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Botón de acción</h4>
-                  <p class="subtab-desc">Personaliza el CTA de tu encuesta.</p>
                   <div class="cta-preview-box">
                     <button class="cta-preview-button" [style.background]="currentButtonColor()" [style.color]="currentButtonTextColor()" [style.border-radius]="buttonRadius() + 'px'" [style.font-family]="currentFontButton()">
                       {{ ctaText() || 'Comenzar encuesta' }}
@@ -414,6 +405,13 @@
                     <span>Texto del botón</span>
                     <input class="cta-text-input" type="text" [ngModel]="ctaText()" (ngModelChange)="updateCtaText($event)" placeholder="Comenzar encuesta" />
                   </label>
+                  <div class="right-section-label">Forma</div>
+                  <div class="button-style-grid">
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'square'" type="button" (click)="setButtonStyle('square')">Recto</button>
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'rounded'" type="button" (click)="setButtonStyle('rounded')">Suave</button>
+                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'pill'" type="button" (click)="setButtonStyle('pill')">Píldora</button>
+                  </div>
+                  <div class="right-section-label">Color</div>
                   <div class="control-row-pair">
                     <label class="color-control">
                       <span>Color fondo</span>
@@ -424,11 +422,7 @@
                       <input type="color" [ngModel]="currentButtonTextColor()" (ngModelChange)="updateButtonTextColor($event)" />
                     </label>
                   </div>
-                  <div class="button-style-grid">
-                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'square'" type="button" (click)="setButtonStyle('square')">Cuadrado</button>
-                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'rounded'" type="button" (click)="setButtonStyle('rounded')">Redondeado</button>
-                    <button class="button-style-card" [class.active]="brand().buttonStyle === 'pill'" type="button" (click)="setButtonStyle('pill')">Píldora</button>
-                  </div>
+                  <div class="right-section-label">Bordes</div>
                   <label class="slider-control">
                     <span>Radio botón: {{ buttonRadius() }}px</span>
                     <input type="range" min="0" max="40" [ngModel]="buttonRadius()" (ngModelChange)="updateButtonRadius($event)" />
@@ -442,11 +436,8 @@
 
               @if (customTab === 'typography') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Tipografía</h4>
-                  <p class="subtab-desc">Experimenta con combinaciones profesionales.</p>
-
                   <div class="typography-innovation-wrap">
-                    <h5 class="innovation-label">Combinaciones Mágicas</h5>
+                    <h5 class="innovation-label">Combinaciones recomendadas</h5>
                     <div class="pairing-scroll">
                       @for (pair of fontPairings; track pair.name) {
                         <div class="pairing-item-card" 
@@ -466,7 +457,7 @@
 
                     <div class="innovation-divider"></div>
 
-                    <h5 class="innovation-label">Explorar Fuentes</h5>
+                    <h5 class="innovation-label">Explorar fuentes</h5>
                     <div class="font-category-chips">
                       @for (cat of ['All', 'Sans', 'Serif', 'Display']; track cat) {
                         <button class="cat-chip" 
@@ -501,14 +492,77 @@
                         @for (f of fontPresets; track f.family) { <option [value]="f.family">{{ f.family }}</option> }
                       </select>
                     </label>
+
+                    <div class="innovation-divider"></div>
+                    <h5 class="innovation-label">Tamaños por elemento</h5>
+                    @if (activeSection() === 'welcome') {
+                      <div class="font-size-grid">
+                        <label class="font-size-control">
+                          <span>Título portada <b>{{ elementFontSize('welcome-title') }}px</b></span>
+                          <input type="range" min="28" max="92" [ngModel]="elementFontSize('welcome-title')" (ngModelChange)="updateElementFontSize('welcome-title', $event)" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Descripción <b>{{ elementFontSize('welcome-desc') }}px</b></span>
+                          <input type="range" min="13" max="30" [ngModel]="elementFontSize('welcome-desc')" (ngModelChange)="updateElementFontSize('welcome-desc', $event)" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Botón <b>{{ elementFontSize('welcome-cta') }}px</b></span>
+                          <input type="range" min="12" max="28" [ngModel]="elementFontSize('welcome-cta')" (ngModelChange)="updateElementFontSize('welcome-cta', $event)" />
+                        </label>
+                      </div>
+                    } @else if (activeSection() === 'questions') {
+                      <div class="font-size-grid">
+                        <label class="font-size-control">
+                          <span>Pregunta <b>{{ elementFontSize('question-title', activeQuestionIndex()) }}px</b></span>
+                          <input type="range" min="20" max="56" [ngModel]="elementFontSize('question-title', activeQuestionIndex())" (ngModelChange)="updateElementFontSize('question-title', $event, activeQuestionIndex())" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Ayuda <b>{{ elementFontSize('question-help', activeQuestionIndex()) }}px</b></span>
+                          <input type="range" min="12" max="24" [ngModel]="elementFontSize('question-help', activeQuestionIndex())" (ngModelChange)="updateElementFontSize('question-help', $event, activeQuestionIndex())" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Respuestas <b>{{ elementFontSize('question-answer', activeQuestionIndex()) }}px</b></span>
+                          <input type="range" min="13" max="28" [ngModel]="elementFontSize('question-answer', activeQuestionIndex())" (ngModelChange)="updateElementFontSize('question-answer', $event, activeQuestionIndex())" />
+                        </label>
+                      </div>
+                    } @else {
+                      <div class="font-size-grid">
+                        <label class="font-size-control">
+                          <span>Título final <b>{{ elementFontSize('end-title') }}px</b></span>
+                          <input type="range" min="24" max="76" [ngModel]="elementFontSize('end-title')" (ngModelChange)="updateElementFontSize('end-title', $event)" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Mensaje final <b>{{ elementFontSize('end-desc') }}px</b></span>
+                          <input type="range" min="13" max="30" [ngModel]="elementFontSize('end-desc')" (ngModelChange)="updateElementFontSize('end-desc', $event)" />
+                        </label>
+                        <label class="font-size-control">
+                          <span>Resumen <b>{{ elementFontSize('end-summary') }}px</b></span>
+                          <input type="range" min="11" max="22" [ngModel]="elementFontSize('end-summary')" (ngModelChange)="updateElementFontSize('end-summary', $event)" />
+                        </label>
+                      </div>
+                    }
                   </div>
                 </div>
               }
 
               @if (customTab === 'effects') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Efectos visuales</h4>
-                  <p class="subtab-desc">Añade efectos premium a tus tarjetas.</p>
+                  <label class="font-control">
+                    <span>Formato de preguntas</span>
+                    <div class="button-style-grid">
+                      <button class="button-style-card" [class.active]="brand().questionStyle === 'classic'" type="button" (click)="applyQuestionStyleTemplate('classic')">Lista</button>
+                      <button class="button-style-card" [class.active]="brand().questionStyle === 'boxed'" type="button" (click)="applyQuestionStyleTemplate('boxed')">Tarjetas</button>
+                      <button class="button-style-card" [class.active]="brand().questionStyle === 'compact'" type="button" (click)="applyQuestionStyleTemplate('compact')">Compacto</button>
+                    </div>
+                  </label>
+                  <label class="font-control">
+                    <span>Sombra</span>
+                    <div class="shadow-grid">
+                      @for (sp of shadowPresets; track sp.value) {
+                        <button class="shadow-btn" [class.active]="currentShadow() === sp.value" type="button" (click)="setShadowPreset($any(sp.value))">{{ sp.label }}</button>
+                      }
+                    </div>
+                  </label>
                   <div class="effects-toggles">
                     <label class="effect-toggle">
                       <input type="checkbox" [checked]="isGlassActive()" (change)="toggleGlass()" />
@@ -526,14 +580,6 @@
                     </label>
                   </div>
                   <label class="font-control">
-                    <span>Sombra</span>
-                    <div class="shadow-grid">
-                      @for (sp of shadowPresets; track sp.value) {
-                        <button class="shadow-btn" [class.active]="currentShadow() === sp.value" type="button" (click)="setShadowPreset($any(sp.value))">{{ sp.label }}</button>
-                      }
-                    </div>
-                  </label>
-                  <label class="font-control">
                     <span>Animación</span>
                     <div class="shadow-grid">
                       @for (ap of animationPresets; track ap.value) {
@@ -542,7 +588,7 @@
                     </div>
                   </label>
                   <div class="effect-divider"></div>
-                  <h4 class="subtab-title">Barra de progreso</h4>
+                  <div class="right-section-label">Barra de progreso</div>
                   <label class="effect-toggle">
                     <input type="checkbox" [checked]="progressBarConfig().enabled" (change)="toggleProgressBar()" />
                     <span class="effect-toggle-label">
@@ -565,17 +611,11 @@
 
               @if (customTab === 'media') {
                 <div class="subtab-panel">
-                  <h4 class="subtab-title">Logo y decoración</h4>
-                  <p class="subtab-desc">Sube imágenes para tu encuesta.</p>
+                  <div class="right-section-label">Marca</div>
                   <input type="file" id="upload-logo" accept="image/*" (change)="onLogoSelected($event)" style="display:none" />
                   <button class="upload-btn" type="button" (click)="triggerFileInput('upload-logo')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Subir logo
-                  </button>
-                  <input type="file" id="upload-welcome-deco" accept="image/*" (change)="onWelcomeImageSelected($event)" style="display:none" />
-                  <button class="upload-btn" type="button" (click)="triggerFileInput('upload-welcome-deco')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                    Subir decoración
                   </button>
                   @if (brand().logoUrl) {
                     <label class="slider-control">
@@ -584,10 +624,16 @@
                     </label>
                     <button class="upload-btn upload-btn-danger" type="button" (click)="removeLogo()">Quitar logo</button>
                   }
-                  <p class="helper-copy">Arrastra el logo y las imágenes dentro de Bienvenida para posicionarlos.</p>
+                  <div class="right-section-label">Bienvenida</div>
+                  <input type="file" id="upload-welcome-deco" accept="image/*" (change)="onWelcomeImageSelected($event)" style="display:none" />
+                  <button class="upload-btn" type="button" (click)="triggerFileInput('upload-welcome-deco')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                    Subir decoración
+                  </button>
+                  
                   @if (activeSection() === 'questions') {
                     <div class="effect-divider"></div>
-                    <h4 class="subtab-title">Imagen de pregunta</h4>
+                    <div class="right-section-label">Imagen de pregunta</div>
                     <input type="file" id="upload-question-img" accept="image/*" (change)="onQuestionImageSelected($event)" style="display:none" />
                     <button class="upload-btn" type="button" (click)="triggerFileInput('upload-question-img')">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
@@ -599,7 +645,7 @@
                   }
                   @if (activeSection() === 'end') {
                     <div class="effect-divider"></div>
-                    <h4 class="subtab-title">Decoración final</h4>
+                    <div class="right-section-label">Decoración final</div>
                     <input type="file" id="upload-end-deco" accept="image/*" (change)="onEndImageSelected($event)" style="display:none" />
                     <button class="upload-btn" type="button" (click)="triggerFileInput('upload-end-deco')">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
@@ -616,57 +662,698 @@
     }
 
     @if (currentTab === 'preview') {
-      <div class="editor-stage preview-stage">
-        <div class="preview-device-frame" [class.preview-tablet]="previewDevice === 'tablet'" [class.preview-mobile]="previewDevice === 'mobile'">
-          <app-survey-simulator [survey]="s"></app-survey-simulator>
+      <div class="editor-stage public-preview-studio">
+        <section class="public-preview-workbench" [class.is-phone]="previewDevice === 'mobile'" [class.is-desktop]="previewDevice !== 'mobile'">
+          @if (previewDevice !== 'mobile') {
+            <div class="browser-preview-shell">
+              <div class="public-preview-surface">
+                <app-survey-simulator [survey]="s" [showUtilityToolbar]="false"></app-survey-simulator>
+              </div>
+            </div>
+          } @else {
+            <div class="phone-preview-shell">
+              <div class="phone-preview-frame">
+                <div class="phone-preview-island" aria-hidden="true"></div>
+                <div class="phone-preview-status" aria-hidden="true">
+                  <span>9:41</span>
+                  <span class="material-symbols-outlined">signal_cellular_alt</span>
+                </div>
+                <div class="phone-preview-screen">
+                  <app-survey-simulator [survey]="s" [showUtilityToolbar]="false"></app-survey-simulator>
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <div class="preview-floating-controls" aria-label="Controles de vista previa">
+          <div class="public-preview-segment">
+            <button type="button" [class.active]="previewDevice !== 'mobile'" (click)="setPreviewDevice('desktop')" title="Vista de computadora">
+              <span class="material-symbols-outlined">desktop_windows</span>
+              Computadora
+            </button>
+            <button type="button" [class.active]="previewDevice === 'mobile'" (click)="setPreviewDevice('mobile')" title="Vista de teléfono">
+              <span class="material-symbols-outlined">smartphone</span>
+              Teléfono
+            </button>
+          </div>
         </div>
       </div>
     }
 
     @if (currentTab === 'collect') {
-      <div class="editor-stage">
-        <div class="collect-grid">
-          <div class="collect-card collect-card-primary">
-            <span class="collect-label">Estado</span>
-            <h2>{{ s.status === 'activo' ? 'Encuesta activa' : 'Borrador' }}</h2>
-            <p>Comparte el enlace cuando termines de personalizar la bienvenida, colores, logo y botones.</p>
-            <div class="collect-actions">
-              <button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">Publicar</button>
-              <button class="editor-action-btn" type="button" (click)="copyShareLink()">Copiar enlace</button>
-            </div>
-          </div>
-          <div class="collect-card">
-            <span class="collect-label">Enlace público</span>
-            <div class="share-link-box">{{ getShareLink() }}</div>
-          </div>
-          <div class="collect-card">
-            <span class="collect-label">Resumen</span>
-            <ul class="collect-list">
-              <li>{{ getQuestionCountLabel() }}</li>
-              <li>{{ s.responses_count || 0 }} respuestas registradas</li>
-              <li>Última actualización: {{ s.updatedAt | date:'short' }}</li>
-            </ul>
-          </div>
+      <div class="editor-stage share-stage">
+        <div class="share-module-shell">
+          <aside class="share-module-sidebar">
+            <nav class="share-module-nav" aria-label="Herramientas de compartir">
+              @for (item of shareSections; track item.id) {
+                <button type="button" [class.active]="activeShareSection() === item.id" (click)="setActiveShareSection(item.id)">
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                  <span>
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.description }}</small>
+                  </span>
+                </button>
+              }
+            </nav>
+          </aside>
+
+          <main class="share-module-main">
+            @switch (activeShareSection()) {
+              @case ('dashboard') {
+                <section class="share-view share-saas-dashboard">
+                  <div class="share-saas-hero">
+                    <div>
+                      <h2>Survey distribution overview</h2>
+                      <p>Resumen general para publicar, compartir y medir la distribución de esta encuesta.</p>
+                    </div>
+                    <div class="share-hero-actions">
+                      <span class="share-status-pill" [class.share-status-live]="s.status === 'activo'">
+                        <span class="material-symbols-outlined">{{ s.status === 'activo' ? 'radio_button_checked' : 'edit_note' }}</span>
+                        {{ s.status === 'activo' ? 'Activa' : 'Borrador' }}
+                      </span>
+                      <button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">{{ s.status === 'activo' ? 'Actualizar' : 'Publicar' }}</button>
+                    </div>
+                  </div>
+                  <div class="share-saas-kpis">
+                    <div class="saas-kpi-card mint"><span class="material-symbols-outlined">forum</span><small>Respuestas</small><strong>{{ s.responses.length || s.responses_count || 0 }}</strong><em>Registradas</em></div>
+                    <div class="saas-kpi-card blue"><span class="material-symbols-outlined">help</span><small>Preguntas</small><strong>{{ s.questions.length }}</strong><em>{{ getQuestionCountLabel() }}</em></div>
+                    <div class="saas-kpi-card orange"><span class="material-symbols-outlined">view_carousel</span><small>Páginas</small><strong>{{ getSurveyPageCount() }}</strong><em>Flujo total</em></div>
+                    <div class="saas-kpi-card purple"><span class="material-symbols-outlined">fact_check</span><small>Checklist</small><strong>{{ getChecklistCompletion() }}%</strong><em>Completado</em></div>
+                  </div>
+
+                  <div class="share-saas-layout">
+                    <div class="share-saas-main">
+                      <div class="saas-card saas-link-card">
+                        <div class="saas-card-head">
+                          <div><span class="collect-label">Enlace principal</span><h3>Public survey link</h3></div>
+                          <button class="editor-action-btn" type="button" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">Abrir</button>
+                        </div>
+                        <div class="saas-link-input">
+                          <span class="material-symbols-outlined">link</span>
+                          <div>{{ s.status === 'activo' ? getShareLink() : 'Publica la encuesta para habilitar el enlace.' }}</div>
+                          <button type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar</button>
+                        </div>
+                        <div class="saas-link-stats">
+                          <span>Estado: <strong>{{ s.status === 'activo' ? 'Online' : 'Borrador' }}</strong></span>
+                          <span>Copias: <strong>{{ shareCopyHistory().length }}</strong></span>
+                          <span>Clicks: <strong>0</strong></span>
+                        </div>
+                      </div>
+
+                      <div class="saas-action-showcase">
+                        <button type="button" class="saas-action-card preview" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">
+                          <span class="material-symbols-outlined">visibility</span>
+                          <strong>Vista pública</strong>
+                          <small>Abre la experiencia final.</small>
+                        </button>
+                        <button type="button" class="saas-action-card qr" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">
+                          <span class="material-symbols-outlined">qr_code_2</span>
+                          <strong>Copiar QR</strong>
+                          <small>URL lista para diseño o impresión.</small>
+                        </button>
+                        <button type="button" class="saas-action-card settings" (click)="setActiveShareSection('settings')">
+                          <span class="material-symbols-outlined">tune</span>
+                          <strong>Publicación</strong>
+                          <small>Estado, acceso y fecha límite.</small>
+                        </button>
+                      </div>
+
+                      <div class="saas-card">
+                        <div class="saas-card-head">
+                          <div><span class="collect-label">Quick channels</span><h3>Canales rápidos</h3></div>
+                          <button class="saas-text-btn" type="button" (click)="setActiveShareSection('channels')">Ver todos</button>
+                        </div>
+                        <div class="saas-channel-grid">
+                          <button type="button" class="saas-channel-item whatsapp" (click)="openWhatsAppShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">chat</span><strong>WhatsApp</strong><small>Mensaje listo</small></button>
+                          <button type="button" class="saas-channel-item email" (click)="openEmailShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">mail</span><strong>Email</strong><small>Asunto y cuerpo</small></button>
+                          <button type="button" class="saas-channel-item embed" (click)="copyEmbedCode()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">integration_instructions</span><strong>Web Embed</strong><small>Iframe responsive</small></button>
+                          <button type="button" class="saas-channel-item copy" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">content_copy</span><strong>Texto listo</strong><small>Copiar mensaje</small></button>
+                        </div>
+                      </div>
+
+                      <div class="saas-card saas-campaign-card">
+                        <div class="saas-campaign-visual">
+                          <span class="material-symbols-outlined">campaign</span>
+                        </div>
+                        <div>
+                          <span class="collect-label">Siguiente mejor acción</span>
+                          <h3>{{ s.status === 'activo' ? 'Comparte el enlace con tu primer canal' : 'Publica para activar el kit de distribución' }}</h3>
+                          <p>{{ s.status === 'activo' ? 'Usa WhatsApp o Email para validar el flujo con una audiencia pequeña antes de difundirlo masivamente.' : 'Cuando la encuesta esté activa se habilitan link, QR, canales y vista pública.' }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <aside class="share-saas-side">
+                      <div class="saas-card saas-qr-card">
+                        <div class="saas-card-head"><div><span class="collect-label">Código QR</span><h3>Scan preview</h3></div><button class="saas-text-btn" type="button" (click)="setActiveShareSection('qr')">Editar</button></div>
+                        <div class="saas-qr-frame">
+                          @if (s.status === 'activo') {
+                            <img [src]="getQrCodeUrl()" [alt]="'QR de ' + s.title" loading="lazy">
+                          } @else {
+                            <span class="material-symbols-outlined">qr_code_2</span>
+                          }
+                        </div>
+                        <div class="qr-actions"><button class="editor-action-btn" type="button" (click)="openQrCode()" [disabled]="s.status !== 'activo'">Abrir QR</button><button class="editor-action-btn" type="button" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">Copiar</button></div>
+                      </div>
+
+                      <div class="saas-card saas-summary-card">
+                        <div class="saas-card-head"><div><span class="collect-label">Survey summary</span><h3>Resumen</h3></div></div>
+                        <div class="saas-summary-list">
+                          <div><span>Última actualización</span><strong>{{ s.updatedAt | date:'short' }}</strong></div>
+                          <div><span>Publicación</span><strong>{{ s.status === 'activo' ? 'Disponible' : 'Pendiente' }}</strong></div>
+                          <div><span>Conversión estimada</span><strong>{{ getQuickConversionRate() }}%</strong></div>
+                        </div>
+                      </div>
+
+                      <div class="saas-card saas-utility-card">
+                        <div class="saas-card-head"><div><span class="collect-label">Utilidades</span><h3>Herramientas</h3></div></div>
+                        <button type="button" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">post_add</span> Copiar invitación</button>
+                        <button type="button" (click)="setActiveShareSection('link')"><span class="material-symbols-outlined">history</span> Ver historial</button>
+                        <button type="button" (click)="setActiveShareSection('qr')"><span class="material-symbols-outlined">print</span> Preparar impresión</button>
+                      </div>
+                    </aside>
+                  </div>
+                </section>
+              }
+              @case ('link') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Enlace de encuesta</span><h2>Link principal y estado</h2><p>Controla el enlace público, copia rápida y señales de uso.</p></div></div>
+                  <div class="share-two-column">
+                    <div class="share-panel share-premium-card" [class.share-panel-disabled]="s.status !== 'activo'">
+                      <div class="share-panel-head"><div><span class="collect-label">Link principal</span><h3>URL pública</h3></div><button class="editor-action-btn" type="button" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">Abrir</button></div>
+                      <div class="share-link-visual" aria-hidden="true">
+                        <div class="share-phone-mock">
+                          <span></span>
+                          <strong>{{ s.title || 'Encuesta' }}</strong>
+                          <i></i><i></i><i></i>
+                          <em>Comenzar</em>
+                        </div>
+                        <div class="share-link-route">
+                          <span class="material-symbols-outlined">link</span>
+                          <span class="material-symbols-outlined">arrow_forward</span>
+                          <span class="material-symbols-outlined">phone_iphone</span>
+                        </div>
+                      </div>
+                      <div class="share-link-row"><div class="share-link-value">{{ s.status === 'activo' ? getShareLink() : 'Publica la encuesta para habilitar el enlace.' }}</div><button class="editor-action-btn" type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar</button></div>
+                      <div class="share-mini-stat-row"><div><strong>{{ shareCopyHistory().length }}</strong><span>Copias</span></div><div><strong>{{ s.status === 'activo' ? 'Online' : 'Off' }}</strong><span>Estado</span></div><div><strong>0</strong><span>Clicks</span></div></div>
+                    </div>
+                    <div class="share-panel">
+                      <div class="share-panel-head"><div><span class="collect-label">Historial</span><h3>Copias recientes</h3></div></div>
+                      <div class="share-history-list">
+                        @for (entry of shareCopyHistory(); track entry) { <div>{{ entry }}</div> }
+                        @if (!shareCopyHistory().length) { <p>Aún no hay copias registradas en esta sesión.</p> }
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              }
+              @case ('qr') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Código QR</span><h2>Herramienta QR para eventos e impresos</h2><p>Genera un QR dedicado para piezas físicas, pantallas y material promocional.</p></div></div>
+                  <div class="qr-only-layout">
+                    <div class="share-panel qr-tool-preview qr-only-preview" [class.share-panel-disabled]="s.status !== 'activo'">
+                      <div class="qr-frame-large">
+                        @if (s.status === 'activo') {
+                          <img [src]="getQrCodeUrl()" [alt]="'QR de ' + s.title" loading="lazy">
+                        } @else {
+                          <span class="material-symbols-outlined">qr_code_2</span>
+                          <p>Publica la encuesta para generar el QR.</p>
+                        }
+                      </div>
+                      <div class="qr-only-caption">
+                        <strong>{{ qrCtaText() }}</strong>
+                        <small>{{ s.title || 'Encuesta' }}</small>
+                      </div>
+                      <div class="qr-actions">
+                        <button class="editor-action-btn" type="button" (click)="openQrCode()" [disabled]="s.status !== 'activo'">Abrir QR</button>
+                        <button class="editor-action-btn" type="button" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">Copiar QR</button>
+                        <button class="editor-action-btn" type="button" (click)="copyQrCampaignKit()" [disabled]="s.status !== 'activo'">Copiar kit</button>
+                        <button class="editor-action-btn" type="button" (click)="exportQrCampaignKit()" [disabled]="s.status !== 'activo'">Exportar kit</button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              }
+              @case ('channels') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Canales rápidos</span><h2>Enviar por canales frecuentes</h2><p>Cards accionables para compartir sin salir del flujo de trabajo.</p></div></div>
+                  <div class="share-channel-dashboard">
+                    <button class="share-channel-card accent-copy" type="button" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">post_add</span><strong>Texto listo</strong><small>Mensaje con título y enlace.</small><em>Usar</em></button>
+                    <button class="share-channel-card accent-whatsapp" type="button" (click)="openWhatsAppShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">chat</span><strong>WhatsApp</strong><small>Abre una conversación prellenada.</small><em>Usar</em></button>
+                    <button class="share-channel-card accent-email" type="button" (click)="openEmailShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">mail</span><strong>Email</strong><small>Asunto y cuerpo preparados.</small><em>Usar</em></button>
+                    <button class="share-channel-card accent-link" type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">link</span><strong>Link rápido</strong><small>Copia solo la URL pública.</small><em>Usar</em></button>
+                  </div>
+                </section>
+              }
+              @case ('embed') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Embed / Insertar web</span><h2>Embed web</h2><p>Código iframe, preview y recomendaciones responsive.</p></div><button class="editor-action-btn" type="button" (click)="copyEmbedCode()" [disabled]="s.status !== 'activo'">Copiar iframe</button></div>
+                  <div class="embed-tool-grid">
+                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Código iframe</span><h3>Listo para pegar</h3></div></div><pre class="embed-code-box">{{ getEmbedCode() }}</pre></div>
+                    <div class="share-panel embed-preview-card"><div class="share-panel-head"><div><span class="collect-label">Vista previa</span><h3>Contenedor responsive</h3></div></div><div class="embed-preview-box"><app-survey-simulator [survey]="s" [showUtilityToolbar]="false"></app-survey-simulator></div></div>
+                  </div>
+                </section>
+              }
+              @case ('checklist') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Checklist</span><h2>Checklist</h2><p>Revisa errores, recomendaciones y buenas prácticas.</p></div><strong class="share-score-pill">{{ getChecklistCompletion() }}% listo</strong></div>
+                  <div class="share-checklist-grid">
+                    @for (item of getChecklistItems(s); track item.label) {
+                      <div class="share-check-item" [class.ok]="item.ok"><span class="material-symbols-outlined">{{ item.ok ? 'check_circle' : 'error' }}</span><div><strong>{{ item.label }}</strong><p>{{ item.detail }}</p></div></div>
+                    }
+                  </div>
+                </section>
+              }
+              @case ('analytics') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Métricas</span><h2>Métricas de distribución</h2><p>Métricas inmediatas para distribución y conversión.</p></div></div>
+                  <div class="share-metric-grid analytics-grid">
+                    <div class="share-metric-card"><span>Preguntas</span><strong>{{ s.questions.length }}</strong><small>Total</small></div>
+                    <div class="share-metric-card"><span>Páginas</span><strong>{{ getSurveyPageCount() }}</strong><small>Flujo</small></div>
+                    <div class="share-metric-card"><span>Respuestas</span><strong>{{ s.responses.length || s.responses_count || 0 }}</strong><small>Recibidas</small></div>
+                    <div class="share-metric-card"><span>Escaneos QR</span><strong>0</strong><small>Sin tracking externo</small></div>
+                    <div class="share-metric-card"><span>Clicks enlace</span><strong>0</strong><small>Sin tracking externo</small></div>
+                    <div class="share-metric-card"><span>Conversión</span><strong>{{ getQuickConversionRate() }}%</strong><small>Estimación local</small></div>
+                  </div>
+                  <div class="share-progress-panel"><span>Progreso de captación</span><div><i [style.width.%]="getQuickConversionRate()"></i></div></div>
+                </section>
+              }
+              @case ('settings') {
+                <section class="share-view">
+                  <div class="share-view-header"><div><span class="collect-label">Configuración de publicación</span><h2>Acceso, estado y seguridad</h2><p>Controles principales para abrir, pausar o preparar la encuesta.</p></div></div>
+                  <div class="settings-dashboard-grid">
+                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Estado</span><h3>{{ s.status === 'activo' ? 'Encuesta activa' : 'Encuesta en borrador' }}</h3></div></div><div class="share-action-row"><button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">{{ s.status === 'activo' ? 'Actualizar publicación' : 'Activar encuesta' }}</button>@if (s.status === 'activo') { <button class="editor-action-btn danger-btn" type="button" (click)="unpublish()" [disabled]="isSaving()">Desactivar</button> }</div></div>
+                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Acceso</span><h3>Visibilidad</h3></div></div><div class="segmented-setting"><button type="button" [class.active]="publicationAccess() === 'public'" (click)="updatePublicationAccess('public')">Público</button><button type="button" [class.active]="publicationAccess() === 'private'" (click)="updatePublicationAccess('private')">Privado</button></div><label class="share-setting-control"><span>Fecha límite</span><input type="date" [ngModel]="publicationDeadline()" (ngModelChange)="updatePublicationDeadline($event)"></label></div>
+                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Seguridad</span><h3>Buenas prácticas</h3></div></div><div class="publication-map" aria-hidden="true"><span class="material-symbols-outlined">verified_user</span><i></i><span class="material-symbols-outlined">public</span><i></i><span class="material-symbols-outlined">analytics</span></div><div class="share-advice-box"><strong>Configuración avanzada</strong><p>Antes de compartir masivamente, valida el preview, el enlace público y el checklist. Las reglas de acceso avanzadas pueden conectarse al backend cuando esté disponible.</p></div></div>
+                  </div>
+                </section>
+              }
+            }
+          </main>
         </div>
       </div>
     }
 
     @if (currentTab === 'analyze') {
-      <div class="editor-stage">
-        <div class="collect-grid">
-          <div class="collect-card collect-card-primary">
-            <span class="collect-label">Analíticas</span>
-            <h2>{{ s.responses.length || s.responses_count || 0 }} respuestas</h2>
-            <p>Revisa el comportamiento de la encuesta en el panel detallado.</p>
-            <div class="collect-actions">
-              <button class="editor-publish-btn" type="button" (click)="goToAnalytics()">Abrir analíticas</button>
+      <div class="editor-stage inline-analytics-stage">
+          <div class="inline-results-dashboard">
+            <aside class="inline-results-sidebar" aria-label="Dashboard de resultados">
+              <nav class="inline-results-nav" aria-label="Secciones de resultados">
+                @for (section of resultsSections; track section.id) {
+                  <button type="button" [class.active]="activeResultsSection() === section.id" (click)="setActiveResultsSection(section.id)">
+                    <span class="material-symbols-outlined">{{ section.icon }}</span>
+                    <strong>{{ section.label }}</strong>
+                    <small>{{ section.description }}</small>
+                  </button>
+                }
+              </nav>
+            </aside>
+
+            <div class="inline-results-content">
+              <header class="inline-analytics-header">
+                <div>
+                  <span class="collect-label">Resultados y análisis</span>
+                  <h2>{{ s.title || 'Encuesta' }}</h2>
+                  <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} respuestas registradas · Última respuesta: {{ latestResponseDate() }}</p>
+                </div>
+                <div class="inline-analytics-actions">
+                  <button type="button" (click)="exportInlineAnalyticsCSV()">
+                    <span class="material-symbols-outlined">download</span>
+                    CSV
+                  </button>
+                  <button type="button" (click)="exportInlineAnalyticsExcel()">Excel</button>
+                  <button type="button" (click)="printInlineAnalytics()">PDF</button>
+                </div>
+              </header>
+
+          @if (activeResultsSection() === 'analysis') {
+          @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
+            <section class="inline-empty-premium">
+              <div class="inline-empty-visual">
+                <span class="material-symbols-outlined">query_stats</span>
+              </div>
+              <div>
+                <span class="collect-label">Sin respuestas todavía</span>
+                <h3>Empieza a recolectar para activar el análisis</h3>
+                <p>Comparte el enlace o QR de la encuesta. Cuando lleguen respuestas, verás métricas, tendencias, tabla de respuestas y análisis por pregunta aquí mismo.</p>
+                <div class="inline-empty-actions">
+                  <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
+                  <button type="button" class="editor-action-btn" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar enlace</button>
+                </div>
+              </div>
+            </section>
+          } @else {
+            @if (analyticsMetrics(); as m) {
+              <div class="inline-metrics-grid">
+                <div class="inline-metric-card primary">
+                  <span class="material-symbols-outlined">mark_email_read</span>
+                  <strong>{{ m.totalResponses | number }}</strong>
+                  <small>Total respuestas</small>
+                  <em>Histórico completo</em>
+                </div>
+                <div class="inline-metric-card success">
+                  <span class="material-symbols-outlined">task_alt</span>
+                  <strong>{{ m.completionRate }}%</strong>
+                  <small>Tasa de completado</small>
+                  <em>{{ m.completionRate >= 70 ? 'Buen estado' : 'Revisar fricción' }}</em>
+                </div>
+                <div class="inline-metric-card blue">
+                  <span class="material-symbols-outlined">timer</span>
+                  <strong>{{ m.avgDurationFormatted }}</strong>
+                  <small>Tiempo promedio</small>
+                  <em>{{ m.avgDuration > 180 ? 'Algo largo' : 'Rápido' }}</em>
+                </div>
+                <div class="inline-metric-card orange">
+                  <span class="material-symbols-outlined">bar_chart</span>
+                  <strong>{{ m.npsScore > 0 ? '+' : '' }}{{ m.npsScore }}</strong>
+                  <small>NPS score</small>
+                  <em>{{ m.npsScore > 0 ? 'Positivo' : m.npsScore < 0 ? 'Negativo' : 'Neutral' }}</em>
+                </div>
+              </div>
+            }
+
+            <div class="inline-charts-grid">
+              <section class="inline-chart-card">
+                <div class="inline-card-head">
+                  <div>
+                    <span class="collect-label">Últimos 7 días</span>
+                    <h3>Respuestas por día</h3>
+                  </div>
+                </div>
+                <div class="inline-bar-chart">
+                  @for (item of dailyResponses(); track item.label) {
+                    <div class="inline-bar-group">
+                      <span>{{ item.count }}</span>
+                      <div><i [style.height.%]="(item.count / maxDailyResponses()) * 100"></i></div>
+                      <small>{{ item.label }}</small>
+                    </div>
+                  }
+                </div>
+              </section>
+
+              <section class="inline-chart-card">
+                <div class="inline-card-head">
+                  <div>
+                    <span class="collect-label">Tendencia</span>
+                    <h3>Últimos 14 días</h3>
+                  </div>
+                </div>
+                <div class="inline-trend-chart">
+                  @for (val of responseTrend().data; track $index) {
+                    <div>
+                      <span [style.height.%]="(val / maxTrendResponses()) * 100"></span>
+                      <small>{{ responseTrend().labels[$index] }}</small>
+                    </div>
+                  }
+                </div>
+              </section>
+            </div>
+
+          <section class="inline-question-analysis">
+            <div class="inline-card-head">
+              <div>
+                <span class="collect-label">Análisis por pregunta</span>
+                <h3>Distribución de respuestas</h3>
+              </div>
+              @if (selectedQuestionDistribution().length > 0) {
+                <div class="question-chart-switch" aria-label="Vista de gráfica">
+                  <button type="button" [class.active]="questionChartView() === 'bars'" (click)="setQuestionChartView('bars')">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Barras
+                  </button>
+                  <button type="button" [class.active]="questionChartView() === 'donut'" (click)="setQuestionChartView('donut')">
+                    <span class="material-symbols-outlined">donut_large</span>
+                    Dona
+                  </button>
+                  <button type="button" [class.active]="questionChartView() === 'ranking'" (click)="setQuestionChartView('ranking')">
+                    <span class="material-symbols-outlined">leaderboard</span>
+                    Ranking
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (s.questions.length > 0) {
+              <div class="inline-question-tabs">
+                @for (q of s.questions; track q.id; let i = $index) {
+                  <button type="button" [class.active]="selectedAnalyticsQuestionId() === q.id" (click)="selectAnalyticsQuestion(q.id)">
+                    <span>{{ i + 1 }}</span>
+                    <strong>{{ q.text || 'Pregunta ' + (i + 1) }}</strong>
+                  </button>
+                }
+              </div>
+
+              @if (selectedQuestionDistribution().length > 0) {
+                <div class="inline-distribution-card">
+                  <h4>{{ selectedAnalyticsQuestionText() }}</h4>
+                  @if (questionChartView() === 'bars') {
+                    <div class="question-bars-view">
+                      @for (item of selectedQuestionDistribution(); track item.label) {
+                        <div class="inline-dist-row">
+                          <span>{{ item.label }}</span>
+                          <div><i [style.width.%]="item.percentage"></i></div>
+                          <strong>{{ item.count }}</strong>
+                          <em>{{ item.percentage }}%</em>
+                        </div>
+                      }
+                    </div>
+                  } @else if (questionChartView() === 'donut') {
+                    <div class="question-donut-view">
+                      <div class="question-donut-chart" [style.background]="questionDonutGradient()" aria-hidden="true">
+                        <strong>{{ selectedQuestionDistribution()[0].percentage }}%</strong>
+                        <small>{{ selectedQuestionDistribution()[0].label }}</small>
+                      </div>
+                      <div class="question-donut-legend">
+                        @for (item of selectedQuestionDistribution(); track item.label; let i = $index) {
+                          <div>
+                            <i [style.--index]="i"></i>
+                            <span>{{ item.label }}</span>
+                            <strong>{{ item.count }}</strong>
+                            <em>{{ item.percentage }}%</em>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="question-ranking-view">
+                      @for (item of selectedQuestionDistribution(); track item.label; let i = $index) {
+                        <article>
+                          <span>{{ i + 1 }}</span>
+                          <div>
+                            <strong>{{ item.label }}</strong>
+                            <small>{{ item.count }} respuesta{{ item.count === 1 ? '' : 's' }}</small>
+                          </div>
+                          <em>{{ item.percentage }}%</em>
+                        </article>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else if (selectedTextResponses().length > 0) {
+                <div class="inline-text-responses">
+                  <div class="inline-text-head">
+                    <div>
+                      <h4>{{ selectedAnalyticsQuestionText() }}</h4>
+                      <p>{{ selectedTextResponses().length }} respuestas de texto</p>
+                    </div>
+                    <input type="search" [ngModel]="analyticsTextSearch()" (ngModelChange)="updateAnalyticsTextSearch($event)" placeholder="Buscar texto..." />
+                  </div>
+                  <div>
+                    @for (text of selectedTextResponses(); track $index) {
+                      <article>{{ text }}</article>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="inline-empty-analytics">
+                  <span class="material-symbols-outlined">insights</span>
+                  <strong>Sin datos para esta pregunta</strong>
+                  <p>Cuando lleguen respuestas, el análisis aparecerá aquí.</p>
+                </div>
+              }
+            } @else {
+              <div class="inline-empty-analytics">
+                <span class="material-symbols-outlined">help</span>
+                <strong>No hay preguntas todavía</strong>
+                <p>Agrega preguntas para poder analizar resultados.</p>
+              </div>
+            }
+          </section>
+            <section class="inline-responses-table">
+              <div class="inline-card-head">
+                <div>
+                  <span class="collect-label">Respuestas recientes</span>
+                  <h3>Últimos envíos</h3>
+                </div>
+              </div>
+              <div class="inline-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Nombre</th>
+                      <th>Email</th>
+                      <th>Duración</th>
+                      <th>Estado</th>
+                      <th>Vista rápida</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (response of recentAnalyticsResponses(); track response.id) {
+                      <tr>
+                        <td>{{ response.completedAt | date:'short' }}</td>
+                        <td>{{ responseParticipantValue(response, 'name') || 'Sin nombre' }}</td>
+                        <td>{{ responseParticipantValue(response, 'email') || 'Sin email' }}</td>
+                        <td>{{ response.duration }}s</td>
+                        <td><span class="inline-status-pill">{{ responseCompletionLabel(response) }}</span></td>
+                        <td>{{ responseAnswerPreview(response) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+          } @else if (activeResultsSection() === 'responses') {
+            @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
+              <section class="inline-empty-premium">
+                <div class="inline-empty-visual">
+                  <span class="material-symbols-outlined">fact_check</span>
+                </div>
+                <div>
+                  <span class="collect-label">Respuestas individuales</span>
+                  <h3>Aún no hay envíos para revisar</h3>
+                  <p>Cuando una persona complete la encuesta, aquí podrás abrir su respuesta completa sin salir del editor.</p>
+                  <div class="inline-empty-actions">
+                    <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
+                    <button type="button" class="editor-action-btn" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar enlace</button>
+                  </div>
+                </div>
+              </section>
+            } @else {
+              <section class="inline-response-workspace">
+                <aside class="inline-response-list">
+                  <div class="inline-card-head">
+                    <div>
+                      <span class="collect-label">Bandeja</span>
+                      <h3>{{ analyticsResponsesList().length }} envíos</h3>
+                    </div>
+                  </div>
+                  <div class="inline-response-items">
+                    @for (response of analyticsResponsesList(); track response.id; let i = $index) {
+                      <button type="button" [class.active]="selectedIndividualResponse()?.id === response.id" (click)="selectIndividualResponse(response.id)">
+                        <span>#{{ i + 1 }}</span>
+                        <strong>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</strong>
+                        <small>{{ response.completedAt | date:'short' }} · {{ response.duration }}s</small>
+                        <em>{{ responseCompletionLabel(response) }}</em>
+                      </button>
+                    }
+                  </div>
+                </aside>
+
+                @if (selectedIndividualResponse(); as response) {
+                  <article class="inline-response-detail">
+                    <div class="inline-response-detail-head">
+                      <div>
+                        <span class="collect-label">Respuesta #{{ selectedIndividualResponseIndex() }}</span>
+                        <h3>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</h3>
+                        <p>{{ responseParticipantValue(response, 'email') || 'Sin email' }} · {{ response.completedAt | date:'medium' }}</p>
+                      </div>
+                      <div class="inline-response-score">
+                        <strong>{{ individualResponseAnsweredCount(response) }}/{{ s.questions.length }}</strong>
+                        <small>preguntas respondidas</small>
+                      </div>
+                    </div>
+
+                    <div class="inline-response-meta-grid">
+                      <div>
+                        <span class="material-symbols-outlined">timer</span>
+                        <small>Duración</small>
+                        <strong>{{ response.duration }}s</strong>
+                      </div>
+                      <div>
+                        <span class="material-symbols-outlined">task_alt</span>
+                        <small>Estado</small>
+                        <strong>{{ responseCompletionLabel(response) }}</strong>
+                      </div>
+                      <div>
+                        <span class="material-symbols-outlined">schedule</span>
+                        <small>Fecha</small>
+                        <strong>{{ response.completedAt | date:'shortDate' }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="inline-answer-stack">
+                      @for (answer of individualResponseAnswers(response); track answer.question.id) {
+                        <section [class.missing]="!answer.answered">
+                          <span>{{ answer.index }}</span>
+                          <div>
+                            <h4>{{ answer.question.text || 'Pregunta ' + answer.index }}</h4>
+                            @if (answer.question.description) {
+                              <small>{{ answer.question.description }}</small>
+                            }
+                            <p>{{ answer.value }}</p>
+                          </div>
+                        </section>
+                      }
+                    </div>
+                  </article>
+                }
+              </section>
+            }
+          } @else {
+            <section class="inline-report-preview">
+              <div class="inline-report-hero">
+                <span class="material-symbols-outlined">auto_awesome</span>
+                <div>
+                  <span class="collect-label">Próximamente</span>
+                  <h3>Informe automático de resultados</h3>
+                  <p>Este espacio quedará listo para generar un análisis narrativo de la encuesta, detectar patrones, resumir hallazgos y preparar un informe descargable.</p>
+                </div>
+              </div>
+              <div class="inline-report-grid">
+                <article>
+                  <span class="material-symbols-outlined">psychology</span>
+                  <strong>Análisis asistido</strong>
+                  <p>Resumen de tendencias, alertas y oportunidades a partir de las respuestas.</p>
+                </article>
+                <article>
+                  <span class="material-symbols-outlined">summarize</span>
+                  <strong>Informe ejecutivo</strong>
+                  <p>Documento listo para presentar con conclusiones, métricas y próximos pasos.</p>
+                </article>
+                <article>
+                  <span class="material-symbols-outlined">manage_search</span>
+                  <strong>Lectura por pregunta</strong>
+                  <p>Interpretación automática de preguntas abiertas y cerradas.</p>
+                </article>
+              </div>
+            </section>
+          }
             </div>
           </div>
-        </div>
       </div>
     }
   }
 </div>
+
+@if (saveError() || infoMessage()) {
+  <div class="editor-toast-stack" aria-live="polite">
+    @if (saveError()) {
+      <div class="editor-toast editor-toast-error">
+        <span class="material-symbols-outlined">error</span>
+        <p>{{ saveError() }}</p>
+      </div>
+    }
+    @if (infoMessage()) {
+      <div class="editor-toast editor-toast-info">
+        <span class="material-symbols-outlined">check_circle</span>
+        <p>{{ infoMessage() }}</p>
+      </div>
+    }
+  </div>
+}
 
 @if (contextMenuVisible) {
   <div class="context-menu-backdrop" (click)="hideContextMenu()" (contextmenu)="hideContextMenu(); $event.preventDefault()"></div>
@@ -678,13 +1365,6 @@
       </button>
       <button class="context-menu-item" (click)="duplicateQuestion(activeQuestionIndex()); hideContextMenu()">
         <i class="ctx-icon ph ph-copy"></i> Duplicar pregunta
-      </button>
-      <div class="context-menu-divider"></div>
-      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex(), -1); hideContextMenu()" [disabled]="activeQuestionIndex() === 0">
-        <i class="ctx-icon ph ph-arrow-up"></i> Mover arriba
-      </button>
-      <button class="context-menu-item" (click)="moveQuestion(activeQuestionIndex(), 1); hideContextMenu()" [disabled]="activeQuestionIndex() === s.questions.length - 1">
-        <i class="ctx-icon ph ph-arrow-down"></i> Mover abajo
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item context-menu-danger" (click)="removeQuestion(activeQuestionIndex()); hideContextMenu()">
@@ -701,21 +1381,254 @@
       <div>
         <span class="add-question-eyebrow">Nueva pregunta</span>
         <h2>Elige el tipo de pregunta</h2>
-        <p>Selecciona una opcion para agregarla al flujo actual de la encuesta.</p>
+        <p>Selecciona una opción para agregarla al flujo actual de la encuesta.</p>
       </div>
       <button class="template-close-btn" type="button" (click)="addQuestionPanel = false" aria-label="Cerrar">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div class="add-q-grid add-q-modal-grid">
-      @for (qt of questionTypes; track qt.type) {
-        <button class="add-q-type-btn" type="button" (click)="addQuestion(qt.type)">
-          <span class="add-q-type-name">{{ qt.label }}</span>
-          <span class="add-q-type-desc">{{ qt.description }}</span>
-        </button>
+    <div class="add-question-categories">
+      @for (group of questionTypeGroups; track group.name) {
+        <section class="add-question-category">
+          <h3>{{ group.name }}</h3>
+          <div class="add-q-grid add-q-modal-grid">
+            @for (qt of group.items; track qt.type) {
+              <button class="add-q-type-btn" type="button" (click)="addQuestion(qt.type)">
+                <span class="add-q-icon material-symbols-outlined">{{ qt.icon }}</span>
+                <span>
+                  <span class="add-q-type-name">{{ qt.label }}</span>
+                  <span class="add-q-type-desc">{{ qt.description }}</span>
+                </span>
+              </button>
+            }
+          </div>
+        </section>
       }
     </div>
   </div>
+}
+
+@if (logicModalOpen && currentQuestion(); as q) {
+  <div class="logic-modal-backdrop" (click)="closeLogicModal()"></div>
+  <section class="logic-modal" role="dialog" aria-modal="true" aria-label="Saltos de pregunta y lógica en la encuesta">
+    <button class="logic-close-btn" type="button" (click)="closeLogicModal()" aria-label="Cerrar">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <aside class="logic-info-panel">
+      <h2>Saltos de pregunta y lógica en la encuesta</h2>
+      <p>
+        Define caminos inteligentes segun cada respuesta. Puedes enviar a la persona a otra pregunta,
+        a una página o cerrar la encuesta cuando una opción cumple una condición.
+      </p>
+      <svg class="logic-flow-graphic" fill="none" viewBox="0 0 200 80" aria-hidden="true">
+        <path d="M10 40 C 50 40, 50 10, 100 10 S 150 70, 190 70" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+        <circle cx="10" cy="40" r="4" fill="currentColor"></circle>
+        <circle cx="100" cy="10" r="4" fill="currentColor"></circle>
+        <circle cx="190" cy="70" r="4" fill="currentColor"></circle>
+      </svg>
+    </aside>
+
+    <div class="logic-content-panel">
+      <header class="logic-question-head">
+        <span>{{ activeQuestionIndex() + 1 }}</span>
+        <div>
+          <small>Pregunta actual</small>
+          <h3>{{ q.text || 'Pregunta sin título' }}</h3>
+        </div>
+      </header>
+
+      @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+        <div class="logic-table-head">
+          <span>Respuesta</span>
+          <span>Saltar a</span>
+        </div>
+
+        <div class="logic-rows">
+          @for (option of q.options; track option.id) {
+            <div class="logic-row">
+              <div class="logic-answer-cell">
+                <span class="logic-radio"></span>
+                <strong>{{ option.texto || 'Opción sin texto' }}</strong>
+              </div>
+              <span class="logic-row-arrow material-symbols-outlined">arrow_forward</span>
+              <div class="logic-jump-cell">
+                <button class="logic-select-trigger" type="button" (click)="toggleLogicDestination(option.id)">
+                  {{ logicTargetLabel(logicTargetForOption(q, option.texto)) }}
+                  <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                </button>
+
+                @if (openLogicOptionId === option.id) {
+                  <div class="logic-destination-menu">
+                    <nav class="logic-destination-cats" aria-label="Categorias de salto">
+                      <button type="button" [class.active]="logicDestinationCategory === 'question'" (click)="setLogicDestinationCategory('question')">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        Pregunta
+                      </button>
+                      <button type="button" [class.active]="logicDestinationCategory === 'page'" (click)="setLogicDestinationCategory('page')">
+                        <span class="material-symbols-outlined">article</span>
+                        Página
+                      </button>
+                      <button type="button" [class.active]="logicDestinationCategory === 'web'" (click)="setLogicDestinationCategory('web')">
+                        <span class="material-symbols-outlined">link</span>
+                        Enlace del sitio web
+                      </button>
+                      <button type="button" [class.active]="logicDestinationCategory === 'end'" (click)="setLogicDestinationCategory('end')">
+                        <span class="material-symbols-outlined">flag</span>
+                        Final de la encuesta
+                      </button>
+                    </nav>
+
+                    <div class="logic-destination-list">
+                      @if (logicDestinationCategory === 'question') {
+                        <button type="button" (click)="updateOptionLogicTarget(activeQuestionIndex(), option.texto, '')">
+                          <span>0</span>
+                          Siguiente normal
+                        </button>
+                        @for (target of logicTargetQuestions(activeQuestionIndex()); track target.id; let ti = $index) {
+                          <button type="button" (click)="updateOptionLogicTarget(activeQuestionIndex(), option.texto, target.id)">
+                            <span>{{ activeQuestionIndex() + ti + 2 }}</span>
+                            {{ target.text || 'Pregunta ' + (activeQuestionIndex() + ti + 2) }}
+                          </button>
+                        }
+                      }
+
+                      @if (logicDestinationCategory === 'page') {
+                        <button type="button" (click)="updateOptionLogicTarget(activeQuestionIndex(), option.texto, '')">
+                          <span>1</span>
+                          Página 1
+                        </button>
+                        <button type="button" (click)="updateOptionLogicTarget(activeQuestionIndex(), option.texto, 'end')">
+                          <span>2</span>
+                          Página de salida
+                        </button>
+                      }
+
+                      @if (logicDestinationCategory === 'web') {
+                        <div class="logic-empty-state">
+                          <span class="material-symbols-outlined">lock</span>
+                          Los enlaces externos se configuran en una versión posterior.
+                        </div>
+                      }
+
+                      @if (logicDestinationCategory === 'end') {
+                        <button type="button" (click)="updateOptionLogicTarget(activeQuestionIndex(), option.texto, 'end')">
+                          <span class="material-symbols-outlined">flag</span>
+                          Final de la encuesta
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="logic-unavailable">
+          <span class="material-symbols-outlined">info</span>
+          La lógica de saltos está disponible para preguntas de selección.
+        </div>
+      }
+
+      <footer class="logic-modal-footer">
+        <button class="logic-reset-btn" type="button" (click)="resetLogicModal()">
+          <span class="material-symbols-outlined">restart_alt</span>
+          Restablecer
+        </button>
+        <button class="logic-save-btn" type="button" (click)="saveLogicModal()">
+          <span class="material-symbols-outlined">lock</span>
+          Guardar
+        </button>
+      </footer>
+    </div>
+  </section>
+}
+
+@if (questionEditorOpen && editingQuestion(); as q) {
+  <div class="question-editor-backdrop" (click)="closeQuestionEditor()"></div>
+  <section class="question-editor-modal" role="dialog" aria-modal="true" aria-label="Editor de pregunta">
+    <button class="question-editor-close" type="button" (click)="closeQuestionEditor()" aria-label="Cerrar">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <div class="question-pro-editor modal-mode">
+      <section class="question-pro-main">
+        <label class="question-pro-field">
+          <span>Pregunta</span>
+          <textarea [ngModel]="q.text" (ngModelChange)="updateQuestionText(editingQuestionIndex, $event)" rows="3" placeholder="Escribe tu pregunta..."></textarea>
+          @if (!q.text.trim()) {
+            <small class="question-inline-warning">Esta pregunta necesita un enunciado antes de publicar.</small>
+          }
+        </label>
+        <label class="question-pro-field">
+          <span>Descripción extra</span>
+          <textarea [ngModel]="q.description" (ngModelChange)="updateQuestionDescription(editingQuestionIndex, $event)" rows="2" placeholder="Texto de ayuda opcional..."></textarea>
+        </label>
+
+        <div class="question-media-bar">
+          <button type="button" (click)="triggerFileInput('upload-question-img')"><span class="material-symbols-outlined">image</span> Imagen</button>
+        </div>
+
+        <div class="question-pro-answers">
+          <div class="question-pro-label">Respuestas</div>
+          @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+            @for (option of q.options; track option.id; let oi = $index) {
+              <div class="question-pro-option">
+                <input type="text" [ngModel]="option.texto" (ngModelChange)="updateOption(editingQuestionIndex, oi, $event)" placeholder="Respuesta..." />
+                <button type="button" title="Eliminar respuesta" (click)="removeOption(editingQuestionIndex, oi)" [disabled]="q.options.length <= 2">
+                  <span class="material-symbols-outlined">more_horiz</span>
+                </button>
+              </div>
+            }
+            @if (choiceOptionCount(q) < 2) {
+              <small class="question-inline-warning">Agrega al menos dos respuestas válidas.</small>
+            }
+            <div class="question-pro-actions">
+              <button type="button" (click)="addOption(editingQuestionIndex)">Añadir respuesta</button>
+              <button type="button" (click)="addOtherOption(editingQuestionIndex)">Añadir "Otra" respuesta</button>
+            </div>
+          } @else {
+            <div class="question-pro-option muted">
+              <span>{{ q.type === 'long-text' ? 'Respuesta abierta larga' : 'Respuesta abierta' }}</span>
+              <span class="material-symbols-outlined">more_horiz</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <aside class="question-pro-preferences">
+        <label class="question-pref-control">
+          <span>Tipo de pregunta</span>
+          <div class="question-select-wrap">
+            <span class="material-symbols-outlined">tune</span>
+            <select [ngModel]="q.type" (ngModelChange)="changeQuestionType(editingQuestionIndex, $event)">
+              @for (qt of questionTypes; track qt.type) {
+                <option [value]="qt.type">{{ qt.label }}</option>
+              }
+            </select>
+          </div>
+        </label>
+        <label class="question-pref-control">
+          <span>Formato de visualización</span>
+          <div class="button-style-grid">
+            <button class="button-style-card" [class.active]="brand().questionStyle === 'classic'" type="button" (click)="applyQuestionStyleTemplate('classic')">Lista</button>
+            <button class="button-style-card" [class.active]="brand().questionStyle === 'boxed'" type="button" (click)="applyQuestionStyleTemplate('boxed')">Tarjetas</button>
+            <button class="button-style-card" [class.active]="brand().questionStyle === 'compact'" type="button" (click)="applyQuestionStyleTemplate('compact')">Compacto</button>
+          </div>
+        </label>
+        <label class="question-switch-row">
+          <span>Pregunta obligatoria</span>
+          <input type="checkbox" [checked]="q.required" (change)="toggleRequired(editingQuestionIndex)" />
+        </label>
+        <button class="question-logic-inline" type="button" (click)="openQuestionLogic(editingQuestionIndex)">
+          <span class="material-symbols-outlined">account_tree</span>
+          Saltos y lógica
+          <strong>{{ q.logic?.length || 0 }}</strong>
+        </button>
+        <button class="question-pro-save" type="button" (click)="saveQuestionEditor()">Guardar</button>
+      </aside>
+    </div>
+  </section>
 }
 
 @if (showPublishChecklist()) {
@@ -724,7 +1637,7 @@
     <div class="template-modal-header">
       <div>
         <h2 class="template-modal-title">Checklist antes de publicar</h2>
-        <p class="template-modal-desc">Revisa que la encuesta este lista antes de compartirla.</p>
+        <p class="template-modal-desc">Revisa que la encuesta esté lista antes de compartirla.</p>
       </div>
       <button class="template-close-btn" type="button" (click)="closePublishChecklist()">
         <span class="material-symbols-outlined">close</span>
@@ -746,30 +1659,222 @@
 
 @if (showTemplateModal) {
   <div class="template-modal-backdrop" (click)="showTemplateModal = false"></div>
-  <div class="template-modal">
-    <div class="template-modal-header">
-      <div>
-        <h2 class="template-modal-title">Catálogo de Plantillas</h2>
-        <p class="template-modal-desc">Elige una plantilla para comenzar rápido. Puedes personalizarla después.</p>
+  <div class="template-modal design-center-modal">
+    <header class="design-center-topbar">
+      <div class="design-center-brand">
+        <span class="material-symbols-outlined">dashboard_customize</span>
+        <strong>Centro de diseño</strong>
       </div>
-      <button class="template-close-btn" type="button" (click)="showTemplateModal = false">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+      <nav class="design-center-tabs" aria-label="Centro de diseño">
+        <button type="button" [class.active]="designCenterTab === 'combine'" (click)="designCenterTab = 'combine'">
+          Recetas
+        </button>
+        <button type="button" [class.active]="designCenterTab === 'base'" (click)="designCenterTab = 'base'">
+          Bases
+        </button>
+        <button type="button" [class.active]="designCenterTab === 'presentation'" (click)="designCenterTab = 'presentation'">
+          Inicio
+        </button>
+        <button type="button" [class.active]="designCenterTab === 'visual'" (click)="designCenterTab = 'visual'">
+          Visual
+        </button>
+        <button type="button" [class.active]="designCenterTab === 'questions'" (click)="designCenterTab = 'questions'">
+          Preguntas
+        </button>
+        <button type="button" [class.active]="designCenterTab === 'completion'" (click)="designCenterTab = 'completion'">
+          Final
+        </button>
+      </nav>
+
+      <button class="template-close-btn" type="button" (click)="showTemplateModal = false" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
       </button>
-    </div>
-    <div class="template-grid">
-      @for (tpl of templatePresets; track tpl.name; let ti = $index) {
-        <div class="template-card">
-          <div class="template-card-preview" [style.background]="tpl.brand.backgroundColor">
-            <div class="template-preview-dot" [style.background]="tpl.brand.primaryColor"></div>
-          </div>
-          <div class="template-card-body">
-            <span class="template-category">{{ tpl.category }}</span>
-            <h3 class="template-name">{{ tpl.name }}</h3>
-            <p class="template-desc">{{ tpl.description }}</p>
-            <button class="template-use-btn" (click)="applyTemplate(ti)">Usar esta plantilla</button>
+    </header>
+
+    <main class="design-center-canvas">
+      <div class="design-center-content">
+        <div class="design-center-heading">
+          <h2>
+            @switch (designCenterTab) {
+              @case ('combine') { Explorar recetas }
+              @case ('base') { Explorar bases }
+              @case ('presentation') { Pantalla de inicio }
+              @case ('visual') { Estilos visuales }
+              @case ('questions') { Diseño de preguntas }
+              @case ('completion') { Pantalla final }
+            }
+          </h2>
+          <p>
+            @switch (designCenterTab) {
+              @case ('combine') { Selecciona un punto de partida completo para el diseño sin reemplazar tus preguntas actuales. }
+              @case ('base') { Elige una estructura con preguntas listas para editar. Esta opción reemplaza el contenido actual. }
+              @case ('presentation') { Ajusta cómo empieza la encuesta, el texto inicial y la llamada principal. }
+              @case ('visual') { Cambia fondo, color, imagen y presencia visual manteniendo el contenido. }
+              @case ('questions') { Define cómo se leen y responden las preguntas dentro de la encuesta. }
+              @case ('completion') { Ajusta el cierre y el tono de agradecimiento final. }
+            }
+          </p>
+        </div>
+
+        @if (designCenterTab !== 'base') {
+          <span class="design-center-safety">Conserva tus preguntas</span>
+        } @else {
+          <span class="design-center-safety warn">Reemplaza contenido</span>
+        }
+      </div>
+
+    @if (designCenterTab === 'combine') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Recetas completas</span>
+          <strong>Recetas completas sin reemplazar preguntas</strong>
+        </div>
+        <div class="design-combo-grid">
+          @for (combo of designCombinations; track combo.kind) {
+            <button
+              class="design-combo-card"
+              [class.combo-dark]="combo.dark"
+              [style.background]="combo.background"
+              type="button"
+              (click)="applyDesignCombination(combo.kind)">
+              <span>{{ combo.label }}</span>
+              <strong>{{ combo.recipe }}</strong>
+              <small>{{ combo.description }}</small>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (designCenterTab === 'visual') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Diseños visuales</span>
+          <strong>Fondo, color, imagen, tipografía y estilo de tarjeta</strong>
+        </div>
+        <div class="visual-template-grid">
+          @for (preset of visualDesignPresets; track preset.name) {
+            <button class="visual-template-card" [class.active]="isVisualDesignActive(preset)" type="button" (click)="applyVisualDesign(preset)">
+              <span class="visual-template-preview" [style.background-image]="'linear-gradient(rgba(15,23,42,0.10), rgba(15,23,42,0.35)), url(' + preset.image + ')'">
+                <span class="visual-template-panel" [style.background]="preset.brand.surfaceColor" [style.color]="preset.brand.textColor">
+                  <i [style.background]="preset.brand.primaryColor"></i>
+                  <b></b>
+                  <em></em>
+                </span>
+              </span>
+              <span class="visual-template-copy"><strong>{{ preset.name }}</strong><small>{{ preset.description }}</small></span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (designCenterTab === 'presentation') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Inicios</span>
+          <strong>Distintas entradas para la encuesta</strong>
+        </div>
+        <div class="flow-template-grid">
+          @for (preset of presentationPresets; track preset.name) {
+            <button class="flow-template-card" [class.active]="isPresentationActive(preset)" type="button" (click)="applyPresentationPreset(preset)">
+              <span class="material-symbols-outlined">{{ preset.icon }}</span>
+              <strong>{{ preset.name }}</strong>
+              <small>{{ preset.description }}</small>
+              <em>{{ preset.layout }} · {{ preset.ctaText }}</em>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (designCenterTab === 'completion') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Finalizaciones</span>
+          <strong>Distintos cierres para confirmar o agradecer</strong>
+        </div>
+        <div class="flow-template-grid">
+          @for (preset of completionPresets; track preset.name) {
+            <button class="flow-template-card" [class.active]="isCompletionActive(preset)" type="button" (click)="applyCompletionPreset(preset)">
+              <span class="material-symbols-outlined">{{ preset.icon }}</span>
+              <strong>{{ preset.name }}</strong>
+              <small>{{ preset.description }}</small>
+              <em>{{ preset.layout }} · {{ preset.title }}</em>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (designCenterTab === 'questions') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Diseño de preguntas</span>
+          <strong>Cambia la estructura visual del bloque</strong>
+        </div>
+        <div class="question-template-grid">
+          @for (style of questionStylePresets; track style.value) {
+            <button class="question-template-card" [class.active]="brand().questionStyle === style.value" type="button" (click)="applyQuestionStyleTemplate(style.value)">
+              <div class="question-template-preview" [ngClass]="'preview-' + style.preview">
+                <span class="preview-meta"></span><span class="preview-title"></span><span class="preview-help"></span><span class="preview-answer"></span><span class="preview-answer short"></span>
+              </div>
+              <span class="question-template-copy">
+                <span class="question-style-icon material-symbols-outlined">{{ style.icon }}</span>
+                <span><strong>{{ style.name }}</strong><small>{{ style.description }}</small></span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (designCenterTab === 'base') {
+      <section class="template-section">
+        <div class="template-section-head">
+          <span>Encuestas base</span>
+          <strong><em class="base-impact-pill">Cambia preguntas</em> Contenido prearmado para arrancar rápido</strong>
+        </div>
+        <div class="base-template-toolbar">
+          <div class="base-category-chips">
+            @for (cat of baseTemplateCategories(); track cat) {
+              <button type="button" [class.active]="selectedBaseCategory === cat" (click)="selectedBaseCategory = cat">{{ cat }}</button>
+            }
           </div>
         </div>
-      }
-    </div>
+        <a class="template-view-all" routerLink="/templates" [queryParams]="{ returnTo: '/editor/' + survey()?.id }" (click)="showTemplateModal = false">
+          Ver todas las plantillas
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+        <div class="template-grid base-template-list">
+          @for (tpl of filteredBaseTemplates(); track tpl.name) {
+            <div class="template-card base-template-card">
+              <div class="base-template-preview" [style.background]="tpl.brand.backgroundColor || '#f8f9ff'">
+                <div class="base-template-window" [style.color]="tpl.brand.textColor || '#1d1b20'">
+                  <span [style.background]="tpl.brand.primaryColor || '#7f00ff'"></span>
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </div>
+              </div>
+              <div class="template-card-body">
+                <span class="template-category">{{ tpl.category }}</span>
+                <h3 class="template-name">{{ tpl.name }}</h3>
+                <p class="template-desc">{{ tpl.description }}</p>
+                <div class="base-template-meta">
+                  <span>{{ tpl.questions.length }} preguntas</span>
+                  <span>{{ tpl.brand.fontTitle || 'Inter' }}</span>
+                </div>
+                <button class="template-use-btn" (click)="applyTemplate(tpl.originalIndex)">Crear con esta base</button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+    </main>
   </div>
 }
+
+

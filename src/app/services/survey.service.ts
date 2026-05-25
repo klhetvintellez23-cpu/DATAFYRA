@@ -29,6 +29,7 @@ export interface SurveyElementConfig {
   y: number;
   width: number;
   height: number;
+  fontSize?: number;
   rotation?: number;
   zIndex?: number;
   positioned?: boolean;
@@ -40,6 +41,7 @@ export interface Question {
   id: string;
   type: QuestionType;
   text: string;
+  description?: string;
   required: boolean;
   options: QuestionOption[];
   min?: number;
@@ -61,8 +63,10 @@ export interface SurveyBrand {
   primaryColor?: string;
   secondaryColor?: string;
   backgroundColor?: string;
+  backgroundImageUrl?: string;
   surfaceColor?: string;
   textColor?: string;
+  questionStyle?: 'glass' | 'solid' | 'minimal' | 'underline' | 'classic' | 'compact' | 'boxed' | 'outlined' | 'soft';
   buttonStyle?: 'rounded' | 'square' | 'pill';
   buttonRadius?: number;
   buttonColor?: string;
@@ -125,6 +129,7 @@ export interface SurveyMetadata {
   canvas?: CanvasData;
   brand?: SurveyBrand;
   theme?: Record<string, any>;
+  welcomeLayout?: 'split' | 'centered' | 'poster' | 'minimal' | 'editorial' | 'orbit' | 'showcase' | 'diagonal';
   welcomeImages?: DecoratedImage[];
   welcomeTitleConfig?: SurveyElementConfig;
   welcomeDescConfig?: SurveyElementConfig;
@@ -134,6 +139,7 @@ export interface SurveyMetadata {
   welcomePreviewConfig?: SurveyElementConfig;
   endTitle?: string;
   endDescription?: string;
+  endLayout?: 'centered' | 'receipt' | 'split' | 'celebration' | 'spotlight' | 'certificate' | 'timeline' | 'compact';
   thankYouTitle?: string;
   thankYouDescription?: string;
   endImages?: DecoratedImage[];
@@ -145,6 +151,8 @@ export interface SurveyMetadata {
   endBrandConfig?: SurveyElementConfig;
   ctaText?: string;
   paginationMode?: 'one-by-one' | 'paged' | 'all-at-once';
+  questionPageBreaks?: number[];
+  questionPageTitles?: string[];
   questionsPerPage?: number;
   progressMode?: 'percentage' | 'steps' | 'hidden';
   closesAt?: string;
@@ -214,13 +222,60 @@ export class SurveyService {
     return this.hydrateSurvey(this.mapper.mapSurvey(row));
   }
 
-  async createSurvey(userId: string, title: string, description: string): Promise<Survey | null> {
+  async createSurvey(userId: string, title: string, description: string, initialMetadata?: SurveyMetadata, initialQuestions: Question[] = []): Promise<Survey | null> {
     if (!this.repository.isAvailable()) {
       return null;
     }
 
-    const row = await this.repository.createSurvey(userId, title, description);
-    return row ? this.hydrateSurvey(this.mapper.mapSurvey(row)) : null;
+    const baseSurvey: Survey = { id: '', userId, title, description, questions: initialQuestions, status: 'borrador', createdAt: '', updatedAt: '', responses: [] };
+    const rawMetadata = initialMetadata ?? this.createDefaultDirectMetadata();
+    if (!rawMetadata.canvas) {
+      rawMetadata.canvas = this.createDefaultCanvas(baseSurvey, rawMetadata);
+    }
+
+    const row = await this.repository.createSurvey(userId, title, description, rawMetadata);
+    if (!row) return null;
+
+    const mapped = this.hydrateSurvey(this.mapper.mapSurvey(row));
+
+    if (initialQuestions.length > 0) {
+      mapped.questions = initialQuestions;
+      return await this.saveSurvey(mapped);
+    }
+
+    return mapped;
+  }
+
+  private createDefaultDirectMetadata(): SurveyMetadata {
+    return {
+      welcomeLayout: 'minimal',
+      ctaText: 'Comenzar',
+      endLayout: 'compact',
+      endTitle: 'Gracias por responder',
+      endDescription: 'Tus respuestas quedaron registradas.',
+      thankYouTitle: 'Gracias por responder',
+      thankYouDescription: 'Tus respuestas quedaron registradas.',
+      brand: {
+        primaryColor: '#18181b',
+        secondaryColor: '#71717a',
+        backgroundColor: '#ffffff',
+        backgroundImageUrl: undefined,
+        surfaceColor: '#ffffff',
+        textColor: '#09090b',
+        questionStyle: 'minimal',
+        buttonStyle: 'square',
+        cardRadius: 16,
+        buttonRadius: 10,
+        fontTitle: 'Inter',
+        fontBody: 'Inter',
+        fontButton: 'Inter',
+        shadowPreset: 'none',
+        glassEffect: false,
+        borderGlow: false,
+        entryAnimation: 'fadeUp',
+        progressBar: { enabled: true, style: 'line' }
+      }
+    };
   }
 
   async saveSurvey(survey: Survey): Promise<Survey | null> {

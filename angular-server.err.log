@@ -1,0 +1,354 @@
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'openAddQuestionAfter' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:181:40:
+[37m      181 │ ...                (addQuestionAfter)="[32mopenAddQuestionAfter[37m($event)"
+          ╵                                        [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:82:15:
+[37m      82 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'openQuestionLogic' does not exist on type 'EditorPage'. Did you mean 'updateQuestionLogic'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:182:41:
+[37m      182 │                     (editQuestionLogic)="[32mopenQuestionLogic[37m($event)"
+          ╵                                          [32m~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:82:15:
+[37m      82 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'logicPanelOpen' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:361:80:
+[37m      361 │ ...ional-dropdown" [open]="[32mlogicPanelOpen[37m && activeSection() === ...
+          ╵                            [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:82:15:
+[37m      82 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'questionTypeGroups' does not exist on type 'EditorPage'. Did you mean 'questionTypes'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:743:21:
+[37m      743 │       @for (group of [32mquestionTypeGroups[37m; track group.name) {
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:82:15:
+[37m      82 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: RouterLink is not used within the template of DashboardPage[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/dashboard/dashboard.ts:13:25:
+[37m      13 │   imports: [FormsModule, [32mRouterLink[37m],
+         ╵                          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 's' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:1020:99:
+[37m      1020 │ ...ms]="{ returnTo: '/editor/' + [32ms[37m.id }" (click)="showTemplateMo...
+           ╵                                  [32m^[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 's' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:1020:99:
+[37m      1020 │ ...ms]="{ returnTo: '/editor/' + [32ms[37m.id }" (click)="showTemplateMo...
+           ╵                                  [32m^[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 's' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:1020:99:
+[37m      1020 │ ...ms]="{ returnTo: '/editor/' + [32ms[37m.id }" (click)="showTemplateMo...
+           ╵                                  [32m^[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 's' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:1020:99:
+[37m      1020 │ ...ms]="{ returnTo: '/editor/' + [32ms[37m.id }" (click)="showTemplateMo...
+           ╵                                  [32m^[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'openPublicPreview' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:645:71:
+[37m      645 │ ...preview-open-public" type="button" (click)="[32mopenPublicPreview[37m()">
+          ╵                                                [32m~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'addSurveyPage' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:127:84:
+[37m      127 │ ...dd-btn sidebar-page-btn" type="button" (click)="[32maddSurveyPage[37m()">
+          ╵                                                    [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'copyPreviewLink' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:701:67:
+[37m      701 │ ...ss="preview-share-btn" type="button" (click)="[32mcopyPreviewLink[37m()">
+          ╵                                                  [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "pill"; fontTitle: string; fontBody: string; shadowPreset: "soft"; }; questions: { ...; }[]; welcomeTitle: string;...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:287:4:
+[37m      287 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "rounded"; fontTitle: string; fontBody: string; shadowPreset: "medium"; }; questions: { ...; }[]; welcomeTitle: st...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:301:4:
+[37m      301 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "pill"; fontTitle: string; fontBody: string; shadowPreset: "float"; glassEffect: true; }; questions: { ...; }[]; w...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:315:4:
+[37m      315 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "rounded"; fontTitle: string; fontBody: string; shadowPreset: "soft"; }; questions: { ...; }[]; welcomeTitle: stri...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:329:4:
+[37m      329 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "rounded"; fontTitle: string; fontBody: string; shadowPreset: "soft"; }; questions: { ...; }[]; welcomeTitle: stri...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:343:4:
+[37m      343 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "pill"; fontTitle: string; fontBody: string; shadowPreset: "medium"; borderGlow: true; }; questions: { ...; }[]; w...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:357:4:
+[37m      357 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "rounded"; fontTitle: string; fontBody: string; shadowPreset: "soft"; }; questions: { ...; }[]; welcomeTitle: stri...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:371:4:
+[37m      371 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'image' is missing in type '{ name: string; description: string; icon: string; category: string; brand: { primaryColor: string; secondaryColor: string; backgroundColor: string; surfaceColor: string; textColor: string; buttonStyle: "square"; fontTitle: string; fontBody: string; shadowPreset: "strong"; }; questions: { ...; }[]; welcomeTitle: str...' but required in type '{ name: string; description: string; icon: string; category: string; image: string; brand: Partial<SurveyBrand>; questions: { text: string; type: string; }[]; welcomeTitle: string; endTitle: string; }'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:385:4:
+[37m      385 │     [32m{[37m
+          ╵     [32m^[0m
+
+  'image' is declared here.
+
+    src/app/pages/editor/editor.ts:281:4:
+[37m      281 │     [32mimage[37m: string;
+          ╵     [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'normalizePageBreaks' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1218:26:
+[37m      1218 │ ... const breaks = this.[32mnormalizePageBreaks[37m(current.questions.le...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'normalizePageBreaks' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1218:26:
+[37m      1218 │ ... const breaks = this.[32mnormalizePageBreaks[37m(current.questions.le...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'normalizePageBreaks' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:2250:24:
+[37m      2250 │     const breaks = this.[32mnormalizePageBreaks[37m(total, this.survey()...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'start' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:2251:23:
+[37m      2251 │     return breaks.map(([32mstart[37m, index) => {
+           ╵                        [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'index' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:2251:30:
+[37m      2251 │     return breaks.map((start, [32mindex[37m) => {
+           ╵                               [32m~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'pageIndexForQuestion' does not exist on type 'EditorPage'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.ts:1198:42:
+[37m      1198 │ ...onPageIndex.set(this.[32mpageIndexForQuestion[37m(insertIndex, this.n...
+           ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'designPageIndex' since it isn't a known property of 'app-survey-simulator'.
+1. If 'app-survey-simulator' is an Angular component and it has 'designPageIndex' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-survey-simulator' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/pages/editor/editor.html:147:20:
+[37m      147 │                     [32m[designPageIndex]="activeQuestionPageIndex()"[37m
+          ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component EditorPage.
+
+    src/app/pages/editor/editor.ts:90:15:
+[37m      90 │   templateUrl: [32m'./editor.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m

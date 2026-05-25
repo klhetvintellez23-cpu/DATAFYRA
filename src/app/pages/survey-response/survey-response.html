@@ -1,4 +1,15 @@
-<main class="response-page" [ngStyle]="themeStyle()">
+<main
+  class="response-page"
+  [class.question-style-classic]="questionStyle() === 'classic'"
+  [class.question-style-compact]="questionStyle() === 'compact'"
+  [class.question-style-soft]="questionStyle() === 'soft'"
+  [class.question-style-outlined]="questionStyle() === 'outlined'"
+  [class.question-style-minimal]="questionStyle() === 'minimal'"
+  [class.question-style-boxed]="questionStyle() === 'boxed'"
+  [class.question-style-glass]="questionStyle() === 'glass'"
+  [class.question-style-solid]="questionStyle() === 'solid'"
+  [class.question-style-underline]="questionStyle() === 'underline'"
+  [ngStyle]="themeStyle()">
   <div class="response-background" aria-hidden="true"></div>
 
   @if (notFound()) {
