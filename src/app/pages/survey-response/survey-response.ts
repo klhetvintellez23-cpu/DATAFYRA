@@ -106,7 +106,7 @@ export class SurveyResponsePage implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly surveyService: SurveyService
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');

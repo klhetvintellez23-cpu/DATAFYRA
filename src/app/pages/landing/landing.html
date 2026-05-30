@@ -2,7 +2,8 @@
 
 <main class="flex-grow vp-animate-fade-in font-body text-[#1d1b20]" style="font-family: 'Epilogue', sans-serif;">
   <section class="hero-section relative overflow-hidden bg-[#F9F5FF]">
-    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+    <div
+      class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
       <div class="z-10 hero-copy">
         <h1 class="text-5xl sm:text-6xl lg:text-[5.25rem] font-bold text-[#1d1b20] leading-[1.05] mb-8">
           <app-lustre-text text="Crea encuestas gratis" [speed]="6"></app-lustre-text>
@@ -26,7 +27,8 @@
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
             </svg>
-            <app-typing-text text="Comparte encuestas por WhatsApp, email y redes sociales" [delay]="1300"></app-typing-text>
+            <app-typing-text text="Comparte encuestas por WhatsApp, email y redes sociales"
+              [delay]="1300"></app-typing-text>
           </div>
           <div class="ag-checklist-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
@@ -40,8 +42,7 @@
         </div>
 
         <div class="flex flex-wrap gap-4 mt-8">
-          <app-wavy-button
-            (click)="openAuth('register', $event)"
+          <app-wavy-button (click)="openAuth('register', $event)"
             className="px-12 sm:px-16 py-6 editorial-gradient text-white font-bold rounded-[2.25rem] shadow-2xl hover:shadow-primary/40 transition-all text-xl sm:text-2xl tracking-wide"
             text="Crea una encuesta">
           </app-wavy-button>
@@ -60,13 +61,16 @@
 
       <div class="hero-gallery" aria-label="Vista previa del flujo de encuestas">
         <figure class="hero-image-card hero-image-card-primary">
-          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=85&w=1000" alt="Persona trabajando en una encuesta desde un portatil" />
+          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=85&w=1000"
+            alt="Persona trabajando en una encuesta desde un portatil" />
         </figure>
         <figure class="hero-image-card hero-image-card-share">
-          <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=85&w=900" alt="Equipo revisando respuestas de clientes" />
+          <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=85&w=900"
+            alt="Equipo revisando respuestas de clientes" />
         </figure>
         <figure class="hero-image-card hero-image-card-analytics">
-          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=85&w=1000" alt="Equipo analizando informacion de negocio" />
+          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=85&w=1000"
+            alt="Equipo analizando informacion de negocio" />
         </figure>
         <div class="hero-proof-card">
           <span class="material-symbols-outlined">verified</span>
@@ -87,7 +91,8 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 items-start">
         <div class="space-y-6">
           <div class="step-visual">
-            <img src="https://images.unsplash.com/photo-1762340275877-32d64414d8aa?auto=format&fit=crop&q=80&w=900" alt="Formulario digital con opciones de respuesta en pantalla" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1762340275877-32d64414d8aa?auto=format&fit=crop&q=80&w=900"
+              alt="Formulario digital con opciones de respuesta en pantalla" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">01</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Diseña tu formulario</h3>
@@ -97,7 +102,8 @@
         </div>
         <div class="space-y-6">
           <div class="step-visual">
-            <img src="https://images.unsplash.com/photo-1759932021109-ffbec9251f9b?auto=format&fit=crop&q=80&w=900" alt="Telefono mostrando aplicaciones sociales para compartir contenido" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1759932021109-ffbec9251f9b?auto=format&fit=crop&q=80&w=900"
+              alt="Telefono mostrando aplicaciones sociales para compartir contenido" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">02</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Comparte el enlace</h3>
@@ -107,7 +113,8 @@
         </div>
         <div class="space-y-6">
           <div class="step-visual">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900" alt="Panel de analiticas con graficos y metricas" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900"
+              alt="Panel de analiticas con graficos y metricas" loading="lazy" />
           </div>
           <div class="text-5xl font-black text-[#7f00ff]">03</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Lee resultados</h3>
@@ -123,16 +130,17 @@
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-14 items-start">
         <div>
-          <p class="section-kicker">Por qué Datafyra</p>
-          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] leading-tight">Todo lo que necesitas para lanzar encuestas sin fricción</h2>
+          <p class="section-kicker">Por qué DataEncuestas</p>
+          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] leading-tight">Todo lo que necesitas para lanzar
+            encuestas sin fricción</h2>
         </div>
         <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
           @for (feature of featureList; track feature.title) {
-            <div class="feature-card">
-              <span class="material-symbols-outlined">{{ feature.icon }}</span>
-              <h4>{{ feature.title }}</h4>
-              <p>{{ feature.description }}</p>
-            </div>
+          <div class="feature-card">
+            <span class="material-symbols-outlined">{{ feature.icon }}</span>
+            <h4>{{ feature.title }}</h4>
+            <p>{{ feature.description }}</p>
+          </div>
           }
         </div>
       </div>
@@ -144,12 +152,12 @@
       <div class="decision-panel">
         <div class="decision-copy">
           <p class="section-kicker">Análisis integrado</p>
-          <h2 class="text-4xl md:text-6xl font-bold text-[#1d1b20] leading-tight">Toma decisiones basadas en datos, no en hojas sueltas</h2>
+          <h2 class="text-4xl md:text-6xl font-bold text-[#1d1b20] leading-tight">Toma decisiones basadas en datos, no
+            en hojas sueltas</h2>
           <p class="text-lg text-[#49454e] font-light leading-relaxed max-w-xl">
             Centraliza la creación, distribución y lectura de tus encuestas sin preparar reportes manuales.
           </p>
-          <app-wavy-button
-            (click)="openAuth('register', $event)"
+          <app-wavy-button (click)="openAuth('register', $event)"
             className="px-10 sm:px-14 py-5 editorial-gradient text-white font-bold rounded-[2rem] shadow-2xl hover:shadow-primary/40 transition-all text-xl sm:text-2xl"
             text="Crear encuesta gratis">
           </app-wavy-button>
@@ -181,7 +189,8 @@
       <div class="text-center max-w-4xl mx-auto mb-16">
         <p class="section-kicker justify-center">Plantillas</p>
         <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] mb-6">Plantillas listas para usar</h2>
-        <p class="text-xl text-[#49454e] font-light">Empieza con estructuras diseñadas para investigación, feedback y operaciones.</p>
+        <p class="text-xl text-[#49454e] font-light">Empieza con estructuras diseñadas para investigación, feedback y
+          operaciones.</p>
       </div>
 
       <div class="mb-12">
@@ -190,40 +199,40 @@
             <h3 class="text-3xl md:text-4xl font-bold mb-4 text-[#1d1b20]">Plantillas populares</h3>
             <p class="text-[#49454e] font-light">Elige una base y personalízala en el editor.</p>
           </div>
-          <a routerLink="/templates" class="text-[#7f00ff] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
-            Ver todas las plantillas <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          <a routerLink="/templates"
+            class="text-[#7f00ff] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
+            Ver todas las plantillas <span
+              class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
           </a>
         </div>
         <div class="flex flex-wrap gap-3">
           @for (category of templateCategories; track category) {
-            <a routerLink="/templates" class="px-5 py-2 rounded-full text-sm font-medium transition-colors"
-              [class.bg-[#7f00ff]]="$first"
-              [class.text-white]="$first"
-              [class.text-[#49454e]]="!$first"
-              [class.hover:text-[#7f00ff]]="!$first">
-              {{ category }}
-            </a>
+          <a routerLink="/templates" class="px-5 py-2 rounded-full text-sm font-medium transition-colors"
+            [class.bg-[#7f00ff]]="$first" [class.text-white]="$first" [class.text-[#49454e]]="!$first"
+            [class.hover:text-[#7f00ff]]="!$first">
+            {{ category }}
+          </a>
           }
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @for (template of popularTemplates; track template.id) {
-          <a [routerLink]="['/templates', template.id]" class="group block text-[#1d1b20]">
-            <div class="template-preview mb-6">
-              <img [src]="template.image" [alt]="template.alt" loading="lazy" />
-              <div class="template-overlay"></div>
-              <span class="template-badge">{{ template.badge }}</span>
-              <div class="template-window">
-                <div class="template-window-bar"><i></i><i></i><i></i></div>
-                <strong>{{ template.title }}</strong>
-                <p>{{ template.prompt }}</p>
-                <div class="template-options"><span></span><span></span><span></span></div>
-              </div>
+        <a [routerLink]="['/templates', template.id]" class="group block text-[#1d1b20]">
+          <div class="template-preview mb-6">
+            <img [src]="template.image" [alt]="template.alt" loading="lazy" />
+            <div class="template-overlay"></div>
+            <span class="template-badge">{{ template.badge }}</span>
+            <div class="template-window">
+              <div class="template-window-bar"><i></i><i></i><i></i></div>
+              <strong>{{ template.title }}</strong>
+              <p>{{ template.prompt }}</p>
+              <div class="template-options"><span></span><span></span><span></span></div>
             </div>
-            <h4 class="text-2xl font-bold mb-2 text-[#1d1b20]">{{ template.title }}</h4>
-            <p class="text-[#49454e] font-light leading-relaxed">{{ template.description }}</p>
-          </a>
+          </div>
+          <h4 class="text-2xl font-bold mb-2 text-[#1d1b20]">{{ template.title }}</h4>
+          <p class="text-[#49454e] font-light leading-relaxed">{{ template.description }}</p>
+        </a>
         }
       </div>
     </div>
@@ -233,10 +242,10 @@
     <div class="final-cta-inner">
       <p class="section-kicker justify-center">Empieza hoy</p>
       <h2>Convierte respuestas en mejores decisiones</h2>
-      <p>Crea tu primera encuesta gratis, compártela en minutos y empieza a leer resultados sin configurar nada complejo.</p>
+      <p>Crea tu primera encuesta gratis, compártela en minutos y empieza a leer resultados sin configurar nada
+        complejo.</p>
       <div class="final-cta-actions">
-        <app-wavy-button
-          (click)="openAuth('register', $event)"
+        <app-wavy-button (click)="openAuth('register', $event)"
           className="px-10 sm:px-14 py-5 bg-white text-[#7f00ff] font-bold rounded-[2rem] shadow-xl transition-all text-xl"
           text="Crear encuesta gratis">
         </app-wavy-button>

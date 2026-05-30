@@ -36,10 +36,11 @@
           <span class="material-symbols-outlined">save</span>
         </button>
       </div>
-      <span class="editor-autosave">
-        <span class="autosave-dot" [class.saved]="saved()"></span>
-        {{ isSaving() ? 'Guardando cambios' : saved() ? 'Cambios guardados' : 'Pendiente de guardar' }}
-      </span>
+      <div class="topbar-divider"></div>
+      <button class="btn-actualizar" type="button" (click)="publish()" [disabled]="isSaving()">Actualizar</button>
+      <button class="topbar-profile-btn" type="button" aria-label="Perfil">
+        <span class="material-symbols-outlined">account_circle</span>
+      </button>
     </div>
   </nav>
 
@@ -702,255 +703,73 @@
     }
 
     @if (currentTab === 'collect') {
-      <div class="editor-stage share-stage">
-        <div class="share-module-shell">
-          <aside class="share-module-sidebar">
-            <nav class="share-module-nav" aria-label="Herramientas de compartir">
-              @for (item of shareSections; track item.id) {
-                <button type="button" [class.active]="activeShareSection() === item.id" (click)="setActiveShareSection(item.id)">
-                  <span class="material-symbols-outlined">{{ item.icon }}</span>
-                  <span>
-                    <strong>{{ item.label }}</strong>
-                    <small>{{ item.description }}</small>
-                  </span>
+      <div class="editor-stage share-simple-stage">
+        <div class="share-simple-container">
+          <div class="share-simple-top">
+            <div class="share-simple-image-col">
+              <img src="/assets/image.png" alt="Compartir enlace" />
+            </div>
+            <div class="share-simple-content-col">
+              <div class="share-simple-header">
+                <h2>Compartir enlace de Datafyra</h2>
+                <p>Invita a otros a unirse a la encuesta</p>
+                <button class="btn-share-settings" type="button" (click)="setActiveShareSection('settings')">
+                  <span class="material-symbols-outlined">settings</span>
                 </button>
-              }
-            </nav>
-          </aside>
+              </div>
+              <div class="share-simple-qr">
+                <div class="qr-wrapper">
+                  @if (s.status === 'activo') {
+                    <img [src]="getQrCodeUrl()" alt="Código QR" />
+                  } @else {
+                    <span class="material-symbols-outlined">qr_code_2</span>
+                  }
+                </div>
+                <span class="qr-label">ESCANEAR CÓDIGO QR</span>
+              </div>
+              <div class="share-simple-link">
+                <div class="link-input-group">
+                  <input type="text" [value]="s.status === 'activo' ? getShareLink() : 'Publica la encuesta para habilitar el enlace.'" readonly />
+                  <button type="button" class="btn-copy" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">
+                    <span class="material-symbols-outlined">content_copy</span> Copiar enlace
+                  </button>
+                </div>
+                <span class="link-helper">enlace de encuesta</span>
+              </div>
+              <div class="share-simple-buttons">
+                <button type="button" class="btn-whatsapp" (click)="openWhatsAppShare()" [disabled]="s.status !== 'activo'">
+                  <span class="material-symbols-outlined">chat</span> Enviar por WhatsApp
+                </button>
+                <button type="button" class="btn-email" (click)="openEmailShare()" [disabled]="s.status !== 'activo'">
+                  <span class="material-symbols-outlined">mail</span> Compartir por correo
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="share-simple-bottom">
+            <div class="message-header">
+              <h3>Mensaje sugerido</h3>
+              <span class="autosave-status"><span class="dot"></span> Auto-guardado activo</span>
+            </div>
+            <div class="message-editor-wrapper">
+              <div class="editor-toolbar">
+                <button type="button"><span class="material-symbols-outlined">format_bold</span></button>
+                <button type="button"><span class="material-symbols-outlined">format_italic</span></button>
+                <button type="button"><span class="material-symbols-outlined">format_underlined</span></button>
+                <button type="button"><span class="material-symbols-outlined">link</span></button>
+              </div>
+              <textarea class="message-textarea" readonly>Estamos trabajando para mejorar y tu opinión es fundamental para nosotros.
 
-          <main class="share-module-main">
-            @switch (activeShareSection()) {
-              @case ('dashboard') {
-                <section class="share-view share-saas-dashboard">
-                  <div class="share-saas-hero">
-                    <div>
-                      <h2>Survey distribution overview</h2>
-                      <p>Resumen general para publicar, compartir y medir la distribución de esta encuesta.</p>
-                    </div>
-                    <div class="share-hero-actions">
-                      <span class="share-status-pill" [class.share-status-live]="s.status === 'activo'">
-                        <span class="material-symbols-outlined">{{ s.status === 'activo' ? 'radio_button_checked' : 'edit_note' }}</span>
-                        {{ s.status === 'activo' ? 'Activa' : 'Borrador' }}
-                      </span>
-                      <button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">{{ s.status === 'activo' ? 'Actualizar' : 'Publicar' }}</button>
-                    </div>
-                  </div>
-                  <div class="share-saas-kpis">
-                    <div class="saas-kpi-card mint"><span class="material-symbols-outlined">forum</span><small>Respuestas</small><strong>{{ s.responses.length || s.responses_count || 0 }}</strong><em>Registradas</em></div>
-                    <div class="saas-kpi-card blue"><span class="material-symbols-outlined">help</span><small>Preguntas</small><strong>{{ s.questions.length }}</strong><em>{{ getQuestionCountLabel() }}</em></div>
-                    <div class="saas-kpi-card orange"><span class="material-symbols-outlined">view_carousel</span><small>Páginas</small><strong>{{ getSurveyPageCount() }}</strong><em>Flujo total</em></div>
-                    <div class="saas-kpi-card purple"><span class="material-symbols-outlined">fact_check</span><small>Checklist</small><strong>{{ getChecklistCompletion() }}%</strong><em>Completado</em></div>
-                  </div>
+¿Podrías dedicarnos 2 minutos para responder esta breve encuesta? Tus respuestas nos ayudarán a ofrecerte un mejor servicio.
 
-                  <div class="share-saas-layout">
-                    <div class="share-saas-main">
-                      <div class="saas-card saas-link-card">
-                        <div class="saas-card-head">
-                          <div><span class="collect-label">Enlace principal</span><h3>Public survey link</h3></div>
-                          <button class="editor-action-btn" type="button" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">Abrir</button>
-                        </div>
-                        <div class="saas-link-input">
-                          <span class="material-symbols-outlined">link</span>
-                          <div>{{ s.status === 'activo' ? getShareLink() : 'Publica la encuesta para habilitar el enlace.' }}</div>
-                          <button type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar</button>
-                        </div>
-                        <div class="saas-link-stats">
-                          <span>Estado: <strong>{{ s.status === 'activo' ? 'Online' : 'Borrador' }}</strong></span>
-                          <span>Copias: <strong>{{ shareCopyHistory().length }}</strong></span>
-                          <span>Clicks: <strong>0</strong></span>
-                        </div>
-                      </div>
-
-                      <div class="saas-action-showcase">
-                        <button type="button" class="saas-action-card preview" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">
-                          <span class="material-symbols-outlined">visibility</span>
-                          <strong>Vista pública</strong>
-                          <small>Abre la experiencia final.</small>
-                        </button>
-                        <button type="button" class="saas-action-card qr" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">
-                          <span class="material-symbols-outlined">qr_code_2</span>
-                          <strong>Copiar QR</strong>
-                          <small>URL lista para diseño o impresión.</small>
-                        </button>
-                        <button type="button" class="saas-action-card settings" (click)="setActiveShareSection('settings')">
-                          <span class="material-symbols-outlined">tune</span>
-                          <strong>Publicación</strong>
-                          <small>Estado, acceso y fecha límite.</small>
-                        </button>
-                      </div>
-
-                      <div class="saas-card">
-                        <div class="saas-card-head">
-                          <div><span class="collect-label">Quick channels</span><h3>Canales rápidos</h3></div>
-                          <button class="saas-text-btn" type="button" (click)="setActiveShareSection('channels')">Ver todos</button>
-                        </div>
-                        <div class="saas-channel-grid">
-                          <button type="button" class="saas-channel-item whatsapp" (click)="openWhatsAppShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">chat</span><strong>WhatsApp</strong><small>Mensaje listo</small></button>
-                          <button type="button" class="saas-channel-item email" (click)="openEmailShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">mail</span><strong>Email</strong><small>Asunto y cuerpo</small></button>
-                          <button type="button" class="saas-channel-item embed" (click)="copyEmbedCode()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">integration_instructions</span><strong>Web Embed</strong><small>Iframe responsive</small></button>
-                          <button type="button" class="saas-channel-item copy" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">content_copy</span><strong>Texto listo</strong><small>Copiar mensaje</small></button>
-                        </div>
-                      </div>
-
-                      <div class="saas-card saas-campaign-card">
-                        <div class="saas-campaign-visual">
-                          <span class="material-symbols-outlined">campaign</span>
-                        </div>
-                        <div>
-                          <span class="collect-label">Siguiente mejor acción</span>
-                          <h3>{{ s.status === 'activo' ? 'Comparte el enlace con tu primer canal' : 'Publica para activar el kit de distribución' }}</h3>
-                          <p>{{ s.status === 'activo' ? 'Usa WhatsApp o Email para validar el flujo con una audiencia pequeña antes de difundirlo masivamente.' : 'Cuando la encuesta esté activa se habilitan link, QR, canales y vista pública.' }}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <aside class="share-saas-side">
-                      <div class="saas-card saas-qr-card">
-                        <div class="saas-card-head"><div><span class="collect-label">Código QR</span><h3>Scan preview</h3></div><button class="saas-text-btn" type="button" (click)="setActiveShareSection('qr')">Editar</button></div>
-                        <div class="saas-qr-frame">
-                          @if (s.status === 'activo') {
-                            <img [src]="getQrCodeUrl()" [alt]="'QR de ' + s.title" loading="lazy">
-                          } @else {
-                            <span class="material-symbols-outlined">qr_code_2</span>
-                          }
-                        </div>
-                        <div class="qr-actions"><button class="editor-action-btn" type="button" (click)="openQrCode()" [disabled]="s.status !== 'activo'">Abrir QR</button><button class="editor-action-btn" type="button" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">Copiar</button></div>
-                      </div>
-
-                      <div class="saas-card saas-summary-card">
-                        <div class="saas-card-head"><div><span class="collect-label">Survey summary</span><h3>Resumen</h3></div></div>
-                        <div class="saas-summary-list">
-                          <div><span>Última actualización</span><strong>{{ s.updatedAt | date:'short' }}</strong></div>
-                          <div><span>Publicación</span><strong>{{ s.status === 'activo' ? 'Disponible' : 'Pendiente' }}</strong></div>
-                          <div><span>Conversión estimada</span><strong>{{ getQuickConversionRate() }}%</strong></div>
-                        </div>
-                      </div>
-
-                      <div class="saas-card saas-utility-card">
-                        <div class="saas-card-head"><div><span class="collect-label">Utilidades</span><h3>Herramientas</h3></div></div>
-                        <button type="button" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">post_add</span> Copiar invitación</button>
-                        <button type="button" (click)="setActiveShareSection('link')"><span class="material-symbols-outlined">history</span> Ver historial</button>
-                        <button type="button" (click)="setActiveShareSection('qr')"><span class="material-symbols-outlined">print</span> Preparar impresión</button>
-                      </div>
-                    </aside>
-                  </div>
-                </section>
-              }
-              @case ('link') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Enlace de encuesta</span><h2>Link principal y estado</h2><p>Controla el enlace público, copia rápida y señales de uso.</p></div></div>
-                  <div class="share-two-column">
-                    <div class="share-panel share-premium-card" [class.share-panel-disabled]="s.status !== 'activo'">
-                      <div class="share-panel-head"><div><span class="collect-label">Link principal</span><h3>URL pública</h3></div><button class="editor-action-btn" type="button" (click)="openPublicPreview()" [disabled]="s.status !== 'activo'">Abrir</button></div>
-                      <div class="share-link-visual" aria-hidden="true">
-                        <div class="share-phone-mock">
-                          <span></span>
-                          <strong>{{ s.title || 'Encuesta' }}</strong>
-                          <i></i><i></i><i></i>
-                          <em>Comenzar</em>
-                        </div>
-                        <div class="share-link-route">
-                          <span class="material-symbols-outlined">link</span>
-                          <span class="material-symbols-outlined">arrow_forward</span>
-                          <span class="material-symbols-outlined">phone_iphone</span>
-                        </div>
-                      </div>
-                      <div class="share-link-row"><div class="share-link-value">{{ s.status === 'activo' ? getShareLink() : 'Publica la encuesta para habilitar el enlace.' }}</div><button class="editor-action-btn" type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'">Copiar</button></div>
-                      <div class="share-mini-stat-row"><div><strong>{{ shareCopyHistory().length }}</strong><span>Copias</span></div><div><strong>{{ s.status === 'activo' ? 'Online' : 'Off' }}</strong><span>Estado</span></div><div><strong>0</strong><span>Clicks</span></div></div>
-                    </div>
-                    <div class="share-panel">
-                      <div class="share-panel-head"><div><span class="collect-label">Historial</span><h3>Copias recientes</h3></div></div>
-                      <div class="share-history-list">
-                        @for (entry of shareCopyHistory(); track entry) { <div>{{ entry }}</div> }
-                        @if (!shareCopyHistory().length) { <p>Aún no hay copias registradas en esta sesión.</p> }
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              }
-              @case ('qr') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Código QR</span><h2>Herramienta QR para eventos e impresos</h2><p>Genera un QR dedicado para piezas físicas, pantallas y material promocional.</p></div></div>
-                  <div class="qr-only-layout">
-                    <div class="share-panel qr-tool-preview qr-only-preview" [class.share-panel-disabled]="s.status !== 'activo'">
-                      <div class="qr-frame-large">
-                        @if (s.status === 'activo') {
-                          <img [src]="getQrCodeUrl()" [alt]="'QR de ' + s.title" loading="lazy">
-                        } @else {
-                          <span class="material-symbols-outlined">qr_code_2</span>
-                          <p>Publica la encuesta para generar el QR.</p>
-                        }
-                      </div>
-                      <div class="qr-only-caption">
-                        <strong>{{ qrCtaText() }}</strong>
-                        <small>{{ s.title || 'Encuesta' }}</small>
-                      </div>
-                      <div class="qr-actions">
-                        <button class="editor-action-btn" type="button" (click)="openQrCode()" [disabled]="s.status !== 'activo'">Abrir QR</button>
-                        <button class="editor-action-btn" type="button" (click)="copyQrCodeUrl()" [disabled]="s.status !== 'activo'">Copiar QR</button>
-                        <button class="editor-action-btn" type="button" (click)="copyQrCampaignKit()" [disabled]="s.status !== 'activo'">Copiar kit</button>
-                        <button class="editor-action-btn" type="button" (click)="exportQrCampaignKit()" [disabled]="s.status !== 'activo'">Exportar kit</button>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              }
-              @case ('channels') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Canales rápidos</span><h2>Enviar por canales frecuentes</h2><p>Cards accionables para compartir sin salir del flujo de trabajo.</p></div></div>
-                  <div class="share-channel-dashboard">
-                    <button class="share-channel-card accent-copy" type="button" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">post_add</span><strong>Texto listo</strong><small>Mensaje con título y enlace.</small><em>Usar</em></button>
-                    <button class="share-channel-card accent-whatsapp" type="button" (click)="openWhatsAppShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">chat</span><strong>WhatsApp</strong><small>Abre una conversación prellenada.</small><em>Usar</em></button>
-                    <button class="share-channel-card accent-email" type="button" (click)="openEmailShare()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">mail</span><strong>Email</strong><small>Asunto y cuerpo preparados.</small><em>Usar</em></button>
-                    <button class="share-channel-card accent-link" type="button" (click)="copyShareLink()" [disabled]="s.status !== 'activo'"><span class="material-symbols-outlined">link</span><strong>Link rápido</strong><small>Copia solo la URL pública.</small><em>Usar</em></button>
-                  </div>
-                </section>
-              }
-              @case ('embed') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Embed / Insertar web</span><h2>Embed web</h2><p>Código iframe, preview y recomendaciones responsive.</p></div><button class="editor-action-btn" type="button" (click)="copyEmbedCode()" [disabled]="s.status !== 'activo'">Copiar iframe</button></div>
-                  <div class="embed-tool-grid">
-                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Código iframe</span><h3>Listo para pegar</h3></div></div><pre class="embed-code-box">{{ getEmbedCode() }}</pre></div>
-                    <div class="share-panel embed-preview-card"><div class="share-panel-head"><div><span class="collect-label">Vista previa</span><h3>Contenedor responsive</h3></div></div><div class="embed-preview-box"><app-survey-simulator [survey]="s" [showUtilityToolbar]="false"></app-survey-simulator></div></div>
-                  </div>
-                </section>
-              }
-              @case ('checklist') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Checklist</span><h2>Checklist</h2><p>Revisa errores, recomendaciones y buenas prácticas.</p></div><strong class="share-score-pill">{{ getChecklistCompletion() }}% listo</strong></div>
-                  <div class="share-checklist-grid">
-                    @for (item of getChecklistItems(s); track item.label) {
-                      <div class="share-check-item" [class.ok]="item.ok"><span class="material-symbols-outlined">{{ item.ok ? 'check_circle' : 'error' }}</span><div><strong>{{ item.label }}</strong><p>{{ item.detail }}</p></div></div>
-                    }
-                  </div>
-                </section>
-              }
-              @case ('analytics') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Métricas</span><h2>Métricas de distribución</h2><p>Métricas inmediatas para distribución y conversión.</p></div></div>
-                  <div class="share-metric-grid analytics-grid">
-                    <div class="share-metric-card"><span>Preguntas</span><strong>{{ s.questions.length }}</strong><small>Total</small></div>
-                    <div class="share-metric-card"><span>Páginas</span><strong>{{ getSurveyPageCount() }}</strong><small>Flujo</small></div>
-                    <div class="share-metric-card"><span>Respuestas</span><strong>{{ s.responses.length || s.responses_count || 0 }}</strong><small>Recibidas</small></div>
-                    <div class="share-metric-card"><span>Escaneos QR</span><strong>0</strong><small>Sin tracking externo</small></div>
-                    <div class="share-metric-card"><span>Clicks enlace</span><strong>0</strong><small>Sin tracking externo</small></div>
-                    <div class="share-metric-card"><span>Conversión</span><strong>{{ getQuickConversionRate() }}%</strong><small>Estimación local</small></div>
-                  </div>
-                  <div class="share-progress-panel"><span>Progreso de captación</span><div><i [style.width.%]="getQuickConversionRate()"></i></div></div>
-                </section>
-              }
-              @case ('settings') {
-                <section class="share-view">
-                  <div class="share-view-header"><div><span class="collect-label">Configuración de publicación</span><h2>Acceso, estado y seguridad</h2><p>Controles principales para abrir, pausar o preparar la encuesta.</p></div></div>
-                  <div class="settings-dashboard-grid">
-                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Estado</span><h3>{{ s.status === 'activo' ? 'Encuesta activa' : 'Encuesta en borrador' }}</h3></div></div><div class="share-action-row"><button class="editor-publish-btn" type="button" (click)="publish()" [disabled]="isSaving()">{{ s.status === 'activo' ? 'Actualizar publicación' : 'Activar encuesta' }}</button>@if (s.status === 'activo') { <button class="editor-action-btn danger-btn" type="button" (click)="unpublish()" [disabled]="isSaving()">Desactivar</button> }</div></div>
-                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Acceso</span><h3>Visibilidad</h3></div></div><div class="segmented-setting"><button type="button" [class.active]="publicationAccess() === 'public'" (click)="updatePublicationAccess('public')">Público</button><button type="button" [class.active]="publicationAccess() === 'private'" (click)="updatePublicationAccess('private')">Privado</button></div><label class="share-setting-control"><span>Fecha límite</span><input type="date" [ngModel]="publicationDeadline()" (ngModelChange)="updatePublicationDeadline($event)"></label></div>
-                    <div class="share-panel"><div class="share-panel-head"><div><span class="collect-label">Seguridad</span><h3>Buenas prácticas</h3></div></div><div class="publication-map" aria-hidden="true"><span class="material-symbols-outlined">verified_user</span><i></i><span class="material-symbols-outlined">public</span><i></i><span class="material-symbols-outlined">analytics</span></div><div class="share-advice-box"><strong>Configuración avanzada</strong><p>Antes de compartir masivamente, valida el preview, el enlace público y el checklist. Las reglas de acceso avanzadas pueden conectarse al backend cuando esté disponible.</p></div></div>
-                  </div>
-                </section>
-              }
-            }
-          </main>
+Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4200/survey/...' }}</textarea>
+              <div class="editor-footer">
+                <button type="button" class="btn-copy-message" (click)="copyShareMessage()" [disabled]="s.status !== 'activo'">
+                  <span class="material-symbols-outlined">content_copy</span> Copiar mensaje
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     }

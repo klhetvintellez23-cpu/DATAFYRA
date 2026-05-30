@@ -2,7 +2,7 @@
   <aside class="dashboard-sidebar">
     <a routerLink="/" class="dashboard-brand" aria-label="Volver al inicio">
       <span class="dashboard-brand-mark">D</span>
-      <span>Datafyra</span>
+      <span>DataEncuestas</span>
     </a>
     <div class="brand-space" aria-hidden="true">
       <span class="brand-check">✓</span>
@@ -26,15 +26,16 @@
       </div>
       <div class="folder-list">
         @for (folder of folders(); track folder.id) {
-          <button class="folder-item" [class.active]="selectedFolderId() === folder.id" type="button" (click)="selectFolder(folder.id)">
-            <span class="material-symbols-outlined">folder</span>
-            <strong>{{ folder.name }}</strong>
-            <em>{{ folderCount(folder.id) }}</em>
-            <i class="material-symbols-outlined" (click)="renameFolder(folder, $event)">edit</i>
-            <i class="material-symbols-outlined danger" (click)="deleteFolder(folder, $event)">delete</i>
-          </button>
+        <button class="folder-item" [class.active]="selectedFolderId() === folder.id" type="button"
+          (click)="selectFolder(folder.id)">
+          <span class="material-symbols-outlined">folder</span>
+          <strong>{{ folder.name }}</strong>
+          <em>{{ folderCount(folder.id) }}</em>
+          <i class="material-symbols-outlined" (click)="renameFolder(folder, $event)">edit</i>
+          <i class="material-symbols-outlined danger" (click)="deleteFolder(folder, $event)">delete</i>
+        </button>
         } @empty {
-          <p class="folder-empty">Crea carpetas para ordenar tus encuestas.</p>
+        <p class="folder-empty">Crea carpetas para ordenar tus encuestas.</p>
         }
       </div>
     </section>
@@ -69,9 +70,9 @@
       <div class="topbar-title-block">
         <h1>
           @if (selectedFolderId()) {
-            {{ folderName(selectedFolderId()) }}
+          {{ folderName(selectedFolderId()) }}
           } @else {
-            Inicio
+          Inicio
           }
         </h1>
       </div>
@@ -113,13 +114,14 @@
           <span>Ordenar</span>
           <select [ngModel]="sortBy()" (ngModelChange)="setSortBy($any($event))">
             @for (option of sortOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
+            <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
         </label>
 
         <div class="layout-toggle" aria-label="Vista">
-          <button type="button" [class.active]="layoutMode() === 'grid'" (click)="setLayoutMode('grid')" title="Cuadrícula">
+          <button type="button" [class.active]="layoutMode() === 'grid'" (click)="setLayoutMode('grid')"
+            title="Cuadrícula">
             <span class="material-symbols-outlined">grid_view</span>
           </button>
           <button type="button" [class.active]="layoutMode() === 'list'" (click)="setLayoutMode('list')" title="Lista">
@@ -130,10 +132,10 @@
 
       <section class="dashboard-filters" aria-label="Filtrar encuestas">
         @for (filter of filterOptions; track filter.value) {
-          <button type="button" [class.active]="activeFilter() === filter.value" (click)="setFilter(filter.value)">
-            {{ filter.label }}
-            <span>{{ filterCount(filter.value) }}</span>
-          </button>
+        <button type="button" [class.active]="activeFilter() === filter.value" (click)="setFilter(filter.value)">
+          {{ filter.label }}
+          <span>{{ filterCount(filter.value) }}</span>
+        </button>
         }
       </section>
 
@@ -151,7 +153,8 @@
           <div class="tile-cover" [style.--tile-accent]="survey.metadata?.brand?.primaryColor || coverColor(survey.id)">
             <div class="tile-cover-pattern" aria-hidden="true"></div>
             <div class="tile-cover-top">
-              <span class="tile-status" [class.active]="survey.status === 'activo'" [class.closed]="survey.status === 'cerrado'">
+              <span class="tile-status" [class.active]="survey.status === 'activo'"
+                [class.closed]="survey.status === 'cerrado'">
                 {{ statusLabel(survey.status) }}
               </span>
               <div class="tile-actions">
@@ -171,7 +174,8 @@
                   <div class="tile-menu-group">Mover a carpeta</div>
                   <button type="button" (click)="moveSurveyToFolder(survey.id, null, $event)">Sin carpeta</button>
                   @for (folder of folders(); track folder.id) {
-                    <button type="button" (click)="moveSurveyToFolder(survey.id, folder.id, $event)">{{ folder.name }}</button>
+                  <button type="button" (click)="moveSurveyToFolder(survey.id, folder.id, $event)">{{ folder.name
+                    }}</button>
                   }
                   <button type="button" (click)="duplicateSurvey(survey, $event)">Duplicar</button>
                   <button type="button" (click)="toggleSurveyStatus(survey, $event)">{{ survey.status === 'activo' ?
@@ -206,18 +210,18 @@
           </div>
 
           <div class="tile-quick-actions" (click)="$event.stopPropagation()">
-              <button type="button" (click)="router.navigate(['/editor', survey.id])">
-                <span class="material-symbols-outlined">edit</span>
-                Editar
-              </button>
-              <button type="button" (click)="router.navigate(['/analytics', survey.id])">
-                <span class="material-symbols-outlined">bar_chart</span>
-                Resultados
-              </button>
-              <button type="button" (click)="copyLink(survey.id, $event)">
-                <span class="material-symbols-outlined">link</span>
-                {{ copiedId() === survey.id ? 'Copiado' : 'Compartir' }}
-              </button>
+            <button type="button" (click)="router.navigate(['/editor', survey.id])">
+              <span class="material-symbols-outlined">edit</span>
+              Editar
+            </button>
+            <button type="button" (click)="router.navigate(['/analytics', survey.id])">
+              <span class="material-symbols-outlined">bar_chart</span>
+              Resultados
+            </button>
+            <button type="button" (click)="copyLink(survey.id, $event)">
+              <span class="material-symbols-outlined">link</span>
+              {{ copiedId() === survey.id ? 'Copiado' : 'Compartir' }}
+            </button>
           </div>
         </article>
         }
@@ -227,17 +231,17 @@
           <h2>{{ emptyTitle() }}</h2>
           <p>{{ emptyDescription() }}</p>
           @if (surveys().length === 0) {
-            <div class="empty-state-actions">
-              <button class="create-survey-btn" type="button" (click)="openCreateModal()">
-                <span>+</span>
-                Crear una encuesta
-              </button>
-              <a class="template-survey-btn" routerLink="/templates" [queryParams]="{ returnTo: '/dashboard' }">
-                Usar plantilla
-              </a>
-            </div>
+          <div class="empty-state-actions">
+            <button class="create-survey-btn" type="button" (click)="openCreateModal()">
+              <span>+</span>
+              Crear una encuesta
+            </button>
+            <a class="template-survey-btn" routerLink="/templates" [queryParams]="{ returnTo: '/dashboard' }">
+              Usar plantilla
+            </a>
+          </div>
           } @else {
-            <button class="template-survey-btn" type="button" (click)="resetDashboardFilters()">Limpiar filtros</button>
+          <button class="template-survey-btn" type="button" (click)="resetDashboardFilters()">Limpiar filtros</button>
           }
         </div>
         }
@@ -250,83 +254,90 @@
 
 
   @if (showCreateModal()) {
-    <div class="modal-backdrop" (click)="closeCreateModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <button class="modal-close" type="button" (click)="closeCreateModal()" aria-label="Cerrar">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-        
-        <h2>Nueva Encuesta</h2>
-        <p>Define los detalles básicos para empezar.</p>
+  <div class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="closeCreateModal()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
 
-        <div class="modal-body">
-          <div class="create-mode-grid" aria-label="Forma de creacion">
-            <button type="button" [class.active]="createMode() === 'blank'" (click)="setCreateMode('blank')">
-              <span class="material-symbols-outlined">edit_note</span>
-              <strong>Desde cero</strong>
-              <small>Crear preguntas y luego disenar.</small>
-            </button>
-            <button type="button" [class.active]="createMode() === 'template'" (click)="setCreateMode('template')">
-              <span class="material-symbols-outlined">grid_view</span>
-              <strong>Usar base</strong>
-              <small>Partir de preguntas ya armadas.</small>
-            </button>
-            <button type="button" [class.active]="createMode() === 'import'" (click)="setCreateMode('import')">
-              <span class="material-symbols-outlined">upload_file</span>
-              <strong>Importar</strong>
-              <small>Pega preguntas en texto.</small>
-            </button>
-          </div>
-          @if (createMode() === 'blank') {
-          <label class="modal-field">
-            <span>Título</span>
-            <input type="text" [ngModel]="newSurveyTitle()" (ngModelChange)="newSurveyTitle.set($event)" placeholder="Ej: Satisfacción del cliente" autofocus />
-          </label>
+      <h2>Nueva Encuesta</h2>
+      <p>Define los detalles básicos para empezar.</p>
 
-          <label class="modal-field">
-            <span>Descripción (Opcional)</span>
-            <textarea [ngModel]="newSurveyDescription()" (ngModelChange)="newSurveyDescription.set($event)" placeholder="Ayuda a los participantes a entender el propósito..."></textarea>
-          </label>
-          }
-          @if (createMode() === 'import') {
-          <div class="import-format-card">
-            <div>
-              <strong>Formato rápido</strong>
-              <p>Una pregunta por línea. Si tiene opciones, sepáralas con <code>|</code>. Puedes usar números, viñetas y comentarios con <code>#</code>.</p>
-            </div>
-            <button type="button" (click)="fillImportExample()">Usar ejemplo</button>
-          </div>
-          <label class="modal-field">
-            <span>Título</span>
-            <input type="text" [ngModel]="importTitle()" (ngModelChange)="importTitle.set($event)" placeholder="Ej: Diagnóstico de clientes" />
-          </label>
-
-          <label class="modal-field">
-            <span>Preguntas</span>
-            <textarea class="import-textarea" [ngModel]="importText()" (ngModelChange)="importText.set($event)" placeholder="Una pregunta por línea. Para opciones usa: ¿Qué prefieres? | Opción A | Opción B"></textarea>
-          </label>
-          <p class="import-help">Ejemplo: ¿Qué canal usas más? | WhatsApp | Email | Instagram</p>
-          }
-          @if (createError()) {
-            <p class="modal-error">{{ createError() }}</p>
-          }
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-cancel" type="button" (click)="closeCreateModal()" [disabled]="isCreating()">Cancelar</button>
-          <button class="btn-confirm" type="button" (click)="confirmCreate()" [disabled]="(createMode() === 'blank' && !newSurveyTitle().trim()) || (createMode() === 'import' && !importText().trim()) || isCreating()">
-            @if (isCreating()) {
-              <span>Creando...</span>
-            } @else if (createMode() === 'template') {
-              <span>Ver bases</span>
-            } @else if (createMode() === 'import') {
-              <span>Importar archivo</span>
-            } @else {
-              <span>Continuar al Editor</span>
-            }
+      <div class="modal-body">
+        <div class="create-mode-grid" aria-label="Forma de creacion">
+          <button type="button" [class.active]="createMode() === 'blank'" (click)="setCreateMode('blank')">
+            <span class="material-symbols-outlined">edit_note</span>
+            <strong>Desde cero</strong>
+            <small>Crear preguntas y luego disenar.</small>
+          </button>
+          <button type="button" [class.active]="createMode() === 'template'" (click)="setCreateMode('template')">
+            <span class="material-symbols-outlined">grid_view</span>
+            <strong>Usar base</strong>
+            <small>Partir de preguntas ya armadas.</small>
+          </button>
+          <button type="button" [class.active]="createMode() === 'import'" (click)="setCreateMode('import')">
+            <span class="material-symbols-outlined">upload_file</span>
+            <strong>Importar</strong>
+            <small>Pega preguntas en texto.</small>
           </button>
         </div>
+        @if (createMode() === 'blank') {
+        <label class="modal-field">
+          <span>Título</span>
+          <input type="text" [ngModel]="newSurveyTitle()" (ngModelChange)="newSurveyTitle.set($event)"
+            placeholder="Ej: Satisfacción del cliente" autofocus />
+        </label>
+
+        <label class="modal-field">
+          <span>Descripción (Opcional)</span>
+          <textarea [ngModel]="newSurveyDescription()" (ngModelChange)="newSurveyDescription.set($event)"
+            placeholder="Ayuda a los participantes a entender el propósito..."></textarea>
+        </label>
+        }
+        @if (createMode() === 'import') {
+        <div class="import-format-card">
+          <div>
+            <strong>Formato rápido</strong>
+            <p>Una pregunta por línea. Si tiene opciones, sepáralas con <code>|</code>. Puedes usar números, viñetas y
+              comentarios con <code>#</code>.</p>
+          </div>
+          <button type="button" (click)="fillImportExample()">Usar ejemplo</button>
+        </div>
+        <label class="modal-field">
+          <span>Título</span>
+          <input type="text" [ngModel]="importTitle()" (ngModelChange)="importTitle.set($event)"
+            placeholder="Ej: Diagnóstico de clientes" />
+        </label>
+
+        <label class="modal-field">
+          <span>Preguntas</span>
+          <textarea class="import-textarea" [ngModel]="importText()" (ngModelChange)="importText.set($event)"
+            placeholder="Una pregunta por línea. Para opciones usa: ¿Qué prefieres? | Opción A | Opción B"></textarea>
+        </label>
+        <p class="import-help">Ejemplo: ¿Qué canal usas más? | WhatsApp | Email | Instagram</p>
+        }
+        @if (createError()) {
+        <p class="modal-error">{{ createError() }}</p>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" (click)="closeCreateModal()"
+          [disabled]="isCreating()">Cancelar</button>
+        <button class="btn-confirm" type="button" (click)="confirmCreate()"
+          [disabled]="(createMode() === 'blank' && !newSurveyTitle().trim()) || (createMode() === 'import' && !importText().trim()) || isCreating()">
+          @if (isCreating()) {
+          <span>Creando...</span>
+          } @else if (createMode() === 'template') {
+          <span>Ver bases</span>
+          } @else if (createMode() === 'import') {
+          <span>Importar archivo</span>
+          } @else {
+          <span>Continuar al Editor</span>
+          }
+        </button>
       </div>
     </div>
+  </div>
   }
 </main>
