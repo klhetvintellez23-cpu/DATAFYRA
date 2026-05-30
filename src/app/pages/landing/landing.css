@@ -712,3 +712,113 @@
     transition: none;
   }
 }
+
+/* Novedades y Actualizaciones Section */
+.updates-section {
+  padding: 7rem 1.5rem;
+  background: #ffffff;
+  border-top: 1px solid #e7e0ec;
+}
+
+.updates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.update-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+  border-radius: 20px;
+  background: #f9f5ff;
+  border: 1px solid #e7e0ec;
+  transition: all var(--vp-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.update-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(127, 0, 255, 0.08);
+  border-color: #7f00ff;
+}
+
+.update-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  align-self: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.update-tag.tag-new {
+  background: #e6f9f0;
+  color: #10b981;
+}
+
+.update-tag.tag-improvement {
+  background: #e5f1ff;
+  color: #3b82f6;
+}
+
+.update-tag.tag-fix {
+  background: #fff8e6;
+  color: #f59e0b;
+}
+
+.update-card h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1d1b20;
+  margin: 0 0 1rem;
+  line-height: 1.25;
+}
+
+.update-card p {
+  font-size: 0.95rem;
+  color: #49454e;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+  font-weight: 300;
+  flex-grow: 1;
+}
+
+.update-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(231, 224, 236, 0.6);
+  padding-top: 1rem;
+}
+
+.update-date {
+  font-size: 0.8rem;
+  color: #625b71;
+  font-weight: 700;
+}
+
+.update-more-link {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #7f00ff;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: transform var(--vp-transition-fast);
+}
+
+.update-card:hover .update-more-link {
+  transform: translateX(3px);
+}
+
+.update-more-link span {
+  font-size: 1.1rem;
+}

@@ -44,6 +44,62 @@ export class DashboardPage implements OnInit {
   importTitle = signal<string>('Encuesta importada');
   importText = signal<string>('');
 
+  // General controls
+  showNotifications = signal<boolean>(false);
+  showUserMenu = signal<boolean>(false);
+  showConfigModal = signal<boolean>(false);
+  showHelpModal = signal<boolean>(false);
+  showTutorial = signal<boolean>(false);
+  tutorialStep = signal<number>(0);
+
+  // General settings (local storage)
+  themePreference = signal<'light' | 'dark'>('light');
+  languagePreference = signal<'es' | 'en'>('es');
+  accountName = signal<string>('');
+  accountEmail = signal<string>('');
+  accountRole = signal<string>('Creador');
+  enableEmailNotifications = signal<boolean>(true);
+  enableSystemNotifications = signal<boolean>(true);
+
+  // Notification items
+  notifications = signal<Array<{
+    id: string;
+    title: string;
+    description: string;
+    date: Date;
+    read: boolean;
+    type: 'system' | 'survey' | 'activity';
+  }>>([
+    {
+      id: '1',
+      title: 'Nueva respuesta recibida',
+      description: 'Tu encuesta "Satisfacción del Cliente" tiene 1 nueva respuesta.',
+      date: new Date(Date.now() - 1000 * 60 * 30),
+      read: false,
+      type: 'survey'
+    },
+    {
+      id: '2',
+      title: 'Encuesta publicada con éxito',
+      description: 'La encuesta "Feedback de Producto v2" ahora está activa.',
+      date: new Date(Date.now() - 1000 * 60 * 120),
+      read: false,
+      type: 'activity'
+    },
+    {
+      id: '3',
+      title: '¡Bienvenido a Datafyra!',
+      description: 'Comienza creando tu primera encuesta o usando una plantilla.',
+      date: new Date(Date.now() - 1000 * 60 * 60 * 24),
+      read: true,
+      type: 'system'
+    }
+  ]);
+
+  unreadNotificationsCount = computed(() => 
+    this.notifications().filter(n => !n.read).length
+  );
+
   private readonly foldersStorageKey = 'datafyra-dashboard-folders';
   private readonly surveyFoldersStorageKey = 'datafyra-dashboard-survey-folders';
 
@@ -111,6 +167,7 @@ export class DashboardPage implements OnInit {
 
     this.loadDashboardState();
     this.loadSurveys();
+    this.loadUserPreferences();
   }
 
   async loadSurveys(): Promise<void> {
@@ -521,5 +578,177 @@ export class DashboardPage implements OnInit {
           options: options.map((option) => ({ id: crypto.randomUUID(), texto: option }))
         };
       });
+  }
+
+  // Load preferences from local storage
+  private loadUserPreferences(): void {
+    const savedTheme = localStorage.getItem('datafyra-theme') as 'light' | 'dark' || 'light';
+    this.themePreference.set(savedTheme);
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    const savedLang = localStorage.getItem('datafyra-lang') as 'es' | 'en' || 'es';
+    this.languagePreference.set(savedLang);
+
+    const savedEmailNotifs = localStorage.getItem('datafyra-email-notifs') !== 'false';
+    this.enableEmailNotifications.set(savedEmailNotifs);
+
+    const savedSysNotifs = localStorage.getItem('datafyra-sys-notifs') !== 'false';
+    this.enableSystemNotifications.set(savedSysNotifs);
+  }
+
+  // Dropdown controls
+  toggleNotifications(event: Event): void {
+    event.stopPropagation();
+    this.showNotifications.update((v) => !v);
+    this.showUserMenu.set(false);
+  }
+
+  toggleUserMenu(event: Event): void {
+    event.stopPropagation();
+    this.showUserMenu.update((v) => !v);
+    this.showNotifications.set(false);
+  }
+
+  // Settings modal
+  openSettingsModal(): void {
+    const user = this.auth.user();
+    this.accountName.set(user?.name || 'Usuario Datafyra');
+    this.accountEmail.set(user?.email || 'usuario@datafyra.com');
+    this.accountRole.set('Creador');
+
+    this.showConfigModal.set(true);
+    this.showUserMenu.set(false);
+  }
+
+  closeSettingsModal(): void {
+    this.showConfigModal.set(false);
+  }
+
+  setThemePreference(theme: 'light' | 'dark'): void {
+    this.themePreference.set(theme);
+  }
+
+  setLanguagePreference(lang: 'es' | 'en'): void {
+    this.languagePreference.set(lang);
+  }
+
+  saveSettings(): void {
+    localStorage.setItem('datafyra-theme', this.themePreference());
+    localStorage.setItem('datafyra-lang', this.languagePreference());
+    localStorage.setItem('datafyra-email-notifs', String(this.enableEmailNotifications()));
+    localStorage.setItem('datafyra-sys-notifs', String(this.enableSystemNotifications()));
+    
+    if (this.themePreference() === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    this.addNotification({
+      title: 'Configuración guardada',
+      description: 'Tus preferencias generales se actualizaron con éxito.',
+      type: 'system'
+    });
+
+    this.closeSettingsModal();
+  }
+
+  // Help modal
+  openHelpModal(): void {
+    this.showHelpModal.set(true);
+    this.showUserMenu.set(false);
+  }
+
+  closeHelpModal(): void {
+    this.showHelpModal.set(false);
+  }
+
+  sendSupportMessage(event: Event): void {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const subjectInput = form.querySelector('input[name="subject"]') as HTMLInputElement;
+
+    alert(`Mensaje enviado con éxito.\nAsunto: ${subjectInput.value}\nNos pondremos en contacto contigo pronto.`);
+    form.reset();
+
+    this.addNotification({
+      title: 'Mensaje de soporte enviado',
+      description: `Se registró tu consulta con el asunto: "${subjectInput.value}".`,
+      type: 'activity'
+    });
+
+    this.closeHelpModal();
+  }
+
+  // Welcome tutorial
+  startInteractiveTutorial(): void {
+    this.showHelpModal.set(false);
+    this.tutorialStep.set(0);
+    this.showTutorial.set(true);
+  }
+
+  closeTutorial(): void {
+    this.showTutorial.set(false);
+  }
+
+  nextTutorialStep(): void {
+    if (this.tutorialStep() < 3) {
+      this.tutorialStep.update((s) => s + 1);
+    } else {
+      this.closeTutorial();
+      this.addNotification({
+        title: 'Tutorial completado',
+        description: '¡Felicidades! Ya conoces las herramientas básicas de Datafyra.',
+        type: 'system'
+      });
+    }
+  }
+
+  prevTutorialStep(): void {
+    if (this.tutorialStep() > 0) {
+      this.tutorialStep.update((s) => s - 1);
+    }
+  }
+
+  // Notifications logic
+  markAsRead(id: string): void {
+    this.notifications.update((list) => 
+      list.map((n) => n.id === id ? { ...n, read: true } : n)
+    );
+  }
+
+  markAllNotificationsAsRead(): void {
+    this.notifications.update((list) => 
+      list.map((n) => ({ ...n, read: true }))
+    );
+  }
+
+  addNotification(item: { title: string; description: string; type: 'system' | 'survey' | 'activity' }): void {
+    this.notifications.update((list) => [
+      {
+        id: crypto.randomUUID(),
+        title: item.title,
+        description: item.description,
+        date: new Date(),
+        read: false,
+        type: item.type
+      },
+      ...list
+    ]);
+  }
+
+  openProfileModal(): void {
+    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@datafyra.com'}\nRol: Creador`);
+    this.showUserMenu.set(false);
+  }
+
+  logoutUser(): void {
+    this.showUserMenu.set(false);
+    void this.auth.logout();
+    void this.router.navigate(['/']);
   }
 }

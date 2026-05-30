@@ -41,16 +41,17 @@
     </section>
 
     <nav class="sidebar-support-nav" aria-label="Soporte y configuración">
-      <button class="sidebar-support-item" type="button">
+      <button class="sidebar-support-item" type="button" (click)="openHelpModal()">
         <span class="material-symbols-outlined">help</span>
         Ayuda
       </button>
-      <button class="sidebar-support-item" type="button">
+      <button class="sidebar-support-item" type="button" (click)="openSettingsModal()">
         <span class="material-symbols-outlined">settings</span>
         Configuración
       </button>
     </nav>
 
+    <!-- DESACTIVADO TEMPORALMENTE: Plan Free
     <section class="plan-card" aria-label="Estado del plan">
       <h2>Plan Free</h2>
       <p>Limite mensual de respuestas</p>
@@ -63,6 +64,7 @@
       <span class="renewal">Renovacion en 19 dias</span>
       <button class="limit-btn" type="button">Aumentar el limite</button>
     </section>
+    -->
   </aside>
 
   <section class="dashboard-workspace">
@@ -78,12 +80,96 @@
       </div>
 
       <div class="topbar-icon-actions" aria-label="Cuenta y notificaciones">
-        <button class="dashboard-icon-btn" type="button" aria-label="Notificaciones">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <button class="dashboard-icon-btn" type="button" aria-label="Usuario">
-          <span class="material-symbols-outlined">account_circle</span>
-        </button>
+        <!-- Notificaciones -->
+        <div class="dropdown-wrapper">
+          <button class="dashboard-icon-btn" type="button" aria-label="Notificaciones" (click)="toggleNotifications($event)">
+            <span class="material-symbols-outlined">notifications</span>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="notification-badge">{{ unreadNotificationsCount() }}</span>
+            }
+          </button>
+          
+          @if (showNotifications()) {
+            <div class="notifications-dropdown" (click)="$event.stopPropagation()">
+              <div class="dropdown-header">
+                <h3>Notificaciones</h3>
+                @if (unreadNotificationsCount() > 0) {
+                  <button class="mark-all-read-btn" type="button" (click)="markAllNotificationsAsRead()">Marcar todas</button>
+                }
+              </div>
+              <div class="notifications-list">
+                @for (notification of notifications(); track notification.id) {
+                  <div class="notification-item" [class.unread]="!notification.read" (click)="markAsRead(notification.id)">
+                    <div class="notification-icon-wrapper" [class]="notification.type">
+                      <span class="material-symbols-outlined">
+                        @if (notification.type === 'system') { settings_suggest }
+                        @else if (notification.type === 'survey') { poll }
+                        @else { ads_click }
+                      </span>
+                    </div>
+                    <div class="notification-content">
+                      <h4>{{ notification.title }}</h4>
+                      <p>{{ notification.description }}</p>
+                      <span class="notification-time">{{ notification.date | date:'shortTime' }}</span>
+                    </div>
+                    @if (!notification.read) {
+                      <span class="unread-dot"></span>
+                    }
+                  </div>
+                } @empty {
+                  <div class="no-notifications">
+                    <span class="material-symbols-outlined">notifications_off</span>
+                    <p>No tienes notificaciones recientes</p>
+                  </div>
+                }
+              </div>
+              <div class="dropdown-footer">
+                <small>Estructura lista para futuras notificaciones</small>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Usuario -->
+        <div class="dropdown-wrapper">
+          <button class="dashboard-icon-btn user-avatar-btn" type="button" aria-label="Usuario" (click)="toggleUserMenu($event)">
+            <span class="user-avatar">{{ userInitial() }}</span>
+          </button>
+
+          @if (showUserMenu()) {
+            <div class="user-dropdown" (click)="$event.stopPropagation()">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">{{ userInitial() }}</div>
+                <div class="user-dropdown-info">
+                  <strong>{{ auth.user()?.name || 'Usuario Datafyra' }}</strong>
+                  <span>{{ auth.user()?.email || 'usuario@datafyra.com' }}</span>
+                  <span class="user-role-badge">Creador / Plan Free</span>
+                </div>
+              </div>
+              <div class="user-dropdown-menu">
+                <button type="button" (click)="openProfileModal()">
+                  <span class="material-symbols-outlined">person</span>
+                  Mi perfil
+                </button>
+                <button type="button" (click)="openSettingsModal()">
+                  <span class="material-symbols-outlined">settings</span>
+                  Configuración
+                </button>
+                <div class="dropdown-divider"></div>
+                <button type="button" class="premium-future-btn" disabled title="Próximamente disponible">
+                  <span class="material-symbols-outlined">workspace_premium</span>
+                  <span>Mejorar a Pro</span>
+                  <em class="premium-tag">Premium</em>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button type="button" class="logout-btn" (click)="logoutUser()">
+                  <span class="material-symbols-outlined">logout</span>
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     </header>
 
@@ -336,6 +422,266 @@
           <span>Continuar al Editor</span>
           }
         </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Configuración General Modal -->
+  @if (showConfigModal()) {
+  <div class="modal-backdrop" (click)="closeSettingsModal()">
+    <div class="modal-content settings-modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="closeSettingsModal()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <h2>Configuración General</h2>
+      <p>Personaliza tu experiencia en Datafyra y administra tus preferencias.</p>
+
+      <div class="modal-body settings-modal-body">
+        <div class="settings-grid-layout">
+          <!-- Sección: Apariencia -->
+          <div class="settings-section">
+            <h3 class="settings-sec-title">
+              <span class="material-symbols-outlined">palette</span>
+              Apariencia
+            </h3>
+            <div class="theme-selector-group">
+              <span class="setting-label">Tema del sistema</span>
+              <div class="theme-buttons">
+                <button type="button" class="theme-btn" [class.active]="themePreference() === 'light'" (click)="setThemePreference('light')">
+                  <span class="material-symbols-outlined">light_mode</span>
+                  Claro
+                </button>
+                <button type="button" class="theme-btn" [class.active]="themePreference() === 'dark'" (click)="setThemePreference('dark')">
+                  <span class="material-symbols-outlined">dark_mode</span>
+                  Oscuro
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Idioma -->
+          <div class="settings-section">
+            <h3 class="settings-sec-title">
+              <span class="material-symbols-outlined">language</span>
+              Idioma
+            </h3>
+            <label class="modal-field select-field">
+              <span>Selecciona tu idioma</span>
+              <select [ngModel]="languagePreference()" (ngModelChange)="setLanguagePreference($event)">
+                <option value="es">Español (ES)</option>
+                <option value="en">English (EN)</option>
+              </select>
+            </label>
+          </div>
+
+          <!-- Sección: Cuenta -->
+          <div class="settings-section">
+            <h3 class="settings-sec-title">
+              <span class="material-symbols-outlined">person</span>
+              Detalles de la Cuenta
+            </h3>
+            <div class="account-details-box">
+              <label class="modal-field">
+                <span>Nombre Completo</span>
+                <input type="text" [ngModel]="accountName()" (ngModelChange)="accountName.set($event)" placeholder="Tu nombre" />
+              </label>
+              <label class="modal-field">
+                <span>Correo Electrónico (Solo lectura)</span>
+                <input type="email" [ngModel]="accountEmail()" disabled class="disabled-input" />
+              </label>
+              <label class="modal-field">
+                <span>Rol Actual</span>
+                <input type="text" [ngModel]="accountRole()" disabled class="disabled-input" />
+              </label>
+              <div class="premium-structure-preview">
+                <span class="material-symbols-outlined">workspace_premium</span>
+                <div>
+                  <strong>¿Necesitas roles adicionales?</strong>
+                  <p>La asignación de múltiples creadores y administradores estará disponible en el Plan Enterprise.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección: Notificaciones -->
+          <div class="settings-section">
+            <h3 class="settings-sec-title">
+              <span class="material-symbols-outlined">notifications</span>
+              Preferencias de Notificaciones
+            </h3>
+            <div class="notification-toggles">
+              <label class="toggle-control">
+                <input type="checkbox" [ngModel]="enableEmailNotifications()" (ngModelChange)="enableEmailNotifications.set($event)" />
+                <span class="toggle-label">
+                  <strong>Notificaciones por correo</strong>
+                  <small>Recibir resúmenes semanales de tus encuestas activas.</small>
+                </span>
+              </label>
+              <label class="toggle-control">
+                <input type="checkbox" [ngModel]="enableSystemNotifications()" (ngModelChange)="enableSystemNotifications.set($event)" />
+                <span class="toggle-label">
+                  <strong>Alertas del sistema</strong>
+                  <small>Notificarme sobre nuevas características y actualizaciones.</small>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" (click)="closeSettingsModal()">Cancelar</button>
+        <button class="btn-confirm" type="button" (click)="saveSettings()">Guardar Preferencias</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Centro de Ayuda Modal -->
+  @if (showHelpModal()) {
+  <div class="modal-backdrop" (click)="closeHelpModal()">
+    <div class="modal-content help-modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="closeHelpModal()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <h2>Centro de Ayuda y Soporte</h2>
+      <p>Encuentra respuestas a tus preguntas y aprende a usar Datafyra como un experto.</p>
+
+      <div class="modal-body help-modal-body">
+        <div class="help-grid-layout">
+          <!-- Guía Rápida -->
+          <div class="help-section">
+            <h3>Guía Rápida de Uso</h3>
+            <div class="quick-guide-steps">
+              <div class="guide-step">
+                <span class="step-num">1</span>
+                <div>
+                  <h4>Crea una encuesta</h4>
+                  <p>Haz clic en "Crear una encuesta" o usa una plantilla prediseñada para comenzar.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">2</span>
+                <div>
+                  <h4>Diseña y personaliza</h4>
+                  <p>Agrega preguntas del tipo que prefieras y ajusta los colores de marca desde el editor.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">3</span>
+                <div>
+                  <h4>Comparte y recopila</h4>
+                  <p>Publica tu encuesta y copia el enlace público para enviarlo por WhatsApp o Redes Sociales.</p>
+                </div>
+              </div>
+            </div>
+            
+            <button type="button" class="start-tutorial-btn" (click)="startInteractiveTutorial()">
+              <span class="material-symbols-outlined">play_circle</span>
+              Iniciar Tutorial de Bienvenida
+            </button>
+          </div>
+
+          <!-- FAQ (Preguntas Frecuentes) -->
+          <div class="help-section">
+            <h3>Preguntas Frecuentes (FAQ)</h3>
+            <div class="faq-list">
+              <details class="faq-item" open>
+                <summary>¿Cuántas encuestas puedo crear en el Plan Free?</summary>
+                <p>Puedes crear encuestas ilimitadas. El plan gratuito tiene un límite mensual de 100 respuestas recopiladas en total.</p>
+              </details>
+              <details class="faq-item">
+                <summary>¿Puedo personalizar los colores y logos?</summary>
+                <p>Sí, en el editor puedes configurar la paleta de colores de marca, el estilo de las preguntas, bordes, tipografías y el fondo de la encuesta.</p>
+              </details>
+              <details class="faq-item">
+                <summary>¿Cómo veo los resultados de mis encuestas?</summary>
+                <p>Desde el Inicio del Dashboard, haz clic en "Resultados" en la tarjeta de tu encuesta para acceder a gráficos estadísticos en tiempo real.</p>
+              </details>
+            </div>
+          </div>
+
+          <!-- Formulario de Contacto -->
+          <div class="help-section">
+            <h3>Contacto de Soporte</h3>
+            <p class="support-intro">¿Tienes alguna duda o inconveniente técnico? Envíanos un mensaje y te responderemos en menos de 24 horas.</p>
+            <form class="support-form" (submit)="sendSupportMessage($event)">
+              <label class="modal-field">
+                <span>Asunto</span>
+                <input type="text" name="subject" required placeholder="Ej: Problema al guardar encuesta" />
+              </label>
+              <label class="modal-field">
+                <span>Mensaje</span>
+                <textarea name="message" required placeholder="Escribe aquí tu duda o problema detalladamente..."></textarea>
+              </label>
+              <button type="submit" class="send-support-btn">
+                <span class="material-symbols-outlined">send</span>
+                Enviar Mensaje
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Tutorial Interactivo de Bienvenida -->
+  @if (showTutorial()) {
+  <div class="tutorial-overlay" (click)="closeTutorial()">
+    <div class="tutorial-card" (click)="$event.stopPropagation()">
+      <button class="tutorial-close" type="button" (click)="closeTutorial()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="tutorial-progress-bar">
+        <span [style.width.%]="(tutorialStep() + 1) * 25"></span>
+      </div>
+
+      <div class="tutorial-body">
+        @if (tutorialStep() === 0) {
+          <div class="tutorial-step-content">
+            <span class="material-symbols-outlined tutorial-icon">waving_hand</span>
+            <h2>¡Te damos la bienvenida a Datafyra!</h2>
+            <p>Este breve recorrido te mostrará cómo crear, diseñar y analizar tus encuestas rápidamente. ¡Es muy fácil!</p>
+          </div>
+        }
+        @else if (tutorialStep() === 1) {
+          <div class="tutorial-step-content">
+            <span class="material-symbols-outlined tutorial-icon">folder_open</span>
+            <h2>Organiza tus Proyectos</h2>
+            <p>En el panel izquierdo puedes agrupar tus encuestas en carpetas personalizadas. Ideal para mantener tus encuestas ordenadas.</p>
+          </div>
+        }
+        @else if (tutorialStep() === 2) {
+          <div class="tutorial-step-content">
+            <span class="material-symbols-outlined tutorial-icon">edit_square</span>
+            <h2>Crea y Diseña en Minutos</h2>
+            <p>Usa el botón "Crear una encuesta" para empezar desde cero, o "Usar plantilla" para aprovechar diseños ya optimizados de nuestro catálogo.</p>
+          </div>
+        }
+        @else if (tutorialStep() === 3) {
+          <div class="tutorial-step-content">
+            <span class="material-symbols-outlined tutorial-icon">monitoring</span>
+            <h2>Monitorea en Tiempo Real</h2>
+            <p>Cada respuesta se registra al instante. Accede a estadísticas completas y exporta tus datos haciendo clic en el botón "Resultados" de cada encuesta.</p>
+          </div>
+        }
+      </div>
+
+      <div class="tutorial-actions">
+        <button type="button" class="btn-cancel" (click)="closeTutorial()">Saltar</button>
+        <div class="tutorial-nav-buttons">
+          @if (tutorialStep() > 0) {
+            <button type="button" class="btn-secondary-tutorial" (click)="prevTutorialStep()">Atrás</button>
+          }
+          <button type="button" class="btn-confirm-tutorial" (click)="nextTutorialStep()">
+            {{ tutorialStep() === 3 ? '¡Comenzar!' : 'Siguiente' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -147,7 +147,7 @@ interface QrPreset {
   standalone: true,
   imports: [FormsModule, RouterLink, CommonModule, SurveySimulatorComponent],
   templateUrl: './editor.html',
-  styleUrls: ['./editor.css', './editor-share-results.css']
+  styleUrls: ['./editor.css', './editor-canvas.css', './editor-share-results.css']
 })
 export class EditorPage implements OnInit, OnDestroy {
   survey = signal<Survey | null>(null);
