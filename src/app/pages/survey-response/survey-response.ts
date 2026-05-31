@@ -275,23 +275,20 @@ export class SurveyResponsePage implements OnInit {
   }
 
   themeStyle(): Record<string, string> {
-    const fallback = this.publicThemePresets[0];
     const brand = this.brand();
-    const primary = this.safeColor(brand.primaryColor, fallback.primary);
-    const secondary = this.safeColor(brand.secondaryColor, fallback.secondary);
-    const background = this.safeColor(brand.backgroundColor, fallback.background);
-    const surface = this.safeColor(brand.surfaceColor, fallback.surface);
-    const text = this.safeColor(brand.textColor, fallback.text);
-    const metadata = this.survey()?.metadata as any;
-    const backgroundImage = brand.backgroundImageUrl || metadata?.theme?.backgroundImage || metadata?.backgroundImage || '';
-    const buttonColor = this.safeColor(brand.buttonColor, primary);
-    const buttonText = this.safeColor(brand.buttonTextColor, '#ffffff');
-    const cardRadius = this.clampNumber(brand.cardRadius, 16, 36, 28);
-    const buttonRadius = this.clampNumber(brand.buttonRadius, 10, 999, 18);
+    // Use values directly with simple fallbacks — identical to simulator logic.
+    // Avoid clamping or regex-based rejection that would cause visual divergence.
+    const primary = brand.primaryColor || '#7c3aed';
+    const secondary = brand.secondaryColor || '#06b6d4';
+    const background = brand.backgroundColor || '#f5f3ff';
+    const surface = brand.surfaceColor || '#ffffff';
+    const text = brand.textColor || '#111827';
+    const buttonColor = brand.buttonColor || primary;
+    const buttonText = brand.buttonTextColor || '#ffffff';
     const fontTitle = brand.fontTitle || 'Inter';
     const fontBody = brand.fontBody || 'Inter';
 
-    return {
+    const style: Record<string, string> = {
       '--response-primary': primary,
       '--response-secondary': secondary,
       '--response-bg': background,
@@ -303,12 +300,20 @@ export class SurveyResponsePage implements OnInit {
       '--response-border': 'rgba(15, 23, 42, 0.12)',
       '--response-button': buttonColor,
       '--response-button-text': buttonText,
-      '--response-button-radius': `${brand.buttonStyle === 'pill' ? 999 : buttonRadius}px`,
-      '--response-card-radius': `${cardRadius}px`,
+      '--response-button-radius': `${brand.buttonStyle === 'pill' ? 999 : brand.buttonRadius ?? 18}px`,
+      '--response-card-radius': `${brand.cardRadius ?? 28}px`,
       '--response-title-font': `'${fontTitle}', Inter, sans-serif`,
-      '--response-body-font': `'${fontBody}', Inter, sans-serif`,
-      '--response-background-image': backgroundImage ? `url(${backgroundImage})` : 'none'
+      '--response-body-font': `'${fontBody}', Inter, sans-serif`
     };
+
+    // Background image handling — match simulator overlay approach.
+    if (brand.backgroundImageUrl) {
+      style['background-image'] = `linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)), url("${brand.backgroundImageUrl}")`;
+      style['background-size'] = 'cover';
+      style['background-position'] = 'center';
+    }
+
+    return style;
   }
 
   private async submitSurvey(): Promise<void> {

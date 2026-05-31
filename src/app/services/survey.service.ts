@@ -292,6 +292,7 @@ export class SurveyService {
         id: question.id,
         type: question.type,
         text: question.text,
+        description: question.description,
         required: question.required,
         options: question.options.map((option) => ({
           id: option.id,
@@ -366,8 +367,29 @@ export class SurveyService {
   }
 
   private hydrateSurvey(survey: Survey, metadataOverride?: SurveyMetadata): Survey {
-    const rawMetadata = metadataOverride ?? this.readMetadata(survey.id) ?? survey.metadata ?? {};
-    
+    // Priority: explicit override > database metadata > localStorage fallback > empty default.
+    // Database (survey.metadata) is the canonical source of truth.
+    // localStorage only supplements missing fields during the creator's editing session.
+    const dbMetadata = survey.metadata ?? {};
+    const localMetadata = this.readMetadata(survey.id);
+
+    let rawMetadata: SurveyMetadata;
+    if (metadataOverride) {
+      rawMetadata = metadataOverride;
+    } else if (dbMetadata && Object.keys(dbMetadata).length > 0) {
+      // DB is present — use it as the primary source.
+      // Merge localStorage brand fields only if DB brand is missing (graceful fallback for creator).
+      rawMetadata = { ...dbMetadata };
+      if (localMetadata?.brand && !rawMetadata.brand) {
+        rawMetadata.brand = localMetadata.brand;
+      }
+    } else if (localMetadata) {
+      // No DB metadata at all — fall back to localStorage (legacy / column-missing scenario).
+      rawMetadata = localMetadata;
+    } else {
+      rawMetadata = {};
+    }
+
     if (!rawMetadata.canvas) {
       rawMetadata.canvas = this.createDefaultCanvas(survey, rawMetadata);
     }

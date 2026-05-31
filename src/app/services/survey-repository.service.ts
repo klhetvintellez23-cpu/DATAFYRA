@@ -22,6 +22,7 @@ export interface SurveyQuestionInput {
   id: string;
   type: QuestionType;
   text: string;
+  description?: string;
   required: boolean;
   options: Array<{
     id: string;
@@ -474,6 +475,10 @@ export class SurveyRepositoryService {
 
   private buildMetadata(question: SurveyQuestionInput): Record<string, any> | null {
     const meta: Record<string, any> = { questionType: question.type };
+
+    if (question.description?.trim()) {
+      meta['description'] = question.description.trim();
+    }
     
     if (question.type === 'rating' || question.type === 'scale' || question.type === 'nps') {
       meta['min'] = question.min ?? 1;
