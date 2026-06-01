@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Question, Survey, SurveyMetadata, SurveyService } from '../../services/survey.service';
+import { AdminDataService } from '../../services/admin-data.service';
 
 type DashboardFilter = 'all' | 'activo' | 'borrador' | 'cerrado' | 'withResponses' | 'withoutResponses';
 type DashboardSort = 'updated' | 'responses' | 'created' | 'status';
@@ -88,7 +89,7 @@ export class DashboardPage implements OnInit {
     },
     {
       id: '3',
-      title: '¡Bienvenido a Datafyra!',
+      title: '¡Bienvenido a DataEncuestas!',
       description: 'Comienza creando tu primera encuesta o usando una plantilla.',
       date: new Date(Date.now() - 1000 * 60 * 60 * 24),
       read: true,
@@ -100,8 +101,23 @@ export class DashboardPage implements OnInit {
     this.notifications().filter(n => !n.read).length
   );
 
-  private readonly foldersStorageKey = 'datafyra-dashboard-folders';
-  private readonly surveyFoldersStorageKey = 'datafyra-dashboard-survey-folders';
+  dialogModal = signal<{ type: 'prompt' | 'confirm'; title: string; placeholder?: string; message?: string; value?: string; onConfirm: (val?: string) => void } | null>(null);
+  dialogInputValue = '';
+
+  closeDialogModal(): void {
+    this.dialogModal.set(null);
+  }
+
+  confirmDialogModal(): void {
+    const modal = this.dialogModal();
+    if (modal) {
+      modal.onConfirm(this.dialogInputValue);
+    }
+    this.closeDialogModal();
+  }
+
+  private readonly foldersStorageKey = 'dataencuestas-dashboard-folders';
+  private readonly surveyFoldersStorageKey = 'dataencuestas-dashboard-survey-folders';
 
   readonly filterOptions: { value: DashboardFilter; label: string }[] = [
     { value: 'all', label: 'Todas' },
@@ -154,10 +170,18 @@ export class DashboardPage implements OnInit {
     return sorted;
   });
 
+  readonly isAdministrative = computed(() => {
+    const user = this.auth.user();
+    if (!user) return false;
+    const adminUser = this.adminData.users().find(u => u.email.toLowerCase() === user.email.toLowerCase());
+    return adminUser ? ['Moderator', 'Admin', 'SuperAdmin'].includes(adminUser.role) : false;
+  });
+
   constructor(
     public auth: AuthService,
     private surveyService: SurveyService,
-    public router: Router
+    public router: Router,
+    public adminData: AdminDataService
   ) {}
 
   ngOnInit(): void {
@@ -324,36 +348,58 @@ export class DashboardPage implements OnInit {
   }
 
   addFolder(): void {
-    const name = prompt('Nombre de la carpeta');
-    const clean = name?.trim();
-    if (!clean) return;
-    this.folders.update((folders) => [...folders, { id: crypto.randomUUID(), name: clean }]);
-    this.persistFolders();
+    this.dialogInputValue = '';
+    this.dialogModal.set({
+      type: 'prompt',
+      title: 'Crear nueva carpeta',
+      placeholder: 'Nombre de la carpeta',
+      value: '',
+      onConfirm: (name) => {
+        const clean = name?.trim();
+        if (!clean) return;
+        this.folders.update((folders) => [...folders, { id: crypto.randomUUID(), name: clean }]);
+        this.persistFolders();
+      }
+    });
   }
 
   renameFolder(folder: DashboardFolder, event: Event): void {
     event.stopPropagation();
-    const name = prompt('Nuevo nombre de la carpeta', folder.name);
-    const clean = name?.trim();
-    if (!clean) return;
-    this.folders.update((folders) => folders.map((item) => item.id === folder.id ? { ...item, name: clean } : item));
-    this.persistFolders();
+    this.dialogInputValue = folder.name;
+    this.dialogModal.set({
+      type: 'prompt',
+      title: 'Renombrar carpeta',
+      placeholder: 'Nuevo nombre de la carpeta',
+      value: folder.name,
+      onConfirm: (name) => {
+        const clean = name?.trim();
+        if (!clean) return;
+        this.folders.update((folders) => folders.map((item) => item.id === folder.id ? { ...item, name: clean } : item));
+        this.persistFolders();
+      }
+    });
   }
 
   deleteFolder(folder: DashboardFolder, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Eliminar la carpeta "${folder.name}"? Las encuestas no se eliminarán.`)) return;
-    this.folders.update((folders) => folders.filter((item) => item.id !== folder.id));
-    this.surveyFolders.update((map) => {
-      const next = { ...map };
-      for (const [surveyId, folderId] of Object.entries(next)) {
-        if (folderId === folder.id) delete next[surveyId];
+    this.dialogModal.set({
+      type: 'confirm',
+      title: 'Eliminar carpeta',
+      message: `¿Estás seguro de que deseas eliminar la carpeta "${folder.name}"? Las encuestas dentro de ella no se perderán.`,
+      onConfirm: () => {
+        this.folders.update((folders) => folders.filter((item) => item.id !== folder.id));
+        this.surveyFolders.update((map) => {
+          const next = { ...map };
+          for (const [surveyId, folderId] of Object.entries(next)) {
+            if (folderId === folder.id) delete next[surveyId];
+          }
+          return next;
+        });
+        if (this.selectedFolderId() === folder.id) this.selectedFolderId.set(null);
+        this.persistFolders();
+        this.persistSurveyFolders();
       }
-      return next;
     });
-    if (this.selectedFolderId() === folder.id) this.selectedFolderId.set(null);
-    this.persistFolders();
-    this.persistSurveyFolders();
   }
 
   moveSurveyToFolder(surveyId: string, folderId: string | null, event: Event): void {
@@ -393,12 +439,17 @@ export class DashboardPage implements OnInit {
 
   async deleteSurvey(id: string, event: Event): Promise<void> {
     event.stopPropagation();
-    if (!confirm('Eliminar esta encuesta? Esta accion no se puede deshacer.')) return;
-
-    const success = await this.surveyService.deleteSurvey(id);
-    if (success) {
-      await this.loadSurveys();
-    }
+    this.dialogModal.set({
+      type: 'confirm',
+      title: 'Eliminar encuesta',
+      message: '¿Estás seguro de que deseas eliminar esta encuesta? Esta acción es irreversible y se perderán de manera definitiva todas sus respuestas.',
+      onConfirm: async () => {
+        const success = await this.surveyService.deleteSurvey(id);
+        if (success) {
+          await this.loadSurveys();
+        }
+      }
+    });
   }
 
   copyLink(id: string, event: Event): void {
@@ -582,7 +633,7 @@ export class DashboardPage implements OnInit {
 
   // Load preferences from local storage
   private loadUserPreferences(): void {
-    const savedTheme = localStorage.getItem('datafyra-theme') as 'light' | 'dark' || 'light';
+    const savedTheme = localStorage.getItem('dataencuestas-theme') as 'light' | 'dark' || 'light';
     this.themePreference.set(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -590,13 +641,13 @@ export class DashboardPage implements OnInit {
       document.documentElement.classList.remove('dark');
     }
 
-    const savedLang = localStorage.getItem('datafyra-lang') as 'es' | 'en' || 'es';
+    const savedLang = localStorage.getItem('dataencuestas-lang') as 'es' | 'en' || 'es';
     this.languagePreference.set(savedLang);
 
-    const savedEmailNotifs = localStorage.getItem('datafyra-email-notifs') !== 'false';
+    const savedEmailNotifs = localStorage.getItem('dataencuestas-email-notifs') !== 'false';
     this.enableEmailNotifications.set(savedEmailNotifs);
 
-    const savedSysNotifs = localStorage.getItem('datafyra-sys-notifs') !== 'false';
+    const savedSysNotifs = localStorage.getItem('dataencuestas-sys-notifs') !== 'false';
     this.enableSystemNotifications.set(savedSysNotifs);
   }
 
@@ -616,8 +667,8 @@ export class DashboardPage implements OnInit {
   // Settings modal
   openSettingsModal(): void {
     const user = this.auth.user();
-    this.accountName.set(user?.name || 'Usuario Datafyra');
-    this.accountEmail.set(user?.email || 'usuario@datafyra.com');
+    this.accountName.set(user?.name || 'Usuario DataEncuestas');
+    this.accountEmail.set(user?.email || 'usuario@dataencuestas.com');
     this.accountRole.set('Creador');
 
     this.showConfigModal.set(true);
@@ -637,10 +688,10 @@ export class DashboardPage implements OnInit {
   }
 
   saveSettings(): void {
-    localStorage.setItem('datafyra-theme', this.themePreference());
-    localStorage.setItem('datafyra-lang', this.languagePreference());
-    localStorage.setItem('datafyra-email-notifs', String(this.enableEmailNotifications()));
-    localStorage.setItem('datafyra-sys-notifs', String(this.enableSystemNotifications()));
+    localStorage.setItem('dataencuestas-theme', this.themePreference());
+    localStorage.setItem('dataencuestas-lang', this.languagePreference());
+    localStorage.setItem('dataencuestas-email-notifs', String(this.enableEmailNotifications()));
+    localStorage.setItem('dataencuestas-sys-notifs', String(this.enableSystemNotifications()));
     
     if (this.themePreference() === 'dark') {
       document.documentElement.classList.add('dark');
@@ -702,7 +753,7 @@ export class DashboardPage implements OnInit {
       this.closeTutorial();
       this.addNotification({
         title: 'Tutorial completado',
-        description: '¡Felicidades! Ya conoces las herramientas básicas de Datafyra.',
+        description: '¡Felicidades! Ya conoces las herramientas básicas de DataEncuestas.',
         type: 'system'
       });
     }
@@ -742,7 +793,7 @@ export class DashboardPage implements OnInit {
   }
 
   openProfileModal(): void {
-    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@datafyra.com'}\nRol: Creador`);
+    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@dataencuestas.com'}\nRol: Creador`);
     this.showUserMenu.set(false);
   }
 

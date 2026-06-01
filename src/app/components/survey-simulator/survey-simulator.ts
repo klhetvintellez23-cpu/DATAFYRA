@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, computed, signal } from '@angular/core';
 import { AnswerValue, Question, Survey, SurveyBrand, SurveyElementConfig } from '../../services/survey.service';
 import { SurveyNavigationButtonsComponent } from '../../pages/survey-response/components/survey-navigation-buttons';
@@ -24,8 +24,9 @@ type SimulatorTransformKind =
   | 'end-title'
   | 'end-desc'
   | 'end-summary'
-  | 'end-brand';
-type TransformMode = 'move' | 'resize';
+  | 'end-brand'
+  | string;
+type TransformMode = 'move' | 'resize' | 'stretch';
 
 @Component({
   selector: 'app-survey-simulator',
@@ -79,6 +80,8 @@ type TransformMode = 'move' | 'resize';
           (titleChange)="welcomeTitleChange.emit($event)"
           (descriptionChange)="welcomeDescriptionChange.emit($event)"
           (ctaTextChange)="ctaTextChange.emit($event)"
+          (extraTextChange)="extraTextChange.emit($event)"
+          (deleteRequest)="deleteRequest.emit($event)"
           (start)="startSurvey()">
         </app-survey-welcome-screen>
       } @else if (shouldShowQuestions()) {
@@ -103,6 +106,15 @@ type TransformMode = 'move' | 'resize';
               class="design-question-card-shell"
               [class.design-clickable-question]="designMode"
               (click)="openStaticQuestion(question)">
+              
+              @if (designMode) {
+                <div class="design-question-actions-pill" (click)="$event.stopPropagation()">
+                  <button type="button" (click)="editQuestion.emit(survey.questions.indexOf(question))" title="Editar"><span class="material-symbols-outlined">edit</span></button>
+                  <button type="button" (click)="editQuestionLogic.emit(survey.questions.indexOf(question))" title="Lógica"><span class="material-symbols-outlined">account_tree</span></button>
+                  <button type="button" class="danger" (click)="deleteQuestion.emit(survey.questions.indexOf(question))" title="Eliminar"><span class="material-symbols-outlined">delete</span></button>
+                </div>
+              }
+
               <app-survey-question-card
                 [question]="question"
                 [index]="survey.questions.indexOf(question)"
@@ -114,21 +126,14 @@ type TransformMode = 'move' | 'resize';
                 (answerChange)="updateAnswer(question.id, $event)">
               </app-survey-question-card>
             </div>
-            @if (designMode) {
-              <div class="design-question-actions">
-                <button type="button" class="design-add-question" (click)="addQuestionAfter.emit(survey.questions.indexOf(question)); $event.stopPropagation()" title="Agregar pregunta">
-                  <span class="material-symbols-outlined">add</span>
-                </button>
-                <button type="button" class="design-logic-button" (click)="editQuestion.emit(survey.questions.indexOf(question)); $event.stopPropagation()">
-                  <span class="material-symbols-outlined">edit</span>
-                  Editar
-                </button>
-                <button type="button" class="design-logic-button" (click)="editQuestionLogic.emit(survey.questions.indexOf(question)); $event.stopPropagation()">
-                  <span class="material-symbols-outlined">account_tree</span>
-                  Condicionales
-                </button>
-              </div>
-            }
+          }
+          @if (designMode && currentPageQuestions().length > 0) {
+            <div class="design-page-add-question">
+               <button class="design-page-add-btn" type="button" (click)="addQuestionAfter.emit(survey.questions.length - 1)">
+                 <span class="material-symbols-outlined">add</span>
+                 Nueva pregunta
+               </button>
+            </div>
           }
         </section>
 
@@ -239,8 +244,8 @@ type TransformMode = 'move' | 'resize';
 
     .simulator-page.design-mode .simulator-question-page {
       width: min(900px, 100%);
-      padding: 24px 28px 20px;
-      gap: 0;
+      padding: 32px 28px;
+      gap: 28px;
     }
 
     .empty-question-page {
@@ -357,58 +362,69 @@ type TransformMode = 'move' | 'resize';
       border-radius: 999px;
     }
 
-    .design-question-actions {
+    .design-question-actions-pill {
+      position: absolute;
+      top: 16px;
+      right: 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin: -4px 0 20px;
-      position: relative;
-      z-index: 4;
+      background: #f1edf7;
+      border-radius: 999px;
+      padding: 4px;
+      z-index: 10;
+      gap: 2px;
     }
 
-    .design-add-question {
-      width: 30px;
-      height: 30px;
+    .design-question-actions-pill button {
+      background: none;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(79, 70, 229, 0.24);
-      border-radius: 999px;
-      background: #ffffff;
-      color: var(--response-primary, #4f46e5);
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
       cursor: pointer;
+      color: #625b71;
     }
 
-    .design-add-question .material-symbols-outlined {
-      font-size: 19px;
+    .design-question-actions-pill button:hover {
+      background: rgba(0,0,0,0.05);
     }
 
-    .design-logic-button {
-      height: 30px;
-      display: inline-flex;
+    .design-question-actions-pill button.danger {
+      color: #ef4444;
+    }
+
+    .design-question-actions-pill button .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .design-page-add-question {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .design-page-add-btn {
+      background: #7f00ff;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 999px;
-      padding: 0 12px;
-      background: rgba(255, 255, 255, 0.88);
-      color: #374151;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 800;
+      gap: 8px;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 12px rgba(127,0,255,0.25);
+      transition: all 0.2s ease;
     }
 
-    .design-logic-button:hover,
-    .design-add-question:hover {
-      border-color: var(--response-primary, #4f46e5);
-      color: var(--response-primary, #4f46e5);
-    }
-
-    .design-logic-button .material-symbols-outlined {
-      font-size: 16px;
+    .design-page-add-btn:hover {
+      background: #6a00d6;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(127,0,255,0.35);
     }
 
     :host ::ng-deep .simulator-page.question-style-compact app-survey-question-card .question-card {
@@ -617,8 +633,11 @@ export class SurveySimulatorComponent implements OnChanges {
   @Output() endTitleChange = new EventEmitter<string>();
   @Output() endDescriptionChange = new EventEmitter<string>();
   @Output() addQuestionAfter = new EventEmitter<number>();
+  @Output() extraTextChange = new EventEmitter<{id: string, text: string}>();
+  @Output() deleteRequest = new EventEmitter<string>();
   @Output() editQuestion = new EventEmitter<number>();
   @Output() editQuestionLogic = new EventEmitter<number>();
+  @Output() deleteQuestion = new EventEmitter<number>();
   @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: SimulatorTransformKind; mode: TransformMode; index?: number; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
 
   private readonly inputVersion = signal(0);
@@ -774,7 +793,8 @@ export class SurveySimulatorComponent implements OnChanges {
       '--response-body-font': `'${brand.fontBody || 'Inter'}', Inter, sans-serif`
     };
     if (brand.backgroundImageUrl) {
-      style['background-image'] = `linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)), url("${brand.backgroundImageUrl}")`;
+      const opacity = 1 - (brand.backgroundOpacity !== undefined ? brand.backgroundOpacity : 0.28);
+      style['background-image'] = `linear-gradient(rgba(255, 255, 255, ${opacity}), rgba(255, 255, 255, ${opacity})), url("${brand.backgroundImageUrl}")`;
       style['background-size'] = 'cover';
       style['background-position'] = 'center';
     }

@@ -40,7 +40,7 @@ export class SurveyResponsePage implements OnInit {
   isSubmitting = signal(false);
   validationError = signal('');
   submitError = signal('');
-  private readonly partialStoragePrefix = 'datafyra-partial-response';
+  private readonly partialStoragePrefix = 'dataencuestas-partial-response';
 
   readonly publicThemePresets: PublicThemePreset[] = [
     { name: 'Lila moderno', primary: '#7c3aed', secondary: '#06b6d4', background: '#f5f3ff', surface: '#ffffff', text: '#111827' },
@@ -308,7 +308,8 @@ export class SurveyResponsePage implements OnInit {
 
     // Background image handling — match simulator overlay approach.
     if (brand.backgroundImageUrl) {
-      style['background-image'] = `linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)), url("${brand.backgroundImageUrl}")`;
+      const opacity = 1 - (brand.backgroundOpacity !== undefined ? brand.backgroundOpacity : 0.28);
+      style['background-image'] = `linear-gradient(rgba(255, 255, 255, ${opacity}), rgba(255, 255, 255, ${opacity})), url("${brand.backgroundImageUrl}")`;
       style['background-size'] = 'cover';
       style['background-position'] = 'center';
     }

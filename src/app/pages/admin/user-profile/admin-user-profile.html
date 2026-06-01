@@ -1,0 +1,391 @@
+<div class="profile-view-container" *ngIf="userProfile() as user; else userNotFound">
+  <!-- Top Navigation & Back Link -->
+  <div class="view-header">
+    <a routerLink="/admin/users" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="back-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+      </svg>
+      <span>Volver a la base de usuarios</span>
+    </a>
+  </div>
+
+  <!-- Profile Layout Details Grid -->
+  <div class="profile-layout-grid">
+    <!-- Left Column: User Summary Card & Direct Moderation Options -->
+    <div class="profile-side-column">
+      <!-- 1. General Info Card -->
+      <div class="profile-card info-summary-card">
+        <div class="avatar-large-container">
+          <img *ngIf="user.avatarUrl; else largeNoAvatar" [src]="user.avatarUrl" alt="Avatar" class="avatar-large" />
+          <ng-template #largeNoAvatar>
+            <div class="avatar-large-placeholder">
+              {{ user.name.charAt(0).toUpperCase() }}
+            </div>
+          </ng-template>
+          <span class="status-indicator-dot large" [ngClass]="user.status"></span>
+        </div>
+
+        <h2 class="user-profile-name">{{ user.name }}</h2>
+        <span class="user-profile-email">{{ user.email }}</span>
+        
+        <div class="profile-badge-deck">
+          <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">{{ user.role }}</span>
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status }}</span>
+        </div>
+
+        <div class="profile-details-list">
+          <div class="detail-row">
+            <span class="detail-label">ID de Usuario</span>
+            <code class="detail-code">{{ user.id }}</code>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Fecha Registro</span>
+            <span class="detail-value">{{ user.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Último Acceso</span>
+            <span class="detail-value">{{ user.lastLoginAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Moderation Control Card -->
+      <div class="profile-card moderation-controls-card">
+        <h3 class="side-card-title">Acciones de Moderación</h3>
+        <p class="side-card-desc">Modifica el rol del sistema o altera el estado administrativo de la cuenta.</p>
+
+        <div class="controls-deck">
+          <!-- Role Mod Button -->
+          <button class="control-action-btn primary-action" (click)="initializeRoleModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-action-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+            <span>Modificar Rol</span>
+          </button>
+
+          <!-- Toggle Suspended Button -->
+          <button 
+            *ngIf="user.status === 'activo'" 
+            class="control-action-btn warning-action" 
+            (click)="triggerSuspend()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-action-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+            <span>Suspender Cuenta</span>
+          </button>
+
+          <button 
+            *ngIf="user.status === 'suspendido'" 
+            class="control-action-btn success-action" 
+            (click)="triggerActivate()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-action-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span>Reactivar Cuenta</span>
+          </button>
+
+          <!-- Toggle Blocked Button -->
+          <button 
+            *ngIf="user.status !== 'bloqueado'" 
+            class="control-action-btn danger-action" 
+            (click)="triggerBlock()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-action-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            <span>Bloquear Permanentemente</span>
+          </button>
+
+          <button 
+            *ngIf="user.status === 'bloqueado'" 
+            class="control-action-btn success-action" 
+            (click)="triggerUnblock()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-action-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h16.5a1.5 1.5 0 0 0 1.5-1.5V15a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 15v5.25a1.5 1.5 0 0 0 1.5 1.5Z" />
+            </svg>
+            <span>Desbloquear Cuenta</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: surveys list table & moderation timelines -->
+    <div class="profile-main-column">
+      <!-- 1. Surveys Table card -->
+      <div class="profile-card main-table-card">
+        <div class="card-header">
+          <h2 class="card-title">Encuestas de {{ user.name }}</h2>
+          <p class="card-subtitle">Listado de encuestas creadas y controles administrativos directos.</p>
+        </div>
+
+        <div class="surveys-table-wrapper" *ngIf="userSurveys().length > 0; else noSurveys">
+          <table class="profile-surveys-table">
+            <thead>
+              <tr>
+                <th>Título de Encuesta</th>
+                <th>Fecha de Creación</th>
+                <th>Estado</th>
+                <th class="align-center">Respuestas</th>
+                <th class="align-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let survey of userSurveys()" class="survey-row">
+                <td class="survey-title-cell font-bold">
+                  {{ survey.title }}
+                </td>
+                <td class="survey-date-cell">
+                  {{ survey.createdAt | date:'mediumDate' }}
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="survey.status">
+                    {{ survey.status === 'despublicado' ? 'Despublicada' : survey.status }}
+                  </span>
+                </td>
+                <td class="align-center font-bold">
+                  {{ survey.responsesCount | number }}
+                </td>
+                <td class="align-right">
+                  <div class="survey-actions-deck">
+                    <!-- Archive action -->
+                    <button 
+                      *ngIf="survey.status === 'activo'" 
+                      class="survey-action-btn" 
+                      title="Archivar Encuesta"
+                      (click)="triggerArchiveSurvey(survey.id)"
+                    >
+                      Archivar
+                    </button>
+                    <!-- Unpublish action -->
+                    <button 
+                      *ngIf="survey.status === 'activo'" 
+                      class="survey-action-btn" 
+                      title="Despublicar Encuesta"
+                      (click)="triggerUnpublishSurvey(survey.id)"
+                    >
+                      Despublicar
+                    </button>
+                    <!-- Restore action -->
+                    <button 
+                      *ngIf="survey.status !== 'activo'" 
+                      class="survey-action-btn restore" 
+                      title="Restaurar Encuesta"
+                      (click)="triggerRestoreSurvey(survey.id)"
+                    >
+                      Restaurar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty surveys state -->
+        <ng-template #noSurveys>
+          <div class="empty-column-box">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-col-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+            <h4 class="empty-col-title">Sin encuestas creadas</h4>
+            <p class="empty-col-desc">Este usuario no ha diseñado ningún formulario o encuesta en DataEncuestas todavía.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- 2. Audit Trail timeline for this specific user -->
+      <div class="profile-card user-timeline-card">
+        <div class="card-header">
+          <h2 class="card-title">Historial de Moderación</h2>
+          <p class="card-subtitle">Registros del sistema relacionados con la cuenta de este usuario.</p>
+        </div>
+
+        <div class="timeline-container" *ngIf="userLogs().length > 0; else noLogs">
+          <div class="timeline-log-item" *ngFor="let log of userLogs()">
+            <div class="log-top-meta">
+              <span class="log-admin-name font-bold">{{ log.adminName }}</span>
+              <span class="log-admin-email">({{ log.adminEmail }})</span>
+              <span class="log-timestamp">{{ log.timestamp | date:'medium' }}</span>
+            </div>
+            <div class="log-body-details">
+              <span class="log-badge" [ngClass]="getLogBadgeClass(log.action)">
+                {{ formatLogAction(log.action) }}
+              </span>
+              <p class="log-desc">{{ log.details }}</p>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noLogs>
+          <div class="empty-column-box">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-col-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <h4 class="empty-col-title">Historial Limpio</h4>
+            <p class="empty-col-desc">No se han registrado acciones de moderación o cambios de rol administrativos para esta cuenta.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECLARATIVE MODAL DIALOG CONTAINER LAYER -->
+  
+  <!-- A. Change Role Modal -->
+  <div class="modal-backdrop-layer" *ngIf="activeModal() === 'role'">
+    <div class="modal-card-box vp-animate-fade-in">
+      <div class="modal-header">
+        <h3 class="modal-title">Modificar Rol de Usuario</h3>
+        <button class="modal-close-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Selecciona el nuevo rol para <strong>{{ user.name }}</strong>. Los cambios serán auditados.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Rol del Sistema</label>
+          <select class="form-select" [ngModel]="selectedNewRole()" (ngModelChange)="selectedNewRole.set($event)">
+            <option value="User">User (Creador de encuestas regular)</option>
+            <option value="Moderator">Moderator (Acceso lectura + despublicar encuestas)</option>
+            <option value="Admin">Admin (Control total + restaurar encuestas + bloqueos)</option>
+            <option value="SuperAdmin" *ngIf="loggedInAdmin()?.role === 'SuperAdmin'">SuperAdmin (Control total + cambios de rol)</option>
+          </select>
+        </div>
+
+        <div class="modal-alert-box alert-warning" *ngIf="selectedNewRole() === 'SuperAdmin'">
+          <strong>Atención:</strong> Asignar el rol SuperAdmin otorga control absoluto sobre el sistema, incluyendo la capacidad de promover y suspender otros administradores.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" (click)="closeModal()">Cancelar</button>
+        <button class="modal-btn primary" (click)="confirmRoleChange()">Confirmar Cambio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. Suspend Account Modal -->
+  <div class="modal-backdrop-layer" *ngIf="activeModal() === 'suspend'">
+    <div class="modal-card-box vp-animate-fade-in">
+      <div class="modal-header">
+        <h3 class="modal-title">Suspender Cuenta de Usuario</h3>
+        <button class="modal-close-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">La suspensión impedirá que <strong>{{ user.name }}</strong> inicie sesión y edite encuestas temporalmente.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Motivo de la Suspensión (Obligatorio)</label>
+          <textarea 
+            class="form-textarea" 
+            placeholder="Especifica detalladamente el motivo de la suspensión temporal..."
+            [ngModel]="suspensionReason()"
+            (ngModelChange)="suspensionReason.set($event)"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" (click)="closeModal()">Cancelar</button>
+        <button 
+          class="modal-btn warning" 
+          [disabled]="!suspensionReason().trim()" 
+          (click)="confirmSuspend()"
+        >
+          Confirmar Suspensión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. Block Account Modal -->
+  <div class="modal-backdrop-layer" *ngIf="activeModal() === 'block'">
+    <div class="modal-card-box vp-animate-fade-in">
+      <div class="modal-header">
+        <h3 class="modal-title">Bloquear Cuenta Permanentemente</h3>
+        <button class="modal-close-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Bloquear la cuenta a <strong>{{ user.name }}</strong> de forma permanente restringirá su acceso indefinidamente. Esta acción es de alto impacto.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Motivo del Bloqueo Permanente (Obligatorio)</label>
+          <textarea 
+            class="form-textarea" 
+            placeholder="Describe los motivos graves que justifican el bloqueo permanente de la cuenta..."
+            [ngModel]="blockReason()"
+            (ngModelChange)="blockReason.set($event)"
+          ></textarea>
+        </div>
+
+        <div class="modal-alert-box alert-danger">
+          <strong>Advertencia de Seguridad:</strong> Los bloqueos de cuenta son de carácter definitivo a menos que otro administrador realice un desbloqueo manual explícito.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" (click)="closeModal()">Cancelar</button>
+        <button 
+          class="modal-btn danger" 
+          [disabled]="!blockReason().trim()" 
+          (click)="confirmBlock()"
+        >
+          Confirmar Bloqueo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- D. Unpublish Survey Modal -->
+  <div class="modal-backdrop-layer" *ngIf="activeModal() === 'survey_unpublish'">
+    <div class="modal-card-box vp-animate-fade-in">
+      <div class="modal-header">
+        <h3 class="modal-title">Despublicar Encuesta</h3>
+        <button class="modal-close-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Despublicar esta encuesta impedirá que los encuestados ingresen nuevas respuestas a este formulario.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Motivo de Despublicación (Obligatorio)</label>
+          <textarea 
+            class="form-textarea" 
+            placeholder="Especifica el motivo de la desactivación de la encuesta (ej. Spam, Contenido inapropiado)..."
+            [ngModel]="unpublishReason()"
+            (ngModelChange)="unpublishReason.set($event)"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" (click)="closeModal()">Cancelar</button>
+        <button 
+          class="modal-btn warning" 
+          [disabled]="!unpublishReason().trim()" 
+          (click)="confirmUnpublishSurvey()"
+        >
+          Confirmar Despublicación
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- User Not Found Fallback -->
+<ng-template #userNotFound>
+  <div class="not-found-container vp-animate-fade-in">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="not-found-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+    </svg>
+    <h3 class="not-found-title">Usuario no encontrado</h3>
+    <p class="not-found-desc">La cuenta de usuario solicitada no existe o ha sido eliminada del sistema.</p>
+    <a routerLink="/admin/users" class="not-found-btn">Volver a la base de usuarios</a>
+  </div>
+</ng-template>

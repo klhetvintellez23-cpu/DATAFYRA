@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
 import { Survey, SurveyBrand, SurveyElementConfig } from '../../../services/survey.service';
 
-type WelcomeDesignKind = 'logo' | 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta' | 'welcome-preview';
-type TransformMode = 'move' | 'resize';
+type WelcomeDesignKind = 'logo' | 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta' | 'welcome-preview' | string;
+type TransformMode = 'move' | 'resize' | 'stretch';
 
 @Component({
   selector: 'app-survey-welcome-screen',
@@ -30,66 +30,108 @@ type TransformMode = 'move' | 'resize';
             </div>
           }
 
-          <div class="design-box" data-design-kind="welcome-kicker" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-kicker')" [ngStyle]="boxStyle('welcome-kicker')" (mousedown)="selectBox($event, 'welcome-kicker')">
-            <button class="move-handle" type="button" aria-label="Mover etiqueta" (mousedown)="beginTransform($event, 'welcome-kicker', 'move')"></button>
-            <div class="welcome-kicker">Encuesta publica</div>
-            <button class="resize-handle" type="button" aria-label="Redimensionar etiqueta" (mousedown)="beginTransform($event, 'welcome-kicker', 'resize')"></button>
-          </div>
-
-          <div class="design-box" data-design-kind="welcome-title" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-title')" [ngStyle]="boxStyle('welcome-title')" (mousedown)="selectBox($event, 'welcome-title')">
-            <button class="move-handle" type="button" aria-label="Mover titulo" (mousedown)="beginTransform($event, 'welcome-title', 'move')"></button>
-            <h1
-              [style.font-size.px]="fontSize('welcome-title')"
-              [attr.contenteditable]="designMode ? 'true' : null"
-              [class.design-editable]="designMode"
-              (keydown)="designMode && preventEditableEnter($event)"
-              (blur)="designMode && emitEditable($event, titleChange)">
-              {{ survey.title || 'Nueva encuesta' }}
-            </h1>
-            <button class="resize-handle" type="button" aria-label="Redimensionar titulo" (mousedown)="beginTransform($event, 'welcome-title', 'resize')"></button>
-          </div>
-
-          <div class="design-box" data-design-kind="welcome-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-desc')" [ngStyle]="boxStyle('welcome-desc')" (mousedown)="selectBox($event, 'welcome-desc')">
-            <button class="move-handle" type="button" aria-label="Mover descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'move')"></button>
-            <p
-              [style.font-size.px]="fontSize('welcome-desc')"
-              [attr.contenteditable]="designMode ? 'true' : null"
-              [class.design-editable]="designMode"
-              (blur)="designMode && emitEditable($event, descriptionChange)">
-              {{ survey.description || 'Tu opinion nos ayuda a mejorar. Completar esta encuesta tomara solo unos minutos.' }}
-            </p>
-            <button class="resize-handle" type="button" aria-label="Redimensionar descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'resize')"></button>
-          </div>
-
-          <div class="design-box" data-design-kind="welcome-meta" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-meta')" [ngStyle]="boxStyle('welcome-meta')" (mousedown)="selectBox($event, 'welcome-meta')">
-            <button class="move-handle" type="button" aria-label="Mover datos" (mousedown)="beginTransform($event, 'welcome-meta', 'move')"></button>
-            <div class="welcome-meta">
-              <span>{{ questionCount }} pregunta{{ questionCount === 1 ? '' : 's' }}</span>
-              <span>Respuesta segura</span>
+          @if (!isHidden('welcome-kicker')) {
+            <div class="design-box" data-design-kind="welcome-kicker" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-kicker')" [ngStyle]="boxStyle('welcome-kicker')" (mousedown)="selectBox($event, 'welcome-kicker')">
+              <button class="move-handle" type="button" aria-label="Mover etiqueta" (mousedown)="beginTransform($event, 'welcome-kicker', 'move')"></button>
+              <div class="welcome-kicker">Encuesta publica</div>
+              <button class="resize-handle" type="button" aria-label="Redimensionar etiqueta" (mousedown)="beginTransform($event, 'welcome-kicker', 'resize')"></button>
+              <button class="stretch-handle" type="button" aria-label="Estirar etiqueta" (mousedown)="beginTransform($event, 'welcome-kicker', 'stretch')"></button>
             </div>
-            <button class="resize-handle" type="button" aria-label="Redimensionar datos" (mousedown)="beginTransform($event, 'welcome-meta', 'resize')"></button>
-          </div>
+          }
 
-          <div class="design-box" data-design-kind="welcome-cta" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-cta')" [ngStyle]="boxStyle('welcome-cta')" (mousedown)="selectBox($event, 'welcome-cta')">
-            <button class="move-handle" type="button" aria-label="Mover boton" (mousedown)="beginTransform($event, 'welcome-cta', 'move')"></button>
-            <button class="welcome-button" type="button" (click)="!designMode && start.emit()">
-              @if (designMode) {
-                <span
-                  contenteditable="true"
-                  class="button-editable"
-                  [style.font-size.px]="fontSize('welcome-cta')"
-                  (click)="$event.stopPropagation()"
-                  (mousedown)="$event.stopPropagation()"
-                  (keydown)="preventEditableEnter($event)"
-                  (blur)="emitEditable($event, ctaTextChange)">
-                  {{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}
-                </span>
-              } @else {
-                <span [style.font-size.px]="fontSize('welcome-cta')">{{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}</span>
-              }
-            </button>
-            <button class="resize-handle" type="button" aria-label="Redimensionar boton" (mousedown)="beginTransform($event, 'welcome-cta', 'resize')"></button>
-          </div>
+          @if (!isHidden('welcome-title')) {
+            <div class="design-box" data-design-kind="welcome-title" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-title')" [ngStyle]="boxStyle('welcome-title')" (mousedown)="selectBox($event, 'welcome-title')">
+              <button class="move-handle" type="button" aria-label="Mover titulo" (mousedown)="beginTransform($event, 'welcome-title', 'move')"></button>
+              <h1
+                [style.font-size.px]="fontSize('welcome-title')"
+                [attr.contenteditable]="designMode ? 'true' : null"
+                [class.design-editable]="designMode"
+                (keydown)="designMode && preventEditableEnter($event)"
+                (blur)="designMode && emitEditable($event, titleChange)">
+                {{ survey.title || 'Nueva encuesta' }}
+              </h1>
+              <button class="resize-handle" type="button" aria-label="Redimensionar titulo" (mousedown)="beginTransform($event, 'welcome-title', 'resize')"></button>
+              <button class="stretch-handle" type="button" aria-label="Estirar titulo" (mousedown)="beginTransform($event, 'welcome-title', 'stretch')"></button>
+            </div>
+          }
+
+          @if (!isHidden('welcome-desc')) {
+            <div class="design-box" data-design-kind="welcome-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-desc')" [ngStyle]="boxStyle('welcome-desc')" (mousedown)="selectBox($event, 'welcome-desc')">
+              <button class="move-handle" type="button" aria-label="Mover descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'move')"></button>
+              <p
+                [style.font-size.px]="fontSize('welcome-desc')"
+                [attr.contenteditable]="designMode ? 'true' : null"
+                [class.design-editable]="designMode"
+                (blur)="designMode && emitEditable($event, descriptionChange)">
+                {{ survey.description || 'Tu opinion nos ayuda a mejorar. Completar esta encuesta tomara solo unos minutos.' }}
+              </p>
+              <button class="resize-handle" type="button" aria-label="Redimensionar descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'resize')"></button>
+              <button class="stretch-handle" type="button" aria-label="Estirar descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'stretch')"></button>
+            </div>
+          }
+
+          @for (extra of survey.metadata?.welcomeExtraTexts; track extra.id) {
+            @if (!isHidden(extra.id)) {
+              <div class="welcome-extra-text design-box"
+                   [ngStyle]="boxStyle(extra.id)"
+                   [class.design-active]="designMode"
+                   [class.design-selected]="isSelected(extra.id)"
+                   [attr.data-design-kind]="extra.id"
+                   (mousedown)="selectBox($event, extra.id)">
+                <button class="move-handle" type="button" aria-label="Mover texto extra" (mousedown)="beginTransform($event, extra.id, 'move')"></button>
+                <p
+                  [style.font-size.px]="fontSize(extra.id)"
+                  [attr.contenteditable]="designMode ? 'true' : null"
+                  [class.design-editable]="designMode"
+                  (blur)="designMode && emitExtraTextChange($event, extra.id)">
+                  {{ extra.text || 'Nuevo texto' }}
+                </p>
+                <button class="resize-handle" type="button" aria-label="Redimensionar texto extra" (mousedown)="beginTransform($event, extra.id, 'resize')"></button>
+                <button class="stretch-handle" type="button" aria-label="Estirar texto extra" (mousedown)="beginTransform($event, extra.id, 'stretch')"></button>
+                @if (isSelected(extra.id)) {
+                  <button class="delete-element-btn" type="button" title="Borrar elemento" (click)="deleteRequest.emit(extra.id)">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                  </button>
+                }
+              </div>
+            }
+          }
+
+          @if (!isHidden('welcome-meta')) {
+            <div class="design-box" data-design-kind="welcome-meta" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-meta')" [ngStyle]="boxStyle('welcome-meta')" (mousedown)="selectBox($event, 'welcome-meta')">
+              <button class="move-handle" type="button" aria-label="Mover datos" (mousedown)="beginTransform($event, 'welcome-meta', 'move')"></button>
+              <div class="welcome-meta">
+                <span>{{ questionCount }} pregunta{{ questionCount === 1 ? '' : 's' }}</span>
+                <span>Respuesta segura</span>
+              </div>
+              <button class="resize-handle" type="button" aria-label="Redimensionar datos" (mousedown)="beginTransform($event, 'welcome-meta', 'resize')"></button>
+              <button class="stretch-handle" type="button" aria-label="Estirar datos" (mousedown)="beginTransform($event, 'welcome-meta', 'stretch')"></button>
+            </div>
+          }
+
+          @if (!isHidden('welcome-cta')) {
+            <div class="design-box" data-design-kind="welcome-cta" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-cta')" [ngStyle]="boxStyle('welcome-cta')" (mousedown)="selectBox($event, 'welcome-cta')">
+              <button class="move-handle" type="button" aria-label="Mover boton" (mousedown)="beginTransform($event, 'welcome-cta', 'move')"></button>
+              <button class="welcome-button" type="button" (click)="!designMode && start.emit()">
+                @if (designMode) {
+                  <span
+                    contenteditable="true"
+                    class="button-editable"
+                    [style.font-size.px]="fontSize('welcome-cta')"
+                    (click)="$event.stopPropagation()"
+                    (mousedown)="$event.stopPropagation()"
+                    (keydown)="preventEditableEnter($event)"
+                    (blur)="emitEditable($event, ctaTextChange)">
+                    {{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}
+                  </span>
+                } @else {
+                  <span [style.font-size.px]="fontSize('welcome-cta')">{{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}</span>
+                }
+              </button>
+              <button class="resize-handle" type="button" aria-label="Redimensionar boton" (mousedown)="beginTransform($event, 'welcome-cta', 'resize')"></button>
+              <button class="stretch-handle" type="button" aria-label="Estirar boton" (mousedown)="beginTransform($event, 'welcome-cta', 'stretch')"></button>
+            </div>
+          }
         </div>
 
         <div class="preview-zone positioning-root" [class.positioned-layout]="usesPreviewPositioning()" [style.min-height.px]="positionedPreviewHeight()">
@@ -107,6 +149,7 @@ type TransformMode = 'move' | 'resize';
               </div>
             </aside>
             <button class="resize-handle" type="button" aria-label="Redimensionar vista previa" (mousedown)="beginTransform($event, 'welcome-preview', 'resize')"></button>
+            <button class="stretch-handle" type="button" aria-label="Estirar vista previa" (mousedown)="beginTransform($event, 'welcome-preview', 'stretch')"></button>
           </div>
         </div>
       </div>
@@ -162,6 +205,8 @@ type TransformMode = 'move' | 'resize';
     .design-box {
       position: relative;
       box-sizing: border-box;
+      width: fit-content;
+      max-width: 100%;
     }
 
     .positioned-layout > .design-box {
@@ -183,7 +228,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .move-handle,
-    .resize-handle {
+    .resize-handle,
+    .stretch-handle {
       display: none;
       position: absolute;
       z-index: 20;
@@ -193,7 +239,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .design-selected .move-handle,
-    .design-selected .resize-handle {
+    .design-selected .resize-handle,
+    .design-selected .stretch-handle {
       display: block;
     }
 
@@ -217,6 +264,30 @@ type TransformMode = 'move' | 'resize';
       margin: 8px auto 0;
     }
 
+    .delete-element-btn {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: white;
+      border: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .delete-element-btn:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+
     .resize-handle {
       right: -7px;
       bottom: -7px;
@@ -224,6 +295,16 @@ type TransformMode = 'move' | 'resize';
       height: 14px;
       border-radius: 5px;
       cursor: nwse-resize;
+    }
+
+    .stretch-handle {
+      right: -5px;
+      top: 50%;
+      width: 8px;
+      height: 24px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      cursor: ew-resize;
     }
 
     .welcome-logo {
@@ -410,6 +491,10 @@ type TransformMode = 'move' | 'resize';
 
     .layout-centered .welcome-content {
       text-align: center;
+    }
+
+    .layout-centered .design-box {
+      margin-inline: auto;
     }
 
     .layout-centered .welcome-kicker,
@@ -661,18 +746,22 @@ type TransformMode = 'move' | 'resize';
 
     .design-editable,
     .button-editable {
-      outline: 2px dashed transparent;
-      outline-offset: 6px;
-      border-radius: 10px;
+      outline: none;
+      border-radius: 8px;
       cursor: text;
-      transition: outline-color 160ms ease, background 160ms ease;
+      transition: background 160ms ease;
+    }
+
+    .design-editable {
+      width: fit-content;
+      display: inline-block;
+      max-width: 100%;
     }
 
     .design-editable:hover,
     .design-editable:focus,
     .button-editable:hover,
     .button-editable:focus {
-      outline-color: color-mix(in srgb, var(--response-primary, #7c3aed) 45%, transparent);
       background: color-mix(in srgb, var(--response-primary, #7c3aed) 7%, transparent);
     }
 
@@ -759,6 +848,8 @@ export class SurveyWelcomeScreenComponent {
   @Output() titleChange = new EventEmitter<string>();
   @Output() descriptionChange = new EventEmitter<string>();
   @Output() ctaTextChange = new EventEmitter<string>();
+  @Output() extraTextChange = new EventEmitter<{id: string, text: string}>();
+  @Output() deleteRequest = new EventEmitter<WelcomeDesignKind>();
   @Output() transformStart = new EventEmitter<{ event: MouseEvent; kind: WelcomeDesignKind; mode: TransformMode; frame?: SurveyElementConfig; frames?: Record<string, SurveyElementConfig> }>();
   selectedKind: WelcomeDesignKind | null = null;
 
@@ -807,6 +898,27 @@ export class SurveyWelcomeScreenComponent {
     return this.designMode && this.selectedKind === kind;
   }
 
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (!this.designMode || !this.selectedKind) return;
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      const activeElement = document.activeElement;
+      const isInput = activeElement?.tagName === 'INPUT' || 
+                      activeElement?.tagName === 'TEXTAREA' || 
+                      activeElement?.hasAttribute('contenteditable') || 
+                      activeElement?.getAttribute('contenteditable') === 'true' || 
+                      (activeElement as HTMLElement)?.isContentEditable === true;
+      if (!isInput) {
+        this.deleteRequest.emit(this.selectedKind);
+        this.selectedKind = null;
+      }
+    }
+  }
+
+  isHidden(kind: WelcomeDesignKind): boolean {
+    return this.configFor(kind).hidden === true;
+  }
+
   boxStyle(kind: WelcomeDesignKind): Record<string, string> {
     const config = this.configFor(kind);
     if (!this.shouldUsePositionedStyle(kind)) return {};
@@ -850,7 +962,12 @@ export class SurveyWelcomeScreenComponent {
     return this.maxElementBottom([this.configFor('welcome-preview')], 0);
   }
 
-  private shouldUsePositionedStyle(kind: WelcomeDesignKind): boolean {
+  emitExtraTextChange(event: Event, id: string): void {
+    const el = event.target as HTMLElement;
+    this.extraTextChange.emit({ id, text: el.innerText.trim() });
+  }
+
+  shouldUsePositionedStyle(kind: WelcomeDesignKind): boolean {
     return kind === 'welcome-preview'
       ? this.usesPreviewPositioning()
       : this.usesPositionedLayout();
@@ -858,6 +975,10 @@ export class SurveyWelcomeScreenComponent {
 
   private configFor(kind: WelcomeDesignKind): SurveyElementConfig {
     const metadata = this.survey.metadata;
+    if (kind.startsWith('extra-text-')) {
+      const extra = metadata?.welcomeExtraTexts?.find(t => t.id === kind);
+      return extra?.config ?? { x: 50, y: 350, width: 300, height: 40 };
+    }
     const stored = kind === 'logo' ? this.brand.logoConfig
       : kind === 'welcome-kicker' ? metadata?.welcomeKickerConfig
       : kind === 'welcome-title' ? metadata?.welcomeTitleConfig
@@ -870,6 +991,9 @@ export class SurveyWelcomeScreenComponent {
 
   private hasStoredConfig(kind: WelcomeDesignKind): boolean {
     const metadata = this.survey.metadata;
+    if (kind.startsWith('extra-text-')) {
+      return true; // Extra texts are always positioned in the canvas
+    }
     return kind === 'logo' ? this.brand.logoConfig?.positioned === true
       : kind === 'welcome-kicker' ? metadata?.welcomeKickerConfig?.positioned === true
       : kind === 'welcome-title' ? metadata?.welcomeTitleConfig?.positioned === true
@@ -924,6 +1048,6 @@ export class SurveyWelcomeScreenComponent {
 
   private isEditableTarget(target: EventTarget | null): boolean {
     const element = target as HTMLElement | null;
-    return !!element?.closest('[contenteditable="true"], input, textarea, select, .move-handle, .resize-handle');
+    return !!element?.closest('[contenteditable="true"], input, textarea, select, .move-handle, .resize-handle, .stretch-handle');
   }
 }

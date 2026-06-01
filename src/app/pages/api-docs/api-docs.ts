@@ -38,10 +38,10 @@ export class ApiDocsPage {
   activeTab: 'curl' | 'js' | 'python' = 'curl';
 
   codeExamples = {
-    curl: `curl -X GET "https://api.datafyra.com/v1/surveys" \\
+    curl: `curl -X GET "https://api.dataencuestas.com/v1/surveys" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json"`,
-    js: `const response = await fetch('https://api.datafyra.com/v1/surveys', {
+    js: `const response = await fetch('https://api.dataencuestas.com/v1/surveys', {
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY'
   }
@@ -49,7 +49,7 @@ export class ApiDocsPage {
 const data = await response.json();`,
     python: `import requests
 
-url = "https://api.datafyra.com/v1/surveys"
+url = "https://api.dataencuestas.com/v1/surveys"
 headers = {"Authorization": "Bearer YOUR_API_KEY"}
 
 response = requests.get(url, headers=headers)

@@ -49,7 +49,7 @@ type AssetKind =
   | 'end-desc'
   | 'end-summary'
   | 'end-brand';
-type TransformMode = 'move' | 'resize';
+type TransformMode = 'move' | 'resize' | 'stretch';
 type LayoutFrameMap = Record<string, SurveyElementConfig>;
 
 interface PalettePreset {
@@ -112,7 +112,7 @@ interface DesignCombinationPreset {
 }
 
 interface ActiveTransform {
-  kind: AssetKind;
+  kind: AssetKind | string;
   index?: number;
   mode: TransformMode;
   startX: number;
@@ -123,6 +123,7 @@ interface ActiveTransform {
   initialHeight: number;
   originX: number;
   originY: number;
+  initialFontSize?: number;
 }
 
 interface PublishChecklistItem {
@@ -158,9 +159,25 @@ export class EditorPage implements OnInit, OnDestroy {
   saveError = signal<string | null>(null);
   infoMessage = signal<string | null>(null);
   copied = signal(false);
+
+  dialogModal = signal<{ type: 'prompt' | 'confirm'; title: string; placeholder?: string; message?: string; value?: string; onConfirm: (val?: string) => void } | null>(null);
+  dialogInputValue = '';
+
+  closeDialogModal(): void {
+    this.dialogModal.set(null);
+  }
+
+  confirmDialogModal(): void {
+    const modal = this.dialogModal();
+    if (modal) {
+      modal.onConfirm(this.dialogInputValue);
+    }
+    this.closeDialogModal();
+  }
   publishChecklist = signal<PublishChecklistItem[]>([]);
   showPublishChecklist = signal(false);
   activeShareSection = signal<ShareSection>('link');
+  showShareDropdown = signal(false);
   qrSize = signal(360);
   qrColor = signal('#111827');
   selectedQrPreset = signal<QrPresetId>('flyer');
@@ -308,7 +325,7 @@ export class EditorPage implements OnInit, OnDestroy {
   private saveErrorTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Customization Tabs (Canva Style)
-  customTab: 'content' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media' | null = null;
+
   currentTab: EditorTab = 'design';
   designCenterTab: DesignCenterTab = 'combine';
 
@@ -321,34 +338,23 @@ export class EditorPage implements OnInit, OnDestroy {
   collapsedSections: Record<string, boolean> = {};
 
   sidebarClass = () => {
-    if (this.currentTab !== 'design') return 'editor-sidebar-right';
-    return this.customTab ? 'editor-sidebar-right custom-nav-active panel-open' : 'editor-sidebar-right custom-nav-active panel-closed';
+    return 'editor-sidebar-right panel-open';
   };
 
   effectiveRightSidebarWidth(): number {
-    if (this.currentTab === 'design' && !this.customTab) return 82;
-    if (this.currentTab === 'design') return Math.min(Math.max(500, this.rightSidebarWidth), 560);
-    return Math.max(500, this.rightSidebarWidth);
+    if (this.currentTab === 'design') return Math.min(Math.max(300, this.rightSidebarWidth), 560);
+    return Math.max(300, this.rightSidebarWidth);
   }
 
   // Resizable sidebar logic
   isResizing = false;
-  rightSidebarWidth = Number(localStorage.getItem('df_sidebar_width')) || 520;
+  rightSidebarWidth = Number(localStorage.getItem('df_sidebar_width_v3')) || 380;
 
   // Contextual Focus
-  focusSettings(tab: 'content' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media', section?: 'welcome' | 'questions' | 'end', index?: number) {
+  focusSettings(section?: 'welcome' | 'questions' | 'end', index?: number) {
     this.currentTab = 'design';
-    this.openCustomTab(tab);
     if (section) this.activeSection.set(section);
     if (index !== undefined) this.activeQuestionIndex.set(index);
-  }
-
-  openCustomTab(tab: 'content' | 'colors' | 'buttons' | 'typography' | 'effects' | 'media'): void {
-    this.customTab = tab;
-  }
-
-  closeCustomPanel(): void {
-    this.customTab = null;
   }
 
   openDesignCenter(tab: DesignCenterTab = 'combine'): void {
@@ -368,17 +374,7 @@ export class EditorPage implements OnInit, OnDestroy {
     this.saveErrorTimer = setTimeout(() => this.saveError.set(null), 4200);
   }
 
-  customTabTitle(): string {
-    switch (this.customTab) {
-      case 'content': return 'Contenido';
-      case 'colors': return 'Colores';
-      case 'buttons': return 'Botón';
-      case 'typography': return 'Texto';
-      case 'effects': return 'Efectos';
-      case 'media': return 'Medios';
-      default: return '';
-    }
-  }
+
 
 
   startResizing(event: MouseEvent) {
@@ -2327,6 +2323,17 @@ export class EditorPage implements OnInit, OnDestroy {
     void this.loadExistingSurvey(id);
     // Initial history push
     setTimeout(() => this.pushToHistory(), 1000);
+
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam === 'analyze') {
+      this.currentTab = 'analyze';
+    } else if (tabParam === 'preview') {
+      this.currentTab = 'preview';
+    } else if (tabParam === 'collect') {
+      this.currentTab = 'collect';
+    } else if (tabParam === 'design') {
+      this.currentTab = 'design';
+    }
   }
 
   ngOnDestroy(): void {
@@ -2414,10 +2421,42 @@ export class EditorPage implements OnInit, OnDestroy {
       return;
     }
 
-    if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta', 'welcome-preview'].includes(transform.kind)) {
+    if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta', 'welcome-preview'].includes(transform.kind) || transform.kind.startsWith('extra-text-')) {
       this.survey.update((survey) => {
         if (!survey) return survey;
         const metadata = this.ensureMetadata(survey.metadata);
+
+        if (transform.kind.startsWith('extra-text-')) {
+          const texts = metadata.welcomeExtraTexts || [];
+          const index = texts.findIndex(t => t.id === transform.kind);
+          if (index !== -1) {
+            const extra = texts[index];
+            const config = { ...(extra.config ?? { x: 50, y: 350, width: 300, height: 40 }) };
+            if (transform.mode === 'move') {
+              config.x = transform.initialX + dx;
+              config.y = transform.initialY + dy;
+              config.width = transform.initialWidth;
+              config.height = transform.initialHeight;
+            } else if (transform.mode === 'stretch') {
+              config.width = Math.max(transform.initialWidth + dx, 50);
+            } else {
+              config.width = Math.max(transform.initialWidth + dx, 50);
+              config.height = Math.max(transform.initialHeight + dy, 30);
+
+              const scale = config.width / transform.initialWidth;
+              const initialFS = transform.initialFontSize ?? extra.config?.fontSize ?? 16;
+              config.fontSize = Math.max(8, Math.min(120, Math.round(initialFS * scale)));
+            }
+            config.originX = transform.originX;
+            config.originY = transform.originY;
+            config.positioned = true;
+
+            const newTexts = [...texts];
+            newTexts[index] = { ...extra, config };
+            metadata.welcomeExtraTexts = newTexts;
+          }
+          return { ...survey, metadata };
+        }
 
         let configKey: 'welcomeTitleConfig' | 'welcomeDescConfig' | 'welcomeCtaConfig' | 'welcomeKickerConfig' | 'welcomeMetaConfig' | 'welcomePreviewConfig';
         switch (transform.kind) {
@@ -2436,9 +2475,17 @@ export class EditorPage implements OnInit, OnDestroy {
           config.y = transform.initialY + dy;
           config.width = transform.initialWidth;
           config.height = transform.initialHeight;
+        } else if (transform.mode === 'stretch') {
+          config.width = Math.max(transform.initialWidth + dx, 50);
         } else {
           config.width = Math.max(transform.initialWidth + dx, 50);
           config.height = Math.max(transform.initialHeight + dy, 30);
+
+          if (transform.kind !== 'welcome-preview') {
+            const scale = config.width / transform.initialWidth;
+            const initialFS = transform.initialFontSize ?? config.fontSize ?? this.defaultFontSize(transform.kind);
+            config.fontSize = Math.max(8, Math.min(120, Math.round(initialFS * scale)));
+          }
         }
         config.originX = transform.originX;
         config.originY = transform.originY;
@@ -2472,9 +2519,17 @@ export class EditorPage implements OnInit, OnDestroy {
           config.y = transform.initialY + dy;
           config.width = transform.initialWidth;
           config.height = transform.initialHeight;
+        } else if (transform.mode === 'stretch') {
+          config.width = Math.max(transform.initialWidth + dx, 24);
         } else {
           config.width = Math.max(transform.initialWidth + dx, 24);
           config.height = Math.max(transform.initialHeight + dy, 16);
+
+          if (!['end-rule', 'end-icon'].includes(transform.kind)) {
+            const scale = config.width / transform.initialWidth;
+            const initialFS = transform.initialFontSize ?? config.fontSize ?? this.defaultFontSize(transform.kind);
+            config.fontSize = Math.max(8, Math.min(120, Math.round(initialFS * scale)));
+          }
         }
         config.originX = transform.originX;
         config.originY = transform.originY;
@@ -2580,9 +2635,15 @@ export class EditorPage implements OnInit, OnDestroy {
           config.y = transform.initialY + dy;
           config.width = transform.initialWidth;
           config.height = transform.initialHeight;
+        } else if (transform.mode === 'stretch') {
+          config.width = Math.max(transform.initialWidth + dx, 50);
         } else {
           config.width = Math.max(transform.initialWidth + dx, 50);
           config.height = Math.max(transform.initialHeight + dy, 30);
+
+          const scale = config.width / transform.initialWidth;
+          const initialFS = transform.initialFontSize ?? config.fontSize ?? this.defaultFontSize(transform.kind);
+          config.fontSize = Math.max(8, Math.min(120, Math.round(initialFS * scale)));
         }
         config.originX = transform.originX;
         config.originY = transform.originY;
@@ -2735,7 +2796,7 @@ export class EditorPage implements OnInit, OnDestroy {
     this.activeSection.set('questions');
     this.activeQuestionIndex.set(0);
     this.activeQuestionPageIndex.set(0);
-    this.customTab = null;
+
     this.queueSave();
     await this.router.navigate(['/editor', created.id], { replaceUrl: true });
   }
@@ -2852,7 +2913,7 @@ export class EditorPage implements OnInit, OnDestroy {
   openQuestionLogic(index: number): void {
     this.activeQuestionIndex.set(index);
     this.activeSection.set('questions');
-    this.customTab = null;
+
     this.questionEditorOpen = false;
     this.logicPanelOpen = true;
     this.logicModalOpen = true;
@@ -3120,12 +3181,29 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   removeQuestion(index: number): void {
-    this.survey.update((survey) => survey
-      ? this.normalizeSurvey({
+    this.survey.update((survey) => {
+      if (!survey) return null;
+      
+      if (survey.metadata?.canvas?.screens) {
+        const screens = survey.metadata.canvas.screens;
+        const deletedScreenId = `question-${index}`;
+        const newScreens = screens.filter(s => s.id !== deletedScreenId);
+        newScreens.forEach(s => {
+          if (s.type === 'question' && s.id.startsWith('question-')) {
+            const idx = parseInt(s.id.split('-')[1], 10);
+            if (!isNaN(idx) && idx > index) {
+              s.id = `question-${idx - 1}`;
+            }
+          }
+        });
+        survey.metadata.canvas.screens = newScreens;
+      }
+
+      return this.normalizeSurvey({
         ...survey,
         questions: survey.questions.filter((_, questionIndex) => questionIndex !== index)
-      })
-      : null);
+      });
+    });
     this.activeQuestionIndex.update(idx => Math.max(0, idx - (idx >= index ? 1 : 0)));
     this.queueSave();
   }
@@ -3351,12 +3429,17 @@ export class EditorPage implements OnInit, OnDestroy {
     this.patchBrand({ [field]: family } as Partial<SurveyBrand>);
   }
 
-  elementFontSize(kind: AssetKind, index?: number): number {
+  elementFontSize(kind: AssetKind | string, index?: number): number {
     const survey = this.survey();
-    const fallback = this.defaultFontSize(kind);
+    const fallback = this.defaultFontSize(kind as AssetKind);
     if (!survey) return fallback;
     const metadata = this.ensureMetadata(survey.metadata);
     const question = survey.questions[index ?? this.activeQuestionIndex()];
+
+    if (kind.startsWith('extra-text-')) {
+      const extra = metadata.welcomeExtraTexts?.find(t => t.id === kind);
+      return extra?.config?.fontSize ?? 16;
+    }
 
     const config = kind === 'welcome-title' ? metadata.welcomeTitleConfig
       : kind === 'welcome-desc' ? metadata.welcomeDescConfig
@@ -3421,6 +3504,147 @@ export class EditorPage implements OnInit, OnDestroy {
     this.queueSave();
   }
 
+  toggleWelcomeElement(kind: 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta'): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      
+      const configKey = kind === 'welcome-title' ? 'welcomeTitleConfig'
+        : kind === 'welcome-desc' ? 'welcomeDescConfig'
+        : kind === 'welcome-cta' ? 'welcomeCtaConfig'
+        : kind === 'welcome-kicker' ? 'welcomeKickerConfig'
+        : 'welcomeMetaConfig';
+        
+      const currentConfig = metadata[configKey];
+      metadata[configKey] = {
+        x: 0, y: 0, width: 100, height: 50,
+        ...(currentConfig || {}),
+        hidden: currentConfig ? !currentConfig.hidden : true
+      };
+      
+      return { ...survey, metadata };
+    });
+    this.queueSave();
+  }
+
+  isWelcomeElementHidden(kind: 'welcome-title' | 'welcome-desc' | 'welcome-cta' | 'welcome-kicker' | 'welcome-meta' | string): boolean {
+    const survey = this.survey();
+    if (!survey) return false;
+    const metadata = survey.metadata ?? {};
+    
+    if (kind.startsWith('extra-text-')) {
+      const extra = metadata.welcomeExtraTexts?.find(e => e.id === kind);
+      return extra?.config.hidden === true;
+    }
+    
+    const configKey = kind === 'welcome-title' ? 'welcomeTitleConfig'
+      : kind === 'welcome-desc' ? 'welcomeDescConfig'
+      : kind === 'welcome-cta' ? 'welcomeCtaConfig'
+      : kind === 'welcome-kicker' ? 'welcomeKickerConfig'
+      : 'welcomeMetaConfig';
+      
+    return metadata[configKey]?.hidden === true;
+  }
+
+  addExtraText(): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      const texts = metadata.welcomeExtraTexts || [];
+      const id = 'extra-text-' + Math.random().toString(36).substring(2, 9);
+      
+      metadata.welcomeExtraTexts = [
+        ...texts,
+        {
+          id,
+          text: 'Nuevo texto añadido',
+          config: { x: 50, y: 350, width: 300, height: 40 }
+        }
+      ];
+      return { ...survey, metadata };
+    });
+    this.queueSave();
+  }
+
+  updateExtraTextContent(id: string, text: string): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      const texts = metadata.welcomeExtraTexts || [];
+      const index = texts.findIndex(t => t.id === id);
+      if (index !== -1) {
+        const extra = texts[index];
+        const newTexts = [...texts];
+        newTexts[index] = { ...extra, text };
+        metadata.welcomeExtraTexts = newTexts;
+      }
+      return { ...survey, metadata };
+    });
+    this.queueSave();
+  }
+
+  updateExtraTextFontSize(id: string, size: number | string): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      const texts = metadata.welcomeExtraTexts || [];
+      const index = texts.findIndex(t => t.id === id);
+      if (index !== -1) {
+        const extra = texts[index];
+        const config = { ...(extra.config ?? {}), fontSize: Number(size) };
+        const newTexts = [...texts];
+        newTexts[index] = { ...extra, config };
+        metadata.welcomeExtraTexts = newTexts;
+      }
+      return { ...survey, metadata };
+    });
+    this.queueSave();
+  }
+
+  updateFontSize(configKey: 'welcomeTitleConfig' | 'welcomeDescConfig', size: number | string): void {
+    this.survey.update((survey) => {
+      if (!survey) return survey;
+      const metadata = this.ensureMetadata(survey.metadata);
+      const currentConfig = metadata[configKey] ?? { x: 40, y: 150, width: 400, height: 100 };
+      metadata[configKey] = { ...currentConfig, fontSize: Number(size) };
+      return { ...survey, metadata };
+    });
+    this.queueSave();
+  }
+
+  deleteSelectedElement(kind: string): void {
+    if (!kind) return;
+    
+    if (kind.startsWith('extra-text-')) {
+      this.survey.update((survey) => {
+        if (!survey) return survey;
+        const metadata = this.ensureMetadata(survey.metadata);
+        metadata.welcomeExtraTexts = (metadata.welcomeExtraTexts || []).filter(t => t.id !== kind);
+        return { ...survey, metadata };
+      });
+    } else if (['welcome-title', 'welcome-desc', 'welcome-cta', 'welcome-kicker', 'welcome-meta'].includes(kind)) {
+      this.survey.update((survey) => {
+        if (!survey) return survey;
+        const metadata = this.ensureMetadata(survey.metadata);
+        const configKey = kind === 'welcome-title' ? 'welcomeTitleConfig'
+          : kind === 'welcome-desc' ? 'welcomeDescConfig'
+          : kind === 'welcome-cta' ? 'welcomeCtaConfig'
+          : kind === 'welcome-kicker' ? 'welcomeKickerConfig'
+          : 'welcomeMetaConfig';
+          
+        const currentConfig = metadata[configKey];
+        metadata[configKey] = {
+          x: 0, y: 0, width: 100, height: 50,
+          ...(currentConfig || {}),
+          hidden: true
+        };
+        return { ...survey, metadata };
+      });
+    }
+    
+    this.queueSave();
+  }
+
   applyFontPairing(pairing: { title: string, body: string }) {
     this.updateFont('fontTitle', pairing.title);
     this.updateFont('fontBody', pairing.body);
@@ -3464,6 +3688,12 @@ export class EditorPage implements OnInit, OnDestroy {
     this.loadGoogleFont(this.currentFontTitle());
     this.loadGoogleFont(this.currentFontBody());
     this.loadGoogleFont(this.currentFontButton());
+    
+    // Preload pairing fonts for instant high-fidelity sidebar previews
+    for (const p of this.fontPairings) {
+      this.loadGoogleFont(p.title);
+      this.loadGoogleFont(p.body);
+    }
   }
 
   readonly shadowPresets: { value: string; label: string }[] = [
@@ -3724,6 +3954,10 @@ export class EditorPage implements OnInit, OnDestroy {
 
   removeBackgroundImage(): void {
     this.patchBrand({ backgroundImageUrl: undefined });
+  }
+
+  updateBackgroundOpacity(value: number): void {
+    this.patchBrand({ backgroundOpacity: value });
   }
 
   async onWelcomeImageSelected(event: Event): Promise<void> {
@@ -3989,7 +4223,7 @@ export class EditorPage implements OnInit, OnDestroy {
     const url = this.getShareLink();
     if (!url) return;
 
-    const embed = `<iframe src="${url}" title="Encuesta Datafyra" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
+    const embed = `<iframe src="${url}" title="Encuesta DataEncuestas" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
     navigator.clipboard.writeText(embed);
     this.recordShareCopy('Embed copiado');
     this.copied.set(true);
@@ -4029,7 +4263,7 @@ export class EditorPage implements OnInit, OnDestroy {
       return;
     }
 
-    const subject = encodeURIComponent(`Encuesta: ${survey.title || 'Datafyra'}`);
+    const subject = encodeURIComponent(`Encuesta: ${survey.title || 'DataEncuestas'}`);
     const body = encodeURIComponent(this.getShareMessage());
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
@@ -4117,10 +4351,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   goToAnalytics(): void {
-    const survey = this.survey();
-    if (survey) {
-      void this.router.navigate(['/analytics', survey.id]);
-    }
+    this.currentTab = 'analyze';
   }
 
   analyticsMetrics() {
@@ -4393,6 +4624,29 @@ export class EditorPage implements OnInit, OnDestroy {
     }
   }
 
+  async downloadQrCode(): Promise<void> {
+    const survey = this.survey();
+    if (!survey) return;
+    try {
+      const response = await fetch(this.getQrCodeUrl());
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const sanitizedTitle = (survey.title || 'encuesta').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      link.download = `qr-${sanitizedTitle}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      this.showInfo('Código QR descargado con éxito.');
+    } catch (error) {
+      console.error('Error al descargar el QR:', error);
+      window.open(this.getQrCodeUrl(), '_blank');
+      this.showInfo('Se abrió el QR en una nueva pestaña.');
+    }
+  }
+
   updateQrSize(value: string | number): void {
     const numeric = Number(value);
     if (Number.isFinite(numeric)) {
@@ -4432,12 +4686,12 @@ export class EditorPage implements OnInit, OnDestroy {
 
   getEmbedCode(): string {
     const url = this.getShareLink();
-    return `<iframe src="${url}" title="Encuesta Datafyra" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
+    return `<iframe src="${url}" title="Encuesta DataEncuestas" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
   }
 
   getShareMessage(): string {
     const survey = this.survey();
-    const title = survey?.title?.trim() || 'Encuesta Datafyra';
+    const title = survey?.title?.trim() || 'Encuesta DataEncuestas';
     return `Hola, te comparto esta encuesta: ${title}\n${this.getShareLink()}`;
   }
 
@@ -4475,7 +4729,7 @@ export class EditorPage implements OnInit, OnDestroy {
     const survey = this.survey();
     if (!survey) return;
     const lines = [
-      survey.title || 'Encuesta Datafyra',
+      survey.title || 'Encuesta DataEncuestas',
       this.qrCtaText(),
       `QR activo: ${this.activeQrPreset().name}`,
       `Link: ${this.getTrackedShareLink()}`,
@@ -4489,7 +4743,7 @@ export class EditorPage implements OnInit, OnDestroy {
   exportQrCampaignKit(): void {
     const survey = this.survey();
     if (!survey) return;
-    const title = this.htmlEscape(survey.title || 'Encuesta Datafyra');
+    const title = this.htmlEscape(survey.title || 'Encuesta DataEncuestas');
     const cta = this.htmlEscape(this.qrCtaText());
     const qr = this.htmlEscape(this.getQrCodeUrl());
     const variants = this.qrPresets.map((preset) => `
@@ -4625,24 +4879,31 @@ export class EditorPage implements OnInit, OnDestroy {
     event?.stopPropagation();
     this.openPageMenuIndex = null;
     const current = this.pageTitle(pageIndex);
-    const value = window.prompt('Nombre de la página', current);
-    if (value === null) return;
-
-    const title = value.trim() || `Página ${pageIndex + 1}`;
-    this.survey.update((survey) => {
-      if (!survey) return survey;
-      const metadata = this.ensureMetadata(survey.metadata);
-      const titles = [...(metadata.questionPageTitles ?? [])];
-      titles[pageIndex] = title;
-      return {
-        ...survey,
-        metadata: {
-          ...metadata,
-          questionPageTitles: titles
-        }
-      };
+    this.dialogInputValue = current;
+    this.dialogModal.set({
+      type: 'prompt',
+      title: 'Editar nombre de página',
+      placeholder: 'Nombre de la página',
+      value: current,
+      onConfirm: (value) => {
+        if (value === null || value === undefined) return;
+        const title = value.trim() || `Página ${pageIndex + 1}`;
+        this.survey.update((survey) => {
+          if (!survey) return survey;
+          const metadata = this.ensureMetadata(survey.metadata);
+          const titles = [...(metadata.questionPageTitles ?? [])];
+          titles[pageIndex] = title;
+          return {
+            ...survey,
+            metadata: {
+              ...metadata,
+              questionPageTitles: titles
+            }
+          };
+        });
+        this.queueSave();
+      }
     });
-    this.queueSave();
   }
 
   selectQuestionPage(page: { index: number; start: number; count: number }): void {
@@ -4758,38 +5019,42 @@ export class EditorPage implements OnInit, OnDestroy {
 
     const page = pages[pageIndex];
     if (!page) return;
-    const confirmed = window.confirm(`Eliminar "${this.pageTitle(pageIndex)}" y sus ${page.count} pregunta${page.count === 1 ? '' : 's'}?`);
-    if (!confirmed) return;
+    this.dialogModal.set({
+      type: 'confirm',
+      title: 'Eliminar página',
+      message: `¿Estás seguro de que deseas eliminar "${this.pageTitle(pageIndex)}" y sus ${page.count} pregunta${page.count === 1 ? '' : 's'}?`,
+      onConfirm: () => {
+        const questions = survey.questions.filter((_, index) => index < page.start || index >= page.end);
+        const chunks = pages
+          .filter((_, index) => index !== pageIndex)
+          .map((item) => survey.questions.slice(item.start, item.end));
+        const breaks: number[] = [];
+        let cursor = 0;
+        for (const chunk of chunks) {
+          breaks.push(cursor);
+          cursor += chunk.length;
+        }
+        const titles = [...(survey.metadata?.questionPageTitles ?? [])];
+        titles.splice(pageIndex, 1);
 
-    const questions = survey.questions.filter((_, index) => index < page.start || index >= page.end);
-    const chunks = pages
-      .filter((_, index) => index !== pageIndex)
-      .map((item) => survey.questions.slice(item.start, item.end));
-    const breaks: number[] = [];
-    let cursor = 0;
-    for (const chunk of chunks) {
-      breaks.push(cursor);
-      cursor += chunk.length;
-    }
-    const titles = [...(survey.metadata?.questionPageTitles ?? [])];
-    titles.splice(pageIndex, 1);
-
-    const nextPageIndex = Math.max(0, Math.min(pageIndex, chunks.length - 1));
-    this.survey.set(this.normalizeSurvey({
-      ...survey,
-      questions,
-      metadata: {
-        ...this.ensureMetadata(survey.metadata),
-        questionPageBreaks: breaks.length ? breaks : [0],
-        questionPageTitles: titles,
-        paginationMode: breaks.length > 1 ? 'paged' : 'all-at-once'
+        const nextPageIndex = Math.max(0, Math.min(pageIndex, chunks.length - 1));
+        this.survey.set(this.normalizeSurvey({
+          ...survey,
+          questions,
+          metadata: {
+            ...this.ensureMetadata(survey.metadata),
+            questionPageBreaks: breaks.length ? breaks : [0],
+            questionPageTitles: titles,
+            paginationMode: breaks.length > 1 ? 'paged' : 'all-at-once'
+          }
+        }));
+        this.activeSection.set('questions');
+        this.activeQuestionPageIndex.set(nextPageIndex);
+        this.activeQuestionIndex.set(breaks[nextPageIndex] ?? 0);
+        this.showInfo(page.count > 0 ? 'Página eliminada.' : 'Página vacía eliminada.');
+        this.queueSave();
       }
-    }));
-    this.activeSection.set('questions');
-    this.activeQuestionPageIndex.set(nextPageIndex);
-    this.activeQuestionIndex.set(breaks[nextPageIndex] ?? 0);
-    this.showInfo(page.count > 0 ? 'Página eliminada.' : 'Página vacía eliminada.');
-    this.queueSave();
+    });
   }
 
   currentQuestion = computed(() => {
@@ -4949,6 +5214,11 @@ export class EditorPage implements OnInit, OnDestroy {
       case 'question-help': config = survey.questions[index ?? 0]?.helpConfig ?? { x: 0, y: 202, width: 620, height: 54 }; break;
       case 'question-image': config = survey.questions[index ?? 0]?.imageConfig ?? { x: 0, y: 276, width: 260, height: 180 }; break;
       case 'question-answer': config = survey.questions[index ?? 0]?.answerConfig ?? { x: 0, y: 486, width: 708, height: 150 }; break;
+      default:
+        if (kind.startsWith('extra-text-')) {
+          config = metadata.welcomeExtraTexts?.find(t => t.id === kind)?.config ?? { x: 50, y: 350, width: 300, height: 40 };
+        }
+        break;
     }
 
     if (frame) {
@@ -5512,9 +5782,8 @@ export class EditorPage implements OnInit, OnDestroy {
             .map((option, optionIndex) => ({
               ...option,
               id: option.id || this.createLocalId(`option-${index}-${optionIndex}`),
-              texto: option.texto.trim()
+              texto: option.texto
             }))
-            .filter((option) => option.texto.length > 0)
           : [],
         min: this.isScaleType(question.type) ? (question.type === 'nps' ? 0 : 1) : undefined,
         max: this.isScaleType(question.type) ? (question.type === 'rating' ? 5 : 10) : undefined,
@@ -6233,7 +6502,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   private createActiveTransform(
-    kind: AssetKind,
+    kind: AssetKind | string,
     mode: TransformMode,
     event: MouseEvent,
     config: SurveyElementConfig,
@@ -6250,7 +6519,8 @@ export class EditorPage implements OnInit, OnDestroy {
       initialWidth: config.width,
       initialHeight: config.height,
       originX: config.originX ?? config.x,
-      originY: config.originY ?? config.y
+      originY: config.originY ?? config.y,
+      initialFontSize: config.fontSize ?? this.elementFontSize(kind, index)
     };
   }
 

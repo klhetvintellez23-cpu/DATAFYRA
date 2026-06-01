@@ -4456,23 +4456,112 @@
 }
 
 .page-insert-btn {
-  width: 28px;
-  height: 28px;
-  margin: -4px auto 2px;
+  width: 100%;
+  height: 38px;
+  margin: 4px 0;
   border: 1px solid rgba(48, 49, 121, 0.14);
-  border-radius: 999px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.upload-area-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 18px 12px;
+  position: relative;
+  min-height: 64px;
+}
+
+.upload-area-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.upload-area-btn:hover {
+  text-decoration: underline;
+}
+
+.upload-area-trash {
+  position: absolute;
+  right: 12px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
-  background: #ffffff;
-  color: #303179;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  border-radius: 6px;
+}
+
+.upload-area-trash:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.color-boxes-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.design-color-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.design-color-box .color-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.design-color-box .color-preview input[type="color"] {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  opacity: 0;
+  cursor: pointer;
 }
 
 .page-insert-btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(48, 49, 121, 0.28);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .page-insert-btn .material-symbols-outlined {
@@ -6630,3 +6719,501 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =========================================================================
+   Datafyra Editor - Apariencia (Sidebar Right Refactored)
+   ========================================================================= */
+
+.custom-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fdfcff;
+}
+
+.custom-panel-header {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid #e6e2ef;
+}
+
+.custom-panel-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.custom-panel-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.custom-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f8fafc; /* Beautiful soft light lilac/gray background */
+}
+
+.subtab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Premium Card container style matching the screenshot */
+.subtab-panel > .right-section {
+  background: #ffffff;
+  border: 1px solid #e6e2ef;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.015);
+}
+
+.right-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #5b21b6; /* Premium purple matching application brand */
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.subtab-panel > .right-section > .right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e1b4b; /* Navy/Dark Indigo */
+}
+
+.design-image-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Beautiful Pill Buttons for Fondo and Logo actions when uploaded */
+.design-image-row button.upload-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  background: #f1f0f7; /* Soft light grayish purple */
+  color: #5b21b6; /* Brand purple dark text */
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.design-image-row button.upload-btn:hover {
+  background: #e6e4f0;
+  color: #4c1d95;
+  transform: translateY(-1px);
+}
+
+.design-image-row button.upload-btn-danger {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.design-image-row button.upload-btn-danger:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Standard upload button styling for upload/add states (looks like a gorgeous bento button) */
+.design-image-row button.upload-btn:only-child {
+  flex-direction: column;
+  padding: 20px 16px;
+  border: 1.5px dashed #c4b5fd;
+  background: rgba(124, 58, 237, 0.02);
+  color: #5b21b6;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.03);
+}
+
+.design-image-row button.upload-btn:only-child .material-symbols-outlined {
+  font-size: 24px;
+  font-weight: 400;
+  color: #7c3aed;
+  transition: transform 0.2s ease;
+}
+
+.design-image-row button.upload-btn:only-child:hover {
+  background: rgba(124, 58, 237, 0.06);
+  border-color: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.08);
+}
+
+.design-image-row button.upload-btn:only-child:hover .material-symbols-outlined {
+  transform: scale(1.1);
+}
+
+/* Beautiful slider element style */
+.slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.slider-control span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.slider-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  outline: none;
+}
+
+.slider-control input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.slider-control input[type="range"]::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #7c3aed; /* Brand primary purple matching colors */
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.4);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.slider-control input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #6d28d9;
+}
+
+.slider-control input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.slider-control input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #7c3aed;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.slider-control input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Beautiful color picker row with space-between */
+.design-color-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 0;
+  border-bottom: 1px solid #f6f5fb;
+  cursor: pointer;
+}
+
+.design-color-picker:last-child {
+  border-bottom: none;
+}
+
+.design-color-picker span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e1b4b; /* Matches brand indigo text */
+}
+
+/* Styling color input to be a gorgeous circular dot (larger, matching the inspector screenshot) */
+.design-color-picker input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.design-color-picker input[type="color"]:hover {
+  transform: scale(1.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(124, 58, 237, 0.25), 0 4px 12px rgba(124, 58, 237, 0.18);
+}
+
+.design-color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
+}
+
+.design-color-picker input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.design-color-picker input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* Custom Purple Pill Button from Inspector Screenshot */
+.design-image-row button.upload-btn-purple-pill {
+  width: 100%;
+  height: 48px;
+  border-radius: 999px;
+  background: #8c30f5; /* Bright purple matching the inspector mockup */
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(140, 48, 245, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.design-image-row button.upload-btn-purple-pill:hover {
+  background: #7a22df;
+  box-shadow: 0 8px 24px rgba(140, 48, 245, 0.35);
+  transform: translateY(-1.5px);
+}
+
+.design-image-row button.upload-btn-purple-pill .material-symbols-outlined {
+  font-size: 20px;
+  color: #ffffff;
+}
+
+/* =========================================================================
+   Custom Dialog Modal Styles (Replacing native prompt/confirm)
+   ========================================================================= */
+.custom-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.custom-dialog-container {
+  width: min(440px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-dialog-header {
+  padding: 24px 28px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.custom-dialog-header h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1d1b20;
+  letter-spacing: -0.01em;
+}
+
+.custom-dialog-close-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-dialog-close-btn:hover {
+  background: #f1f5f9;
+  color: #1d1b20;
+}
+
+.custom-dialog-body {
+  padding: 28px;
+}
+
+.custom-dialog-message {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #475569;
+  font-weight: 550;
+}
+
+.custom-dialog-input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 15px;
+  color: #1d1b20;
+  font-weight: 650;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.custom-dialog-input:focus {
+  border-color: #7f00ff;
+  box-shadow: 0 0 0 4px rgba(127, 0, 255, 0.12);
+  background: #ffffff;
+}
+
+.custom-dialog-footer {
+  padding: 16px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.custom-dialog-btn-secondary {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-dialog-btn-secondary:hover {
+  background: #f1f5f9;
+  color: #1d1b20;
+}
+
+.custom-dialog-btn-primary {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 12px;
+  background: #7f00ff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(127, 0, 255, 0.25);
+  transition: all 0.2s;
+}
+
+.custom-dialog-btn-primary:hover {
+  background: #6700d6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(127, 0, 255, 0.3);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Premium Typography Config Controls */
+.typo-preset-card {
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.typo-preset-card:hover {
+  border-color: #7c3aed !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+}
+
+.typo-preset-card.active {
+  border-color: #7c3aed !important;
+  background: #f5f3ff !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15) !important;
+}
+
+.font-picker-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin-top: 6px;
+}
+
+.font-picker-select {
+  transition: all 0.2s ease !important;
+}
+
+.font-picker-select:focus {
+  border-color: #7c3aed !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+}
+

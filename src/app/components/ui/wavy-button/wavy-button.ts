@@ -60,7 +60,7 @@ export class WavyButtonComponent implements OnInit, OnChanges {
   @Input() variant: 'default' | 'outline' = 'default';
   @Input() size: 'default' | 'lg' = 'default';
   @Input() colorScheme: 'primary' | 'secondary' | 'dark' = 'primary';
-  
+
   characters: string[] = [];
   isHovered = false;
 

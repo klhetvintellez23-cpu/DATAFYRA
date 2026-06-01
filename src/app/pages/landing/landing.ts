@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { LustreTextComponent } from '../../components/ui/lustretext/lustretext';
 import { WavyButtonComponent } from '../../components/ui/wavy-button/wavy-button';
 import { TypingTextComponent } from '../../components/ui/typing-text/typing-text';
 import { FooterComponent } from '../../components/footer/footer';
 import { AuthModalService } from '../../services/auth-modal.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -18,7 +19,9 @@ import { AuthModalService } from '../../services/auth-modal.service';
 export class LandingPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly authModal = inject(AuthModalService);
+  private readonly authService = inject(AuthService);
 
   readonly featureList = [
     {
@@ -108,6 +111,10 @@ export class LandingPage implements OnInit {
 
   openAuth(mode: 'login' | 'register', event: Event): void {
     event.preventDefault();
-    this.authModal.open(mode);
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.authModal.open(mode);
+    }
   }
 }

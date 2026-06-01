@@ -35,6 +35,7 @@ export interface SurveyElementConfig {
   positioned?: boolean;
   originX?: number;
   originY?: number;
+  hidden?: boolean;
 }
 
 export interface Question {
@@ -60,10 +61,12 @@ export interface Question {
 export interface SurveyBrand {
   logoUrl?: string;
   logoConfig?: SurveyElementConfig;
+  logoAlignment?: 'left' | 'center' | 'right';
   primaryColor?: string;
   secondaryColor?: string;
   backgroundColor?: string;
   backgroundImageUrl?: string;
+  backgroundOpacity?: number;
   surfaceColor?: string;
   textColor?: string;
   questionStyle?: 'glass' | 'solid' | 'minimal' | 'underline' | 'classic' | 'compact' | 'boxed' | 'outlined' | 'soft';
@@ -125,12 +128,19 @@ export interface CanvasData {
   layoutVersion?: number;
 }
 
+export interface WelcomeExtraText {
+  id: string;
+  text: string;
+  config: SurveyElementConfig;
+}
+
 export interface SurveyMetadata {
   canvas?: CanvasData;
   brand?: SurveyBrand;
   theme?: Record<string, any>;
   welcomeLayout?: 'split' | 'centered' | 'poster' | 'minimal' | 'editorial' | 'orbit' | 'showcase' | 'diagonal';
   welcomeImages?: DecoratedImage[];
+  welcomeExtraTexts?: WelcomeExtraText[];
   welcomeTitleConfig?: SurveyElementConfig;
   welcomeDescConfig?: SurveyElementConfig;
   welcomeKickerConfig?: SurveyElementConfig;
@@ -193,7 +203,7 @@ export class SurveyService {
   private readonly repository = inject(SurveyRepositoryService);
   private readonly mapper = inject(SurveyMapperService);
   private readonly surveys = signal<Survey[]>([]);
-  private readonly metadataStorageKey = 'datafyra-survey-metadata';
+  private readonly metadataStorageKey = 'dataencuestas-survey-metadata';
 
   readonly allSurveys = this.surveys.asReadonly();
 
@@ -294,10 +304,12 @@ export class SurveyService {
         text: question.text,
         description: question.description,
         required: question.required,
-        options: question.options.map((option) => ({
-          id: option.id,
-          texto: option.texto
-        })),
+        options: question.options
+          .map((option) => ({
+            id: option.id,
+            texto: option.texto?.trim() ?? ''
+          }))
+          .filter((option) => option.texto.length > 0),
         min: question.min,
         max: question.max,
         imageUrl: question.imageUrl,

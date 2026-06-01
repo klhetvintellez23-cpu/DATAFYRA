@@ -1,82 +1,60 @@
 <app-navbar />
 
 <main class="flex-grow vp-animate-fade-in font-body text-[#1d1b20]" style="font-family: 'Epilogue', sans-serif;">
-  <section class="hero-section relative overflow-hidden bg-[#F9F5FF]">
+  <section class="hero-section relative overflow-hidden bg-gradient-to-br from-[#f8f6fb] to-[#fcfbff]">
     <div
-      class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-      <div class="z-10 hero-copy">
-        <h1 class="text-5xl sm:text-6xl lg:text-[5.25rem] font-bold text-[#1d1b20] leading-[1.05] mb-8">
-          <app-lustre-text text="Crea encuestas gratis" [speed]="6"></app-lustre-text>
+      class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+      <div class="z-10 hero-copy pt-10 lg:pt-0">
+        <h1 class="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold text-[#1d1b20] leading-[1.05] mb-8 tracking-tight">
+          <app-lustre-text text="Crea encuestas<br />gratis" [speed]="6"></app-lustre-text>
         </h1>
 
-        <div class="ag-checklist mb-10 text-[#49454e] font-light text-lg sm:text-xl space-y-4">
-          <div class="ag-checklist-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <app-typing-text text="Diseñador de encuestas gratuito" [delay]="500"></app-typing-text>
+        <div class="ag-checklist mb-10 text-[#49454e] text-lg sm:text-xl space-y-5">
+          <div class="ag-checklist-item items-center">
+            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">edit</span>
+            <app-typing-text text="Diseña encuestas intuitivas" [delay]="500"></app-typing-text>
           </div>
-          <div class="ag-checklist-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="12" r="3"></circle>
-              <circle cx="18" cy="19" r="3"></circle>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            <app-typing-text text="Comparte encuestas por WhatsApp, email y redes sociales"
-              [delay]="1300"></app-typing-text>
+          <div class="ag-checklist-item items-center">
+            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">share</span>
+            <app-typing-text text="Comparte encuestas al instante" [delay]="1300"></app-typing-text>
           </div>
-          <div class="ag-checklist-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7F00FF" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-            <app-typing-text text="Resultados en tiempo real con gráficos automáticos" [delay]="2600"></app-typing-text>
+          <div class="ag-checklist-item items-center">
+            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">bar_chart</span>
+            <app-typing-text text="Analiza resultados en tiempo real" [delay]="2600"></app-typing-text>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 mt-8">
-          <app-wavy-button (click)="openAuth('register', $event)"
-            className="px-12 sm:px-16 py-6 editorial-gradient text-white font-bold rounded-[2.25rem] shadow-2xl hover:shadow-primary/40 transition-all text-xl sm:text-2xl tracking-wide"
-            text="Crea una encuesta">
-          </app-wavy-button>
-          <a routerLink="/templates" class="hero-secondary-link">
+        <div class="flex flex-wrap items-center gap-6 mt-8">
+          <a routerLink="/register" (click)="openAuth('register', $event)"
+            class="bg-[#7f00ff] text-white px-8 py-4 rounded-full font-bold text-base lg:text-lg shadow-[0_10px_30px_rgba(127,0,255,0.3)] hover:shadow-[0_15px_40px_rgba(127,0,255,0.4)] transition-all transform hover:-translate-y-1 cursor-pointer">
+            Crea una encuesta
+          </a>
+          <a routerLink="/templates"
+            class="flex items-center gap-2 text-[#1d1b20] font-bold text-lg hover:text-[#7f00ff] transition-colors">
             Ver plantillas
-            <span class="material-symbols-outlined">arrow_forward</span>
+            <span class="material-symbols-outlined text-xl">arrow_forward</span>
           </a>
         </div>
 
-        <div class="hero-trust-row" aria-label="Indicadores de producto">
-          <span>Sin tarjeta</span>
-          <span>Plantillas editables</span>
-          <span>Resultados en vivo</span>
+        <div class="flex flex-wrap gap-3 mt-12">
+          <span class="px-4 py-2 rounded-full bg-[#f1edf7] text-[#625b71] text-sm font-semibold">- Soporte
+            gratuito</span>
         </div>
       </div>
 
-      <div class="hero-gallery" aria-label="Vista previa del flujo de encuestas">
-        <figure class="hero-image-card hero-image-card-primary">
-          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=85&w=1000"
-            alt="Persona trabajando en una encuesta desde un portatil" />
+      <div class="hero-gallery relative w-full h-full min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
+        <!-- Top Image -->
+        <figure
+          class="absolute left-[8%] lg:left-[12%] top-[0%] lg:top-[1%] w-[70%] lg:w-[66%] z-10 rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
+          <img src="assets/landing/arriba.png" alt="Persona trabajando feliz"
+            class="w-full h-auto object-cover aspect-[5/4]" />
         </figure>
-        <figure class="hero-image-card hero-image-card-share">
-          <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=85&w=900"
-            alt="Equipo revisando respuestas de clientes" />
+        <!-- Bottom Image -->
+        <figure
+          class="absolute right-[5%] lg:right-[0%] bottom-[5%] lg:bottom-[15%] w-[60%] lg:w-[55%] z-20 rounded-3xl overflow-hidden shadow-xl">
+          <img src="assets/landing/abajo.png" alt="Equipo analizando datos"
+            class="w-full h-auto object-cover aspect-[5/4]" />
         </figure>
-        <figure class="hero-image-card hero-image-card-analytics">
-          <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=85&w=1000"
-            alt="Equipo analizando informacion de negocio" />
-        </figure>
-        <div class="hero-proof-card">
-          <span class="material-symbols-outlined">verified</span>
-          <strong>Encuestas listas</strong>
-          <small>Crear, compartir y analizar</small>
-        </div>
       </div>
     </div>
   </section>
@@ -252,7 +230,8 @@
         @for (update of updatesList; track update.title) {
         <article class="update-card">
           <div>
-            <span class="update-tag" [class.tag-new]="update.type === 'new'" [class.tag-improvement]="update.type === 'improvement'" [class.tag-fix]="update.type === 'fix'">
+            <span class="update-tag" [class.tag-new]="update.type === 'new'"
+              [class.tag-improvement]="update.type === 'improvement'" [class.tag-fix]="update.type === 'fix'">
               {{ update.tag }}
             </span>
             <h3>{{ update.title }}</h3>

@@ -1,0 +1,154 @@
+<div class="admin-shell" [class.dark]="isDarkMode()">
+  <!-- Side Navigation Bar -->
+  <aside class="admin-sidebar" [class.show-mobile]="showMobileSidebar()">
+    <div class="sidebar-brand">
+      <img src="assets/dataencuestas-logo.png" alt="DataEncuestas Logo" class="brand-logo" />
+      <div class="brand-info">
+        <span class="brand-name">DataEncuestas</span>
+        <span class="brand-badge">Consola Admin</span>
+      </div>
+      <button class="mobile-close" (click)="toggleMobileSidebar()" aria-label="Cerrar menú">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-title">Navegación</span>
+      
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="nav-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="nav-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 10.089 20.8c-1.596-.337-3.111-1.077-4.398-2.124m.93-11.422a4.993 4.993 0 0 0-3.535 3.535m3.535-3.535a4.993 4.993 0 0 1 3.535 3.535m-3.535 0a4.993 4.993 0 0 0 3.535 3.535m0-7.07c.18.583.275 1.202.275 1.84a5.018 5.018 0 0 1-2.725 4.498m-6.495-1.254a5.018 5.018 0 0 0 2.725-4.498c0-.638-.095-1.257-.275-1.84m0 0a4.993 4.993 0 0 1-3.535 3.535m3.535-3.535a4.993 4.993 0 0 0-3.535 3.535m0 0a4.993 4.993 0 0 1 3.535 3.535" />
+        </svg>
+        <span>Gestionar Usuarios</span>
+      </a>
+
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="nav-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 2.24a3.75 3.75 0 0 0-3.75 3.75v7.5A3.75 3.75 0 0 0 9.75 21h7.5A3.75 3.75 0 0 0 21 17.25v-7.5a3.75 3.75 0 0 0-3.75-3.75M9 8.25h.008v.008H9V8.25Z" />
+        </svg>
+        <span>Registro de Auditoría</span>
+      </a>
+
+      <span class="nav-section-title">Enlaces Directos</span>
+      <a routerLink="/dashboard" class="nav-item return-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="nav-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+        <span>Volver a la App</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Admin Profile info -->
+    <div class="sidebar-profile" *ngIf="adminProfile() as profile">
+      <div class="profile-avatar-container">
+        <img *ngIf="profile.avatarUrl; else noAvatar" [src]="profile.avatarUrl" alt="Avatar" class="profile-avatar" />
+        <ng-template #noAvatar>
+          <div class="profile-avatar-placeholder">
+            {{ profile.name.charAt(0).toUpperCase() }}
+          </div>
+        </ng-template>
+        <span class="status-indicator-dot online"></span>
+      </div>
+      <div class="profile-meta">
+        <span class="profile-name">{{ profile.name }}</span>
+        <span class="profile-role">{{ profile.role }}</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay for Mobile Sidebar -->
+  <div class="mobile-sidebar-overlay" *ngIf="showMobileSidebar()" (click)="toggleMobileSidebar()"></div>
+
+  <!-- Main Viewport Area -->
+  <div class="admin-main">
+    <!-- Top Control Bar -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="mobile-toggle" (click)="toggleMobileSidebar()" aria-label="Abrir menú">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-root">Administración</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current" *ngIf="router.url.includes('dashboard')">Resumen general</span>
+          <span class="breadcrumb-current" *ngIf="router.url.includes('users') && !router.url.includes('profile')">Base de Usuarios</span>
+          <span class="breadcrumb-current" *ngIf="router.url.includes('user-profile')">Ficha del Usuario</span>
+          <span class="breadcrumb-current" *ngIf="router.url.includes('audit-logs')">Historial de Operaciones</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="header-right">
+        <!-- Theme Toggle -->
+        <button class="control-btn" (click)="toggleDarkMode()" [title]="isDarkMode() ? 'Modo Claro' : 'Modo Oscuro'">
+          <svg *ngIf="!isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+          <svg *ngIf="isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21m8.955-8.955h-2.25m-13.5 0h-2.25m15.022-7.477l-1.59 1.59m-11.362 11.362l-1.59 1.59m1.59-11.362l1.59 1.59m11.362 11.362l1.59-1.59M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
+          </svg>
+        </button>
+
+        <!-- Profile Dropdown -->
+        <div class="user-dropdown-container" *ngIf="adminProfile() as profile">
+          <button class="user-dropdown-trigger" (click)="toggleUserDropdown($event)">
+            <img *ngIf="profile.avatarUrl; else smallNoAvatar" [src]="profile.avatarUrl" alt="Avatar" class="avatar-small" />
+            <ng-template #smallNoAvatar>
+              <div class="avatar-small-placeholder">
+                {{ profile.name.charAt(0).toUpperCase() }}
+              </div>
+            </ng-template>
+            <span class="user-trigger-name">{{ profile.name }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-chevron" [class.rotated]="showUserDropdown()">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Card -->
+          <div class="user-dropdown-menu" *ngIf="showUserDropdown()" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span class="d-name">{{ profile.name }}</span>
+              <span class="d-email">{{ profile.email }}</span>
+            </div>
+            <div class="dropdown-body">
+              <div class="dropdown-info-item">
+                <span class="info-lbl">Rol actual:</span>
+                <span class="info-val role-badge" [attr.data-role]="profile.role">{{ profile.role }}</span>
+              </div>
+              <div class="dropdown-info-item">
+                <span class="info-lbl">Estado de Cuenta:</span>
+                <span class="info-val status-badge active">Activa</span>
+              </div>
+            </div>
+            <div class="dropdown-footer">
+              <button class="dropdown-action-btn logout-action" (click)="logout()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="icon-size">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Content Wrapper -->
+    <main class="admin-content-viewport" (click)="closeUserDropdown()">
+      <div class="vp-animate-fade-in">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

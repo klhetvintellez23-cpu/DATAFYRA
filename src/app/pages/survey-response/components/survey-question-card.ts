@@ -18,7 +18,7 @@ type PublicQuestionType =
   | 'email'
   | 'phone';
 type QuestionDesignKind = 'question-meta' | 'question-title' | 'question-help' | 'question-image' | 'question-answer';
-type TransformMode = 'move' | 'resize';
+type TransformMode = 'move' | 'resize' | 'stretch';
 
 @Component({
   selector: 'app-survey-question-card',
@@ -36,6 +36,7 @@ type TransformMode = 'move' | 'resize';
             }
           </div>
           <button class="resize-handle" type="button" aria-label="Redimensionar datos de pregunta" (mousedown)="beginTransform($event, 'question-meta', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar datos de pregunta" (mousedown)="beginTransform($event, 'question-meta', 'stretch')"></button>
         </div>
 
         <div class="design-box" data-design-kind="question-title" [class.design-active]="designMode" [class.design-selected]="isSelected('question-title')" [ngStyle]="boxStyle('question-title')" (mousedown)="selectBox($event, 'question-title')">
@@ -49,12 +50,14 @@ type TransformMode = 'move' | 'resize';
             {{ question.text || 'Pregunta sin titulo' }}
           </h2>
           <button class="resize-handle" type="button" aria-label="Redimensionar titulo de pregunta" (mousedown)="beginTransform($event, 'question-title', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar titulo de pregunta" (mousedown)="beginTransform($event, 'question-title', 'stretch')"></button>
         </div>
 
         <div class="design-box" data-design-kind="question-help" [class.design-active]="designMode" [class.design-selected]="isSelected('question-help')" [ngStyle]="boxStyle('question-help')" (mousedown)="selectBox($event, 'question-help')">
           <button class="move-handle" type="button" aria-label="Mover ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'move')"></button>
           <p class="question-help" [style.font-size.px]="fontSize('question-help')">{{ helperText }}</p>
           <button class="resize-handle" type="button" aria-label="Redimensionar ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'stretch')"></button>
         </div>
 
         @if (question.imageUrl) {
@@ -152,6 +155,7 @@ type TransformMode = 'move' | 'resize';
             }
           </div>
           <button class="resize-handle" type="button" aria-label="Redimensionar respuestas" (mousedown)="beginTransform($event, 'question-answer', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar respuestas" (mousedown)="beginTransform($event, 'question-answer', 'stretch')"></button>
         </div>
 
         @if (error) {
@@ -213,7 +217,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .move-handle,
-    .resize-handle {
+    .resize-handle,
+    .stretch-handle {
       display: none;
       position: absolute;
       z-index: 20;
@@ -223,7 +228,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .design-selected .move-handle,
-    .design-selected .resize-handle {
+    .design-selected .resize-handle,
+    .design-selected .stretch-handle {
       display: block;
     }
 
@@ -254,6 +260,16 @@ type TransformMode = 'move' | 'resize';
       height: 14px;
       border-radius: 5px;
       cursor: nwse-resize;
+    }
+
+    .stretch-handle {
+      right: -5px;
+      top: 50%;
+      width: 8px;
+      height: 24px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      cursor: ew-resize;
     }
 
     .question-meta {
@@ -346,16 +362,14 @@ type TransformMode = 'move' | 'resize';
     }
 
     .design-editable {
-      outline: 2px dashed transparent;
-      outline-offset: 6px;
+      outline: none;
       border-radius: 10px;
       cursor: text;
-      transition: outline-color 160ms ease, background 160ms ease;
+      transition: background 160ms ease;
     }
 
     .design-editable:hover,
     .design-editable:focus {
-      outline-color: color-mix(in srgb, var(--response-primary, #7c3aed) 45%, transparent);
       background: color-mix(in srgb, var(--response-primary, #7c3aed) 7%, transparent);
     }
 
@@ -572,7 +586,7 @@ export class SurveyQuestionCardComponent {
 
   private isEditableTarget(target: EventTarget | null): boolean {
     const element = target as HTMLElement | null;
-    return !!element?.closest('[contenteditable="true"], input, textarea, select, button, .move-handle, .resize-handle');
+    return !!element?.closest('[contenteditable="true"], input, textarea, select, button, .move-handle, .resize-handle, .stretch-handle');
   }
 
   get questionType(): PublicQuestionType {

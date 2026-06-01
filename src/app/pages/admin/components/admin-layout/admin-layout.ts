@@ -1,0 +1,64 @@
+import { Component, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../../services/auth.service';
+import { AdminDataService, type AdminUser } from '../../../../services/admin-data.service';
+
+@Component({
+  selector: 'app-admin-layout',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterOutlet, RouterLinkActive],
+  templateUrl: './admin-layout.html',
+  styleUrl: './admin-layout.css'
+})
+export class AdminLayoutComponent {
+  public readonly auth = inject(AuthService);
+  private readonly adminDataService = inject(AdminDataService);
+  public readonly router = inject(Router);
+
+  // Derive admin profile details from logged-in user
+  readonly adminProfile = computed<AdminUser | null>(() => {
+    const user = this.auth.user();
+    if (!user) return null;
+    return this.adminDataService.users().find(
+      u => u.email.toLowerCase() === user.email.toLowerCase()
+    ) || null;
+  });
+
+  readonly isDarkMode = signal<boolean>(
+    document.documentElement.classList.contains('dark') || 
+    localStorage.getItem('dataencuestas-theme') === 'dark'
+  );
+
+  readonly showMobileSidebar = signal<boolean>(false);
+  readonly showUserDropdown = signal<boolean>(false);
+
+  toggleDarkMode(): void {
+    const next = !this.isDarkMode();
+    this.isDarkMode.set(next);
+    localStorage.setItem('dataencuestas-theme', next ? 'dark' : 'light');
+    if (next) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  toggleMobileSidebar(): void {
+    this.showMobileSidebar.update(v => !v);
+  }
+
+  toggleUserDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showUserDropdown.update(v => !v);
+  }
+
+  closeUserDropdown(): void {
+    this.showUserDropdown.set(false);
+  }
+
+  logout(): void {
+    void this.auth.logout();
+    void this.router.navigate(['/']);
+  }
+}

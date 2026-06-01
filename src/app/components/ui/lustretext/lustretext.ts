@@ -9,8 +9,8 @@ import { CommonModule } from '@angular/common';
     <span class="lustre-text" 
           [class.disabled]="disabled"
           [style.--speed]="speed + 's'"
-          [style.--text-color]="textColor">
-      {{ text }}
+          [style.--text-color]="textColor"
+          [innerHTML]="text">
     </span>
   `,
   styleUrl: './lustretext.css'

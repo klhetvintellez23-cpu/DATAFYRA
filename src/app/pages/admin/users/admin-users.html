@@ -1,0 +1,169 @@
+<div class="users-view-container">
+  <!-- Top Navigation & Title Bar -->
+  <div class="view-header">
+    <div class="title-section">
+      <h1 class="view-title">Base de Usuarios</h1>
+      <p class="view-subtitle">Supervisa, modifica roles y administra estados de cuenta de los clientes.</p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Deck Control -->
+  <div class="filter-deck">
+    <div class="deck-row-main">
+      <!-- Search Input -->
+      <div class="search-input-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Buscar por nombre, correo electrónico o ID..." 
+          class="search-deck-input" 
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </div>
+
+      <!-- Role Select Filter -->
+      <div class="select-wrapper">
+        <select 
+          class="deck-select" 
+          [ngModel]="roleFilter()"
+          (ngModelChange)="roleFilter.set($event)"
+        >
+          <option value="all">Todos los Roles</option>
+          <option value="SuperAdmin">SuperAdmin</option>
+          <option value="Admin">Admin</option>
+          <option value="Moderator">Moderator</option>
+          <option value="User">User (Normal)</option>
+        </select>
+      </div>
+
+      <!-- Status Select Filter -->
+      <div class="select-wrapper">
+        <select 
+          class="deck-select" 
+          [ngModel]="statusFilter()"
+          (ngModelChange)="statusFilter.set($event)"
+        >
+          <option value="all">Todos los Estados</option>
+          <option value="activo">Activos</option>
+          <option value="suspendido">Suspendidos</option>
+          <option value="bloqueado">Bloqueados</option>
+        </select>
+      </div>
+
+      <!-- Reset Action -->
+      <button class="reset-deck-btn" (click)="resetFilters()" title="Restaurar filtros">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="reset-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        <span>Limpiar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Result Count Info -->
+  <div class="result-meta">
+    <span>Encontrados <strong>{{ filteredUsers().length }}</strong> de <strong>{{ adminData.totalUsersCount() }}</strong> usuarios en total.</span>
+  </div>
+
+  <!-- Responsive Table Card container -->
+  <div class="table-card">
+    <div class="table-responsive" *ngIf="filteredUsers().length > 0; else noResults">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>ID</th>
+            <th>Fecha Registro</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th class="align-center">Encuestas</th>
+            <th class="align-center">Respuestas</th>
+            <th class="align-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers()" class="user-row">
+            <!-- User avatar + detail column -->
+            <td>
+              <div class="user-cell">
+                <div class="cell-avatar-container">
+                  <img *ngIf="user.avatarUrl; else rowNoAvatar" [src]="user.avatarUrl" alt="Avatar" class="cell-avatar" />
+                  <ng-template #rowNoAvatar>
+                    <div class="cell-avatar-placeholder">
+                      {{ user.name.charAt(0).toUpperCase() }}
+                    </div>
+                  </ng-template>
+                </div>
+                <div class="cell-meta">
+                  <span class="cell-name">{{ user.name }}</span>
+                  <span class="cell-email">{{ user.email }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <!-- User ID -->
+            <td class="cell-id">
+              <code>{{ user.id }}</code>
+            </td>
+
+            <!-- Created Date -->
+            <td class="cell-date">
+              {{ user.createdAt | date:'mediumDate' }}
+            </td>
+
+            <!-- Role Badge -->
+            <td>
+              <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+                {{ user.role }}
+              </span>
+            </td>
+
+            <!-- Status Badge -->
+            <td>
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(user.status)">
+                {{ user.status }}
+              </span>
+            </td>
+
+            <!-- Surveys Count -->
+            <td class="align-center font-bold">
+              {{ user.surveysCount }}
+            </td>
+
+            <!-- Responses Count -->
+            <td class="align-center font-secondary">
+              {{ user.responsesCount | number }}
+            </td>
+
+            <!-- Actions -->
+            <td class="align-right">
+              <a [routerLink]="['/admin/user-profile', user.id]" class="view-profile-btn">
+                <span>Ver Ficha</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="btn-arrow-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty Results Template -->
+    <ng-template #noResults>
+      <div class="empty-results-box vp-animate-fade-in">
+        <div class="empty-icon-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+          </svg>
+        </div>
+        <h3 class="empty-title">Sin resultados coincidentes</h3>
+        <p class="empty-desc">Ningún usuario coincide con los criterios de búsqueda y filtros seleccionados.</p>
+        <button class="clear-filters-btn" (click)="resetFilters()">Reestablecer Búsqueda</button>
+      </div>
+    </ng-template>
+  </div>
+</div>

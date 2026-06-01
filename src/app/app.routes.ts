@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -31,7 +32,7 @@ export const routes: Routes = [
   },
   {
     path: 'analytics/:id',
-    loadComponent: () => import('./pages/analytics/analytics').then(m => m.AnalyticsPage)
+    redirectTo: 'editor/:id'
   },
   {
     path: 'survey/:id',
@@ -44,6 +45,11 @@ export const routes: Routes = [
   {
     path: 'templates/:id',
     loadComponent: () => import('./pages/template-details/template-details').then(m => m.TemplateDetailsPage)
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadChildren: () => import('./pages/admin/admin.routes').then(m => m.adminRoutes)
   },
   {
     path: '**',

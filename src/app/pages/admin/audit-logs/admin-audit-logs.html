@@ -1,0 +1,177 @@
+<div class="audit-view-container">
+  <!-- Header Title -->
+  <div class="view-header">
+    <div class="title-section">
+      <h1 class="view-title">Registro de Auditoría</h1>
+      <p class="view-subtitle">Historial de seguridad con todos los cambios y acciones realizadas por administradores.</p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="filter-deck">
+    <div class="deck-row-main">
+      <!-- Search Input -->
+      <div class="search-input-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Buscar logs por detalles, objetivo, administrador..." 
+          class="search-deck-input" 
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </div>
+
+      <!-- Action Select Filter -->
+      <div class="select-wrapper">
+        <select 
+          class="deck-select" 
+          [ngModel]="actionFilter()"
+          (ngModelChange)="actionFilter.set($event)"
+        >
+          <option value="all">Todas las Acciones</option>
+          <option value="ROLE_CHANGE">Cambios de Rol</option>
+          <option value="USER_SUSPENSION">Suspensiones</option>
+          <option value="USER_ACTIVATION">Reactivaciones</option>
+          <option value="USER_BLOCK">Bloqueos</option>
+          <option value="USER_UNBLOCK">Desbloqueos</option>
+          <option value="SURVEY_ARCHIVE">Encuestas Archivadas</option>
+          <option value="SURVEY_UNPUBLISH">Encuestas Despublicadas</option>
+          <option value="SURVEY_RESTORE">Encuestas Restauradas</option>
+        </select>
+      </div>
+
+      <!-- Administrator Select Filter -->
+      <div class="select-wrapper">
+        <select 
+          class="deck-select" 
+          [ngModel]="adminFilter()"
+          (ngModelChange)="adminFilter.set($event)"
+        >
+          <option value="all">Todos los Administradores</option>
+          <option *ngFor="let admin of uniqueAdmins()" [value]="admin.email">
+            {{ admin.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Time Frame Select Filter -->
+      <div class="select-wrapper">
+        <select 
+          class="deck-select" 
+          [ngModel]="timeFilter()"
+          (ngModelChange)="timeFilter.set($event)"
+        >
+          <option value="all">Cualquier Fecha</option>
+          <option value="today">Últimas 24 Horas</option>
+          <option value="week">Últimos 7 Días</option>
+          <option value="month">Últimos 30 Días</option>
+        </select>
+      </div>
+
+      <!-- Reset Action -->
+      <button class="reset-deck-btn" (click)="resetFilters()" title="Limpiar filtros">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="reset-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        <span>Limpiar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Result descriptor metadata -->
+  <div class="result-meta">
+    <span>Mostrando <strong>{{ filteredLogs().length }}</strong> de <strong>{{ adminData.auditLogs().length }}</strong> registros de seguridad.</span>
+  </div>
+
+  <!-- Tabular Logs Table card container -->
+  <div class="table-card">
+    <div class="table-responsive" *ngIf="filteredLogs().length > 0; else noLogs">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Administrador</th>
+            <th>Acción Realizada</th>
+            <th>Objetivo</th>
+            <th>Descripción / Motivo</th>
+            <th>Origen (IP / Ubicación)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of filteredLogs()" class="log-row">
+            <!-- Timestamp column -->
+            <td class="cell-time font-bold">
+              <div class="time-cell">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="cell-time-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <span>{{ log.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</span>
+              </div>
+            </td>
+
+            <!-- Admin column -->
+            <td>
+              <div class="admin-cell">
+                <div class="cell-admin-meta">
+                  <span class="cell-admin-name">{{ log.adminName }}</span>
+                  <span class="cell-admin-email">{{ log.adminEmail }}</span>
+                </div>
+                <span class="admin-role-badge" [ngClass]="getAdminRoleBadgeClass(log.adminRole)">
+                  {{ log.adminRole }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Action type Badge -->
+            <td>
+              <span class="log-action-badge" [ngClass]="getActionBadgeClass(log.action)">
+                {{ formatAction(log.action) }}
+              </span>
+            </td>
+
+            <!-- Target Object -->
+            <td class="cell-target font-bold">
+              {{ log.target }}
+            </td>
+
+            <!-- Description details -->
+            <td class="cell-details font-secondary">
+              {{ log.details }}
+            </td>
+
+            <!-- IP / Location origin details -->
+            <td>
+              <div class="origin-cell">
+                <span class="origin-ip"><code>{{ log.ip }}</code></span>
+                <span class="origin-loc">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="origin-loc-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
+                  <span>{{ log.location }}</span>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty Logs Fallback -->
+    <ng-template #noLogs>
+      <div class="empty-logs-box vp-animate-fade-in">
+        <div class="empty-icon-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 2.24a3.75 3.75 0 0 0-3.75 3.75v7.5A3.75 3.75 0 0 0 9.75 21h7.5A3.75 3.75 0 0 0 21 17.25v-7.5a3.75 3.75 0 0 0-3.75-3.75M9 8.25h.008v.008H9V8.25Z" />
+          </svg>
+        </div>
+        <h3 class="empty-title">Sin registros en bitácora</h3>
+        <p class="empty-desc">No se encontraron eventos de seguridad que cumplan con la configuración de filtros establecida.</p>
+        <button class="clear-filters-btn" (click)="resetFilters()">Limpiar Búsqueda</button>
+      </div>
+    </ng-template>
+  </div>
+</div>

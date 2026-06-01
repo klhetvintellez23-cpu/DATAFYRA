@@ -30,17 +30,10 @@
   text-decoration: none;
 }
 
-.site-brand-mark {
+.site-brand-logo {
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 0.9rem;
-  display: grid;
-  place-items: center;
-  background: #7f00ff;
-  color: #fff;
-  font-size: 1.35rem;
-  font-weight: 900;
-  box-shadow: 0 12px 26px rgba(127, 0, 255, 0.22);
+  object-fit: contain;
 }
 
 .site-brand-name {

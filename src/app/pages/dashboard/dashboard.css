@@ -59,8 +59,9 @@ input {
   gap: 10px;
   color: var(--vp-text);
   text-decoration: none;
-  font-size: 16px;
-  font-weight: 760;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
 }
 
 .dashboard-brand-mark {
@@ -2673,4 +2674,214 @@ input {
 
 .dark .theme-btn {
   background: #1c1b1f !important;
+}
+
+/* =========================================================================
+   Custom Dialog Modal Styles (Replacing native prompt/confirm)
+   ========================================================================= */
+.custom-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.custom-dialog-container {
+  width: min(440px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-dialog-header {
+  padding: 24px 28px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.custom-dialog-header h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1d1b20;
+  letter-spacing: -0.01em;
+}
+
+.custom-dialog-close-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-dialog-close-btn:hover {
+  background: #f1f5f9;
+  color: #1d1b20;
+}
+
+.custom-dialog-body {
+  padding: 28px;
+}
+
+.custom-dialog-message {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #475569;
+  font-weight: 550;
+}
+
+.custom-dialog-input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 15px;
+  color: #1d1b20;
+  font-weight: 650;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.custom-dialog-input:focus {
+  border-color: #7f00ff;
+  box-shadow: 0 0 0 4px rgba(127, 0, 255, 0.12);
+  background: #ffffff;
+}
+
+.custom-dialog-footer {
+  padding: 16px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.custom-dialog-btn-secondary {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-dialog-btn-secondary:hover {
+  background: #f1f5f9;
+  color: #1d1b20;
+}
+
+.custom-dialog-btn-primary {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 12px;
+  background: #7f00ff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(127, 0, 255, 0.25);
+  transition: all 0.2s;
+}
+
+.custom-dialog-btn-primary:hover {
+  background: #6700d6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(127, 0, 255, 0.3);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Dark Mode Extensions for Custom Dialog */
+.dark .custom-dialog-container {
+  background: #151318 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45) !important;
+}
+
+.dark .custom-dialog-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .custom-dialog-header h3 {
+  color: #e6e1e6 !important;
+}
+
+.dark .custom-dialog-close-btn:hover {
+  background: rgba(255,255,255,0.06) !important;
+  color: #ffffff !important;
+}
+
+.dark .custom-dialog-message {
+  color: #c9c5ca !important;
+}
+
+.dark .custom-dialog-input {
+  background: #1c1b1f !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
+}
+
+.dark .custom-dialog-input:focus {
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.16) !important;
+}
+
+.dark .custom-dialog-footer {
+  background: #1c1b1f !important;
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .custom-dialog-btn-secondary {
+  background: transparent !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #c9c5ca !important;
+}
+
+.dark .custom-dialog-btn-secondary:hover {
+  background: rgba(255,255,255,0.04) !important;
+  color: #ffffff !important;
+}
+
+.dark .custom-dialog-btn-primary {
+  background: #a78bfa !important;
+  color: #151318 !important;
+  box-shadow: 0 4px 14px rgba(167, 139, 250, 0.25) !important;
+}
+
+.dark .custom-dialog-btn-primary:hover {
+  background: #c4b5fd !important;
+  box-shadow: 0 6px 18px rgba(167, 139, 250, 0.35) !important;
 }

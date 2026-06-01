@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Survey, SurveyBrand, SurveyElementConfig } from '../../../services/survey.service';
 
 type EndDesignKind = 'end-rule' | 'logo' | 'end-icon' | 'end-title' | 'end-desc' | 'end-summary' | 'end-brand';
-type TransformMode = 'move' | 'resize';
+type TransformMode = 'move' | 'resize' | 'stretch';
 
 @Component({
   selector: 'app-survey-thank-you-screen',
@@ -52,6 +52,7 @@ type TransformMode = 'move' | 'resize';
             {{ survey.metadata?.endTitle || survey.metadata?.thankYouTitle || 'Gracias por participar' }}
           </h1>
           <button class="resize-handle" type="button" aria-label="Redimensionar titulo final" (mousedown)="beginTransform($event, 'end-title', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar titulo final" (mousedown)="beginTransform($event, 'end-title', 'stretch')"></button>
         </div>
 
         <div class="design-box" data-design-kind="end-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('end-desc')" [ngStyle]="boxStyle('end-desc')" (mousedown)="selectBox($event, 'end-desc')">
@@ -64,6 +65,7 @@ type TransformMode = 'move' | 'resize';
             {{ survey.metadata?.endDescription || survey.metadata?.thankYouDescription || 'Tu respuesta ha sido registrada exitosamente.' }}
           </p>
           <button class="resize-handle" type="button" aria-label="Redimensionar descripcion final" (mousedown)="beginTransform($event, 'end-desc', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar descripcion final" (mousedown)="beginTransform($event, 'end-desc', 'stretch')"></button>
         </div>
 
         <div class="design-box" data-design-kind="end-summary" [class.design-active]="designMode" [class.design-selected]="isSelected('end-summary')" [ngStyle]="boxStyle('end-summary')" (mousedown)="selectBox($event, 'end-summary')">
@@ -73,12 +75,14 @@ type TransformMode = 'move' | 'resize';
             <span>Envio seguro</span>
           </div>
           <button class="resize-handle" type="button" aria-label="Redimensionar resumen" (mousedown)="beginTransform($event, 'end-summary', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar resumen" (mousedown)="beginTransform($event, 'end-summary', 'stretch')"></button>
         </div>
 
         <div class="design-box" data-design-kind="end-brand" [class.design-active]="designMode" [class.design-selected]="isSelected('end-brand')" [ngStyle]="boxStyle('end-brand')" (mousedown)="selectBox($event, 'end-brand')">
           <button class="move-handle" type="button" aria-label="Mover marca" (mousedown)="beginTransform($event, 'end-brand', 'move')"></button>
-          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by Datafyra</div>
+          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by DataEncuestas</div>
           <button class="resize-handle" type="button" aria-label="Redimensionar marca" (mousedown)="beginTransform($event, 'end-brand', 'resize')"></button>
+          <button class="stretch-handle" type="button" aria-label="Estirar marca" (mousedown)="beginTransform($event, 'end-brand', 'stretch')"></button>
         </div>
       </div>
     </section>
@@ -142,7 +146,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .move-handle,
-    .resize-handle {
+    .resize-handle,
+    .stretch-handle {
       display: none;
       position: absolute;
       z-index: 20;
@@ -152,7 +157,8 @@ type TransformMode = 'move' | 'resize';
     }
 
     .design-selected .move-handle,
-    .design-selected .resize-handle {
+    .design-selected .resize-handle,
+    .design-selected .stretch-handle {
       display: block;
     }
 
@@ -183,6 +189,16 @@ type TransformMode = 'move' | 'resize';
       height: 14px;
       border-radius: 5px;
       cursor: nwse-resize;
+    }
+
+    .stretch-handle {
+      right: -5px;
+      top: 50%;
+      width: 8px;
+      height: 24px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      cursor: ew-resize;
     }
 
     .thanks-rule {
@@ -545,16 +561,14 @@ type TransformMode = 'move' | 'resize';
     }
 
     .design-editable {
-      outline: 2px dashed transparent;
-      outline-offset: 6px;
+      outline: none;
       border-radius: 10px;
       cursor: text;
-      transition: outline-color 160ms ease, background 160ms ease;
+      transition: background 160ms ease;
     }
 
     .design-editable:hover,
     .design-editable:focus {
-      outline-color: color-mix(in srgb, var(--response-primary, #7c3aed) 45%, transparent);
       background: color-mix(in srgb, var(--response-primary, #7c3aed) 7%, transparent);
     }
   `]
@@ -716,6 +730,6 @@ export class SurveyThankYouScreenComponent {
 
   private isEditableTarget(target: EventTarget | null): boolean {
     const element = target as HTMLElement | null;
-    return !!element?.closest('[contenteditable="true"], input, textarea, select, .move-handle, .resize-handle');
+    return !!element?.closest('[contenteditable="true"], input, textarea, select, .move-handle, .resize-handle, .stretch-handle');
   }
 }
