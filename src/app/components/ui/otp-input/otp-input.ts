@@ -48,7 +48,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .otp-slot:focus {
-      border-color: #7C3AED;
+      border-color: #440789;
       box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
       transform: translateY(-2px);
       background: white;

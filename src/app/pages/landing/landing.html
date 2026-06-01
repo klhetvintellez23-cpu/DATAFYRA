@@ -11,26 +11,26 @@
 
         <div class="ag-checklist mb-10 text-[#49454e] text-lg sm:text-xl space-y-5">
           <div class="ag-checklist-item items-center">
-            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">edit</span>
+            <span class="material-symbols-outlined text-[#440789] text-[1.4rem]">edit</span>
             <app-typing-text text="Diseña encuestas intuitivas" [delay]="500"></app-typing-text>
           </div>
           <div class="ag-checklist-item items-center">
-            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">share</span>
+            <span class="material-symbols-outlined text-[#440789] text-[1.4rem]">share</span>
             <app-typing-text text="Comparte encuestas al instante" [delay]="1300"></app-typing-text>
           </div>
           <div class="ag-checklist-item items-center">
-            <span class="material-symbols-outlined text-[#7f00ff] text-[1.4rem]">bar_chart</span>
+            <span class="material-symbols-outlined text-[#440789] text-[1.4rem]">bar_chart</span>
             <app-typing-text text="Analiza resultados en tiempo real" [delay]="2600"></app-typing-text>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-6 mt-8">
-          <a routerLink="/register" (click)="openAuth('register', $event)"
-            class="bg-[#7f00ff] text-white px-8 py-4 rounded-full font-bold text-base lg:text-lg shadow-[0_10px_30px_rgba(127,0,255,0.3)] hover:shadow-[0_15px_40px_rgba(127,0,255,0.4)] transition-all transform hover:-translate-y-1 cursor-pointer">
-            Crea una encuesta
-          </a>
+          <app-wavy-button routerLink="/register" (click)="openAuth('register', $event)" colorScheme="primary-inverted"
+            className="!px-8 !py-4 font-bold !text-base lg:!text-lg shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.2)] transition-all transform hover:-translate-y-1"
+            text="Crea una encuesta">
+          </app-wavy-button>
           <a routerLink="/templates"
-            class="flex items-center gap-2 text-[#1d1b20] font-bold text-lg hover:text-[#7f00ff] transition-colors">
+            class="flex items-center gap-2 text-[#1d1b20] font-bold text-lg hover:text-[#440789] transition-colors">
             Ver plantillas
             <span class="material-symbols-outlined text-xl">arrow_forward</span>
           </a>
@@ -51,7 +51,7 @@
         </figure>
         <!-- Bottom Image -->
         <figure
-          class="absolute right-[5%] lg:right-[0%] bottom-[5%] lg:bottom-[15%] w-[60%] lg:w-[55%] z-20 rounded-3xl overflow-hidden shadow-xl">
+          class="absolute right-[5%] lg:right-[0%] bottom-[0%] lg:bottom-[5%] w-[55%] lg:w-[48%] z-20 rounded-3xl overflow-hidden shadow-xl">
           <img src="assets/landing/abajo.png" alt="Equipo analizando datos"
             class="w-full h-auto object-cover aspect-[5/4]" />
         </figure>
@@ -72,7 +72,7 @@
             <img src="https://images.unsplash.com/photo-1762340275877-32d64414d8aa?auto=format&fit=crop&q=80&w=900"
               alt="Formulario digital con opciones de respuesta en pantalla" loading="lazy" />
           </div>
-          <div class="text-5xl font-black text-[#7f00ff]">01</div>
+          <div class="text-5xl font-black text-[#440789]">01</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Diseña tu formulario</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
             Crea preguntas, escalas y opciones con una estructura clara desde el primer minuto.
@@ -83,7 +83,7 @@
             <img src="https://images.unsplash.com/photo-1759932021109-ffbec9251f9b?auto=format&fit=crop&q=80&w=900"
               alt="Telefono mostrando aplicaciones sociales para compartir contenido" loading="lazy" />
           </div>
-          <div class="text-5xl font-black text-[#7f00ff]">02</div>
+          <div class="text-5xl font-black text-[#440789]">02</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Comparte el enlace</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
             Distribuye tu encuesta por los canales donde ya está tu audiencia.
@@ -94,7 +94,7 @@
             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900"
               alt="Panel de analiticas con graficos y metricas" loading="lazy" />
           </div>
-          <div class="text-5xl font-black text-[#7f00ff]">03</div>
+          <div class="text-5xl font-black text-[#440789]">03</div>
           <h3 class="text-3xl font-bold text-[#1d1b20]">Lee resultados</h3>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
             Detecta patrones, mide satisfacción y toma decisiones con datos frescos.
@@ -178,7 +178,7 @@
             <p class="text-[#49454e] font-light">Elige una base y personalízala en el editor.</p>
           </div>
           <a routerLink="/templates"
-            class="text-[#7f00ff] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
+            class="text-[#440789] font-bold flex items-center gap-2 group hover:text-opacity-80 transition-colors">
             Ver todas las plantillas <span
               class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
           </a>
@@ -186,8 +186,8 @@
         <div class="flex flex-wrap gap-3">
           @for (category of templateCategories; track category) {
           <a routerLink="/templates" class="px-5 py-2 rounded-full text-sm font-medium transition-colors"
-            [class.bg-[#7f00ff]]="$first" [class.text-white]="$first" [class.text-[#49454e]]="!$first"
-            [class.hover:text-[#7f00ff]]="!$first">
+            [class.bg-[#440789]]="$first" [class.text-white]="$first" [class.text-[#49454e]]="!$first"
+            [class.hover:text-[#440789]]="!$first">
             {{ category }}
           </a>
           }
@@ -258,7 +258,7 @@
         complejo.</p>
       <div class="final-cta-actions">
         <app-wavy-button (click)="openAuth('register', $event)"
-          className="px-10 sm:px-14 py-5 bg-white text-[#7f00ff] font-bold rounded-[2rem] shadow-xl transition-all text-xl"
+          className="px-10 sm:px-14 py-5 bg-white text-[#440789] font-bold rounded-[2rem] shadow-xl transition-all text-xl"
           text="Crear encuesta gratis">
         </app-wavy-button>
         <a routerLink="/templates">Explorar plantillas</a>

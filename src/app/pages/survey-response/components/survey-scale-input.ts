@@ -68,15 +68,15 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
     .scale-button:hover {
       transform: translateY(-2px);
-      border-color: color-mix(in srgb, var(--response-primary, #7c3aed) 55%, white);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 55%, white);
       box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
     }
 
     .scale-button.selected {
-      background: linear-gradient(135deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+      background: linear-gradient(135deg, var(--response-primary, #440789), var(--response-secondary, #06b6d4));
       color: #ffffff;
       border-color: transparent;
-      box-shadow: 0 16px 34px color-mix(in srgb, var(--response-primary, #7c3aed) 28%, transparent);
+      box-shadow: 0 16px 34px color-mix(in srgb, var(--response-primary, #440789) 28%, transparent);
     }
 
     .is-stars .scale-grid {

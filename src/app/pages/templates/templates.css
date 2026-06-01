@@ -59,7 +59,7 @@
 /* Custom Scrollbar for Sidebar if needed */
 aside {
     scrollbar-width: thin;
-    scrollbar-color: #7F00FF transparent;
+    scrollbar-color: #440789 transparent;
 }
 
 aside::-webkit-scrollbar {
@@ -71,6 +71,6 @@ aside::-webkit-scrollbar-track {
 }
 
 aside::-webkit-scrollbar-thumb {
-    background-color: #7F00FF;
+    background-color: #440789;
     border-radius: 10px;
 }

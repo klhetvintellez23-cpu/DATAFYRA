@@ -5,7 +5,7 @@
 
     <!-- Decorative blurred shapes -->
     <div class="fixed inset-0 z-0 opacity-40 pointer-events-none blur-[100px]">
-      <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#7f00ff]/30"></div>
+      <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#440789]/30"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#6100c5]/20"></div>
     </div>
 
@@ -31,7 +31,7 @@
               </p>
               <h1 class="text-4xl md:text-5xl text-white mb-2 flex items-baseline gap-2" style="font-family: 'Epilogue', sans-serif; font-weight: 700; letter-spacing: -0.04em;">
                 {{ ms.mode() === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}
-                <span class="w-2 h-2 rounded-full bg-[#7f00ff] inline-block"></span>
+                <span class="w-2 h-2 rounded-full bg-[#440789] inline-block"></span>
               </h1>
             </div>
 
@@ -47,7 +47,7 @@
 
               <!-- Register: Name fields -->
               @if (ms.mode() === 'register') {
-                <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#7f00ff]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
+                <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#440789]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
                   <label class="block text-[9px] font-bold text-white/30 mb-1 uppercase transition-colors group-focus-within:text-[#d5baff]">Nombre Completo</label>
                   <input
                     class="w-full bg-transparent border-none outline-none p-0 text-white text-sm focus:ring-0 placeholder:text-white/20 font-semibold"
@@ -62,7 +62,7 @@
               }
 
               <!-- Email -->
-              <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#7f00ff]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
+              <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#440789]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
                 <label class="block text-[9px] font-bold text-white/30 mb-1 uppercase transition-colors group-focus-within:text-[#d5baff]">Email</label>
                 <input
                   class="w-full bg-transparent border-none outline-none p-0 text-white text-sm focus:ring-0 placeholder:text-white/20 font-semibold"
@@ -76,7 +76,7 @@
               </div>
 
               <!-- Password -->
-              <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#7f00ff]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
+              <div class="bg-white/10 rounded-xl p-4 relative border border-white/5 group transition-all duration-300 focus-within:border-[#440789]/60 focus-within:shadow-[0_0_20px_rgba(127,0,255,0.2)]">
                 <label class="block text-[9px] font-bold text-white/30 mb-1 uppercase transition-colors group-focus-within:text-[#d5baff]">Contraseña</label>
                 <input
                   class="w-full bg-transparent border-none outline-none p-0 text-white text-sm focus:ring-0 placeholder:text-white/20 font-semibold pr-8"
@@ -145,7 +145,7 @@
           } @else {
             <!-- OTP Verification screen -->
             <div class="flex flex-col items-center gap-6 text-center">
-              <div class="bg-[#7f00ff]/20 p-5 rounded-full">
+              <div class="bg-[#440789]/20 p-5 rounded-full">
                 <span class="material-symbols-outlined text-[#d5baff] text-[40px]">mark_email_read</span>
               </div>
               <div>

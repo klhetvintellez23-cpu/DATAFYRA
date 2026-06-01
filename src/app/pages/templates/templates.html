@@ -2,7 +2,7 @@
     <app-navbar />
 
     <main class="max-w-[1440px] mx-auto px-6 lg:px-12 pt-32 pb-20">
-        <a [routerLink]="returnTo()" class="inline-flex items-center gap-2 mb-10 text-sm font-black text-[#49454e] hover:text-[#7F00FF] transition-colors no-underline">
+        <a [routerLink]="returnTo()" class="inline-flex items-center gap-2 mb-10 text-sm font-black text-[#49454e] hover:text-[#440789] transition-colors no-underline">
             <span class="material-symbols-outlined text-base">arrow_back</span>
             {{ returnTo().startsWith('/editor/') ? 'Volver al editor' : 'Volver al dashboard' }}
         </a>
@@ -12,7 +12,7 @@
                 Plantillas de Encuestas Gratis
             </h1>
             <p class="text-gray-500 font-medium">
-                Elige entre las plantillas de encuestas o <a routerLink="/editor/new" class="text-[#7F00FF] font-bold hover:underline">crea tu propia encuesta</a>.
+                Elige entre las plantillas de encuestas o <a routerLink="/editor/new" class="text-[#440789] font-bold hover:underline">crea tu propia encuesta</a>.
             </p>
         </div>
 
@@ -21,8 +21,8 @@
             <aside class="w-full lg:w-[280px] space-y-10 animate-slide-in-left">
                 <div class="space-y-4">
                     <div class="relative group">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#7F00FF] transition-colors">search</span>
-                        <input type="text" placeholder="Buscar..." class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-[#7F00FF]/30 outline-none transition-all text-sm font-medium">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#440789] transition-colors">search</span>
+                        <input type="text" placeholder="Buscar..." class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-[#440789]/30 outline-none transition-all text-sm font-medium">
                     </div>
                 </div>
 
@@ -33,8 +33,8 @@
                             <button 
                                 (click)="selectCategory(cat)"
                                 [class.bg-purple-50]="selectedCategory() === cat"
-                                [class.text-[#7F00FF]]="selectedCategory() === cat"
-                                class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:bg-gray-50 hover:text-[#7F00FF]"
+                                [class.text-[#440789]]="selectedCategory() === cat"
+                                class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:bg-gray-50 hover:text-[#440789]"
                             >
                                 {{ cat }}
                             </button>
@@ -48,7 +48,7 @@
                 <div class="flex items-center justify-between mb-10">
                     <h2 class="text-2xl font-black text-[#1d1b20]">{{ selectedCategory() }} <span class="text-gray-300 font-medium ml-2">({{ filteredTemplates().length }})</span></h2>
                     <div class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                        Ordenar por: <span class="text-[#1d1b20] cursor-pointer hover:text-[#7F00FF]">Popularidad</span>
+                        Ordenar por: <span class="text-[#1d1b20] cursor-pointer hover:text-[#440789]">Popularidad</span>
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@
                             <div class="aspect-[4/3] rounded-[32px] overflow-hidden bg-gray-100 border border-gray-100 relative shadow-sm group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1">
                                 <img [src]="item.image" [alt]="item.title" class="template-card-image" loading="lazy" />
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent opacity-70 group-hover:opacity-90 transition-opacity"></div>
-                                <div class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-[#7F00FF] uppercase tracking-widest shadow-sm">
+                                <div class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-[#440789] uppercase tracking-widest shadow-sm">
                                     Gratis
                                 </div>
                                 <div class="absolute left-5 bottom-5 right-5">
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                             <div class="space-y-1 px-2">
-                                <h4 class="text-lg font-black text-[#1d1b20] group-hover:text-[#7F00FF] transition-colors leading-tight">
+                                <h4 class="text-lg font-black text-[#1d1b20] group-hover:text-[#440789] transition-colors leading-tight">
                                     {{ item.title }}
                                 </h4>
                                 <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -88,7 +88,7 @@
                             <h3 class="text-xl font-black text-[#1d1b20]">No encontramos plantillas</h3>
                             <p class="text-gray-500 max-w-xs">Prueba con otra categoría o términos de búsqueda.</p>
                         </div>
-                        <button (click)="selectCategory('Todas las plantillas')" class="text-[#7F00FF] font-bold hover:underline">Ver todas las plantillas</button>
+                        <button (click)="selectCategory('Todas las plantillas')" class="text-[#440789] font-bold hover:underline">Ver todas las plantillas</button>
                     </div>
                 }
             </div>

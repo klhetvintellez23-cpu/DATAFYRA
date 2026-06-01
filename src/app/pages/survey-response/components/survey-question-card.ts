@@ -212,8 +212,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     .design-active:hover,
     .design-selected {
-      border-color: color-mix(in srgb, var(--response-primary, #7c3aed) 62%, white);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--response-primary, #7c3aed) 12%, transparent);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 62%, white);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--response-primary, #440789) 12%, transparent);
     }
 
     .move-handle,
@@ -223,7 +223,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       position: absolute;
       z-index: 20;
       border: 0;
-      background: var(--response-primary, #7c3aed);
+      background: var(--response-primary, #440789);
       box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
     }
 
@@ -291,8 +291,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     .question-pill {
-      color: var(--response-primary, #7c3aed);
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 12%, white);
+      color: var(--response-primary, #440789);
+      background: color-mix(in srgb, var(--response-primary, #440789) 12%, white);
     }
 
     .required-pill {
@@ -345,8 +345,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     .survey-field:focus {
-      border-color: var(--response-primary, #7c3aed);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--response-primary, #7c3aed) 14%, transparent);
+      border-color: var(--response-primary, #440789);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--response-primary, #440789) 14%, transparent);
     }
 
     .positioned-layout .question-meta,
@@ -370,7 +370,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     .design-editable:hover,
     .design-editable:focus {
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 7%, transparent);
+      background: color-mix(in srgb, var(--response-primary, #440789) 7%, transparent);
     }
 
     .textarea {

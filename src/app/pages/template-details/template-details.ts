@@ -496,7 +496,7 @@ export class TemplateDetailsPage implements OnInit {
         endLayout: 'spotlight',
         brand: {
           ...base.brand,
-          primaryColor: '#7c3aed',
+          primaryColor: '#440789',
           secondaryColor: '#f97316',
           backgroundColor: '#f5f3ff',
           backgroundImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1400',
@@ -514,7 +514,7 @@ export class TemplateDetailsPage implements OnInit {
         endLayout: 'compact',
         brand: {
           ...base.brand,
-          primaryColor: '#4f46e5',
+          primaryColor: '#440789',
           secondaryColor: '#10b981',
           backgroundColor: '#f8fafc',
           backgroundImageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1400',

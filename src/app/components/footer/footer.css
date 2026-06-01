@@ -28,7 +28,7 @@
   border-radius: 0.9rem;
   display: grid;
   place-items: center;
-  background: #7f00ff;
+  background: #440789;
   color: #fff;
   font-size: 1.35rem;
   font-weight: 900;
@@ -74,7 +74,7 @@
 }
 
 .footer-col a:hover {
-  color: #7f00ff;
+  color: #440789;
 }
 
 .footer-bottom {

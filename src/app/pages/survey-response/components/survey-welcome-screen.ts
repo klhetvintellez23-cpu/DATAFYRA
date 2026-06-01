@@ -223,8 +223,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     .design-active:hover,
     .design-selected {
-      border-color: color-mix(in srgb, var(--response-primary, #7c3aed) 62%, white);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--response-primary, #7c3aed) 12%, transparent);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 62%, white);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--response-primary, #440789) 12%, transparent);
     }
 
     .move-handle,
@@ -234,7 +234,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       position: absolute;
       z-index: 20;
       border: 0;
-      background: var(--response-primary, #7c3aed);
+      background: var(--response-primary, #440789);
       box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
     }
 
@@ -320,8 +320,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       margin: 0 0 16px;
       padding: 8px 14px;
       border-radius: 999px;
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 12%, white);
-      color: var(--response-primary, #7c3aed);
+      background: color-mix(in srgb, var(--response-primary, #440789) 12%, white);
+      color: var(--response-primary, #440789);
       font-size: 12px;
       font-weight: 850;
       letter-spacing: 0.12em;
@@ -369,8 +369,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       border-radius: var(--response-button-radius, 18px);
       padding: 18px 32px;
       color: var(--response-button-text, #ffffff);
-      background: linear-gradient(135deg, var(--response-button, #7c3aed), var(--response-secondary, #06b6d4));
-      box-shadow: 0 18px 42px color-mix(in srgb, var(--response-primary, #7c3aed) 30%, transparent);
+      background: linear-gradient(135deg, var(--response-button, #440789), var(--response-secondary, #06b6d4));
+      box-shadow: 0 18px 42px color-mix(in srgb, var(--response-primary, #440789) 30%, transparent);
       font: inherit;
       font-weight: 850;
       font-size: 17px;
@@ -413,7 +413,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       padding: 28px;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12)),
-        color-mix(in srgb, var(--response-primary, #7c3aed) 14%, transparent);
+        color-mix(in srgb, var(--response-primary, #440789) 14%, transparent);
       border: 1px solid rgba(255,255,255,0.38);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 24px 60px rgba(15,23,42,0.12);
     }
@@ -431,7 +431,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       width: 76px;
       height: 12px;
       margin-bottom: 42px;
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 32%, white);
+      background: color-mix(in srgb, var(--response-primary, #440789) 32%, white);
     }
 
     .preview-title {
@@ -474,7 +474,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     .welcome-button:hover {
       transform: translateY(-2px);
       filter: brightness(1.04);
-      box-shadow: 0 24px 54px color-mix(in srgb, var(--response-primary, #7c3aed) 36%, transparent);
+      box-shadow: 0 24px 54px color-mix(in srgb, var(--response-primary, #440789) 36%, transparent);
     }
 
     .welcome-button:active {
@@ -542,7 +542,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       background:
         linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 42%, rgba(255,255,255,0.18) 100%),
         var(--response-background-image),
-        linear-gradient(135deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+        linear-gradient(135deg, var(--response-primary, #440789), var(--response-secondary, #06b6d4));
       background-size: cover;
       background-position: center;
       overflow: hidden;
@@ -569,12 +569,20 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       width: min(820px, 100%);
       min-height: auto;
       grid-template-columns: 1fr;
-      padding: clamp(28px, 7vw, 78px) 0;
+      padding: clamp(28px, 7vw, 78px) clamp(24px, 5vw, 40px);
       background: transparent;
       border: 0;
       border-radius: 0;
       box-shadow: none;
       backdrop-filter: none;
+      text-align: center;
+    }
+
+    .layout-minimal .welcome-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .layout-minimal .welcome-kicker,
@@ -586,18 +594,22 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     .layout-minimal h1 {
       max-width: 760px;
       font-size: clamp(40px, 8vw, 82px);
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .layout-minimal p {
       max-width: 680px;
       font-size: clamp(17px, 2.2vw, 22px);
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .layout-minimal .welcome-button {
       min-width: 0;
       border-radius: 0;
       padding-inline: 0;
-      color: var(--response-primary, #7c3aed);
+      color: var(--response-primary, #440789);
       background: transparent;
       box-shadow: inset 0 -2px 0 currentColor;
     }
@@ -636,7 +648,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       align-items: stretch;
       padding: clamp(24px, 4vw, 44px);
       background:
-        linear-gradient(180deg, color-mix(in srgb, var(--response-primary, #7c3aed) 12%, #ffffff), #ffffff);
+        linear-gradient(180deg, color-mix(in srgb, var(--response-primary, #440789) 12%, #ffffff), #ffffff);
     }
 
     .layout-editorial .welcome-preview {
@@ -652,7 +664,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       grid-template-columns: minmax(0, 1fr) 340px;
       background:
         radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--response-secondary, #06b6d4) 28%, transparent), transparent 28%),
-        radial-gradient(circle at 24% 88%, color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent), transparent 34%),
+        radial-gradient(circle at 24% 88%, color-mix(in srgb, var(--response-primary, #440789) 24%, transparent), transparent 34%),
         color-mix(in srgb, var(--response-bg, #f5f3ff) 76%, #ffffff);
       overflow: hidden;
     }
@@ -670,7 +682,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       height: 420px;
       right: -130px;
       top: -120px;
-      border: 1px solid color-mix(in srgb, var(--response-primary, #7c3aed) 24%, transparent);
+      border: 1px solid color-mix(in srgb, var(--response-primary, #440789) 24%, transparent);
     }
 
     .layout-orbit .welcome-card::after {
@@ -725,7 +737,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       grid-template-columns: minmax(0, 1fr) 320px;
       padding: clamp(30px, 5vw, 64px);
       background:
-        linear-gradient(124deg, #ffffff 0 57%, color-mix(in srgb, var(--response-primary, #7c3aed) 14%, #ffffff) 57% 100%);
+        linear-gradient(124deg, #ffffff 0 57%, color-mix(in srgb, var(--response-primary, #440789) 14%, #ffffff) 57% 100%);
       overflow: hidden;
     }
 
@@ -762,7 +774,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     .design-editable:focus,
     .button-editable:hover,
     .button-editable:focus {
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 7%, transparent);
+      background: color-mix(in srgb, var(--response-primary, #440789) 7%, transparent);
     }
 
     .button-editable {
@@ -790,7 +802,20 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
       .welcome-content.positioned-layout,
       .preview-zone.positioned-layout {
-        min-height: 520px;
+        min-height: auto !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .positioned-layout > .design-box {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 auto 20px !important;
+        transform: none !important;
       }
 
       .welcome-kicker,

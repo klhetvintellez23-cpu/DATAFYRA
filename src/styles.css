@@ -1,14 +1,14 @@
 /* GLOBAL THEME TOKENS - VIOLET PRISM (DIGITAL MARKETING SAAS THEME) */
 :root {
   /* Core Brand Colors - Soft Purple & Deep Purple */
-  --vp-primary: #A78BFA;
-  --vp-primary-hover: #c4b5fd;
-  --vp-secondary: #7C3AED;
-  --vp-secondary-hover: #6d28d9;
+  --vp-primary: #440789;
+  --vp-primary-hover: #5814ad;
+  --vp-secondary: #440789;
+  --vp-secondary-hover: #330568;
   
   /* Gradients */
-  --vp-gradient-main: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
-  --vp-gradient-hover: linear-gradient(135deg, #b8a2fc 0%, #8b5cf6 100%);
+  --vp-gradient-main: linear-gradient(135deg, #440789 0%, #300561 100%);
+  --vp-gradient-hover: linear-gradient(135deg, #5814ad 0%, #3c0675 100%);
   --vp-gradient-lavender: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
 
   /* Neutrals & Text */
@@ -25,9 +25,9 @@
   /* Borders & Shadows */
   --vp-border: #E5E7EB;
   --vp-border-strong: #D1D5DB;
-  --vp-shadow-sm: 0 2px 4px rgba(124, 58, 237, 0.03);
-  --vp-shadow-md: 0 4px 14px rgba(124, 58, 237, 0.06); /* Soft neumorphism tint */
-  --vp-shadow-lg: 0 10px 30px rgba(124, 58, 237, 0.08);
+  --vp-shadow-sm: 0 2px 4px rgba(68, 7, 137, 0.03);
+  --vp-shadow-md: 0 4px 14px rgba(68, 7, 137, 0.06); /* Soft neumorphism tint */
+  --vp-shadow-lg: 0 10px 30px rgba(68, 7, 137, 0.08);
 
   /* Geometry - Soft & Friendly */
   --vp-radius-sm: 8px;
@@ -43,7 +43,7 @@
   --vp-transition-fast: cubic-bezier(0.25, 1, 0.5, 1) 0.15s;
 
   /* Dashboard specific colors */
-  --dash-purple: #7C3AED;
+  --dash-purple: #440789;
   --dash-blue: #3b82f6; 
   --dash-success: #10b981;
   --dash-warning: #f59e0b;

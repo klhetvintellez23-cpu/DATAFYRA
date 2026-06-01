@@ -178,6 +178,10 @@ export class EditorPage implements OnInit, OnDestroy {
   showPublishChecklist = signal(false);
   activeShareSection = signal<ShareSection>('link');
   showShareDropdown = signal(false);
+  surveyEmailAlerts = signal(false);
+  surveyMaxResponses = signal<number | null>(null);
+  surveyPreventDuplicates = signal(false);
+  surveyCloseDate = signal<string>('');
   qrSize = signal(360);
   qrColor = signal('#111827');
   selectedQrPreset = signal<QrPresetId>('flyer');
@@ -482,7 +486,7 @@ export class EditorPage implements OnInit, OnDestroy {
       description: 'Formulario de inscripción para eventos y conferencias.',
       icon: 'ph-ticket',
       category: 'Eventos',
-      brand: { primaryColor: '#7c3aed', secondaryColor: '#a78bfa', backgroundColor: '#f5f3ff', surfaceColor: '#ffffff', textColor: '#3b0764', buttonStyle: 'pill', fontTitle: 'Space Grotesk', fontBody: 'Inter', shadowPreset: 'float', glassEffect: true },
+      brand: { primaryColor: '#440789', secondaryColor: '#a78bfa', backgroundColor: '#f5f3ff', surfaceColor: '#ffffff', textColor: '#3b0764', buttonStyle: 'pill', fontTitle: 'Space Grotesk', fontBody: 'Inter', shadowPreset: 'float', glassEffect: true },
       questions: [
         { text: '¿Cuál es tu nombre completo?', type: 'text' },
         { text: '¿A qué sesión deseas asistir?', type: 'multiple-choice' },
@@ -758,7 +762,7 @@ export class EditorPage implements OnInit, OnDestroy {
     },
     {
       name: 'Nocturna',
-      primaryColor: '#7c3aed',
+      primaryColor: '#440789',
       secondaryColor: '#2563eb',
       backgroundColor: '#16132b',
       surfaceColor: '#221b3d',
@@ -775,7 +779,7 @@ export class EditorPage implements OnInit, OnDestroy {
     {
       name: 'Magenta',
       primaryColor: '#c026d3',
-      secondaryColor: '#7c3aed',
+      secondaryColor: '#440789',
       backgroundColor: '#fdf4ff',
       surfaceColor: '#ffffff',
       textColor: '#581c87'
@@ -798,7 +802,7 @@ export class EditorPage implements OnInit, OnDestroy {
     },
     {
       name: 'Gamer',
-      primaryColor: '#a855f7',
+      primaryColor: '#440789',
       secondaryColor: '#22d3ee',
       backgroundColor: '#0f0a1e',
       surfaceColor: '#1a1333',
@@ -1152,7 +1156,7 @@ export class EditorPage implements OnInit, OnDestroy {
       category: 'Creativo',
       image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=900',
       brand: {
-        primaryColor: '#a855f7',
+        primaryColor: '#440789',
         secondaryColor: '#22d3ee',
         backgroundColor: '#0f0520',
         backgroundImageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=1400',
@@ -1330,7 +1334,7 @@ export class EditorPage implements OnInit, OnDestroy {
       category: 'Briefing',
       image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=900',
       brand: {
-        primaryColor: '#4f46e5',
+        primaryColor: '#440789',
         secondaryColor: '#f97316',
         backgroundColor: '#eef2ff',
         backgroundImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1400',
@@ -1398,7 +1402,7 @@ export class EditorPage implements OnInit, OnDestroy {
       category: 'Workshop',
       image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=900',
       brand: {
-        primaryColor: '#7c3aed',
+        primaryColor: '#440789',
         secondaryColor: '#14b8a6',
         backgroundColor: '#f5f3ff',
         backgroundImageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1400',
@@ -3669,7 +3673,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   currentButtonColor(): string {
-    return this.brand().buttonColor || this.brand().primaryColor || '#7c3aed';
+    return this.brand().buttonColor || this.brand().primaryColor || '#440789';
   }
 
   currentButtonTextColor(): string {
@@ -3858,7 +3862,7 @@ export class EditorPage implements OnInit, OnDestroy {
     return {
       enabled: pb?.enabled ?? true,
       style: pb?.style ?? 'line',
-      color: pb?.color || this.brand().primaryColor || '#7c3aed'
+      color: pb?.color || this.brand().primaryColor || '#440789'
     };
   }
 
@@ -4437,7 +4441,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   questionDonutGradient(): string {
-    const colors = ['#6366f1', '#22c55e', '#f97316', '#0ea5e9', '#a855f7', '#14b8a6', '#f43f5e'];
+    const colors = ['#440789', '#22c55e', '#f97316', '#0ea5e9', '#440789', '#14b8a6', '#f43f5e'];
     let cursor = 0;
     const segments = this.selectedQuestionDistribution().map((item, index) => {
       const start = cursor;
@@ -4645,6 +4649,49 @@ export class EditorPage implements OnInit, OnDestroy {
       window.open(this.getQrCodeUrl(), '_blank');
       this.showInfo('Se abrió el QR en una nueva pestaña.');
     }
+  }
+
+  openSurveySettings(): void {
+    const survey = this.survey();
+    if (survey) {
+      const metadata = (survey.metadata || {}) as any;
+      this.surveyEmailAlerts.set(metadata.emailAlerts ?? false);
+      this.surveyMaxResponses.set(metadata.maxResponses ?? null);
+      this.surveyPreventDuplicates.set(metadata.responsePolicy === 'once-per-browser');
+      this.surveyCloseDate.set(metadata.closesAt ?? '');
+    }
+    this.setActiveShareSection('settings');
+  }
+
+  saveSurveySettings(): void {
+    const survey = this.survey();
+    if (survey) {
+      if (!survey.metadata) {
+        survey.metadata = {};
+      }
+      const metadata = survey.metadata as any;
+      metadata.emailAlerts = this.surveyEmailAlerts();
+      metadata.maxResponses = this.surveyMaxResponses() || undefined;
+      metadata.responsePolicy = this.surveyPreventDuplicates() ? 'once-per-browser' : 'multiple';
+      metadata.closesAt = this.surveyCloseDate() || undefined;
+
+      // Sincronizar campo de cierre si existe
+      if (this.surveyCloseDate()) {
+        this.publicationDeadline.set(this.surveyCloseDate());
+      }
+    }
+    this.showInfo('Configuración de encuesta guardada con éxito.');
+    this.setActiveShareSection('link');
+  }
+
+  onMaxResponsesInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.surveyMaxResponses.set(val ? Number(val) : null);
+  }
+
+  onCloseDateInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.surveyCloseDate.set(val || '');
   }
 
   updateQrSize(value: string | number): void {
@@ -5124,7 +5171,7 @@ export class EditorPage implements OnInit, OnDestroy {
   welcomeCardStyle(): Record<string, string> {
     const brand = this.brand();
     return {
-      '--survey-primary': brand.primaryColor ?? '#7c3aed',
+      '--survey-primary': brand.primaryColor ?? '#440789',
       '--survey-secondary': brand.secondaryColor ?? '#a78bfa',
       '--survey-bg': brand.backgroundColor ?? '#f0edf6',
       '--survey-surface': brand.surfaceColor ?? '#ffffff',
@@ -5134,7 +5181,7 @@ export class EditorPage implements OnInit, OnDestroy {
       '--survey-font-title': `'${brand.fontTitle || 'Inter'}', sans-serif`,
       '--survey-font-body': `'${brand.fontBody || 'Inter'}', sans-serif`,
       '--survey-font-button': `'${brand.fontButton || 'Inter'}', sans-serif`,
-      '--survey-button-color': brand.buttonColor || brand.primaryColor || '#7c3aed',
+      '--survey-button-color': brand.buttonColor || brand.primaryColor || '#440789',
       '--survey-button-text': brand.buttonTextColor || '#ffffff'
     };
   }
@@ -5241,7 +5288,7 @@ export class EditorPage implements OnInit, OnDestroy {
   responseThemeStyle(): Record<string, string> {
     const brand = this.brand();
     const style: Record<string, string> = {
-      '--response-primary': brand.primaryColor ?? '#7c3aed',
+      '--response-primary': brand.primaryColor ?? '#440789',
       '--response-secondary': brand.secondaryColor ?? '#00c4cc',
       '--response-bg': brand.backgroundColor ?? '#16132b',
       '--response-surface': brand.surfaceColor ?? '#ffffff',
@@ -5740,7 +5787,7 @@ export class EditorPage implements OnInit, OnDestroy {
     };
 
     return {
-      primaryColor: '#7c3aed',
+      primaryColor: '#440789',
       secondaryColor: '#00c4cc',
       backgroundColor: '#f0edf6',
       surfaceColor: '#ffffff',
@@ -5822,7 +5869,7 @@ export class EditorPage implements OnInit, OnDestroy {
     }
 
     const brand = this.ensureBrand(metadata.brand);
-    const primaryColor = brand.primaryColor || '#7c3aed';
+    const primaryColor = brand.primaryColor || '#440789';
     const secondaryColor = brand.secondaryColor || '#06b6d4';
     const textColor = brand.textColor || '#111827';
     const bg = brand.backgroundColor || '#f4f0ff';

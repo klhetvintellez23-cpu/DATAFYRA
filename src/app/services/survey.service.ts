@@ -469,7 +469,7 @@ export class SurveyService {
             locked: false,
             hidden: false,
             styles: {
-              backgroundColor: metadata.brand?.primaryColor ?? '#7c3aed',
+              backgroundColor: metadata.brand?.primaryColor ?? '#440789',
               color: metadata.brand?.buttonTextColor ?? '#ffffff',
               borderRadius: metadata.brand?.buttonStyle === 'pill' ? 9999 : metadata.brand?.buttonRadius ?? 8
             }

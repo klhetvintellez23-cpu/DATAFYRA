@@ -23,8 +23,8 @@ input {
   --line: #e7e0ec;
   --soft: #f9f5ff;
   --active: #f9f5ff;
-  --active-ink: #7f00ff;
-  --primary: #7f00ff;
+  --active-ink: #440789;
+  --primary: #440789;
   --avatar: #f5f1fb;
   min-height: 100vh;
   display: grid;
@@ -72,7 +72,7 @@ input {
   border: 1px solid #e7e0ec;
   border-radius: 9px;
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
   font-size: 15px;
 }
 
@@ -189,7 +189,7 @@ input {
 }
 
 .folder-item.active {
-  box-shadow: inset 2px 0 0 #7f00ff;
+  box-shadow: inset 2px 0 0 #440789;
 }
 
 .folder-item .material-symbols-outlined {
@@ -314,7 +314,7 @@ input {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #7f00ff;
+  background: #440789;
 }
 
 .plan-progress-row strong,
@@ -510,14 +510,14 @@ input {
 
 .create-survey-btn {
   min-height: 50px;
-  border: 1px solid #7f00ff;
+  border: 1px solid #440789;
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 0 22px;
-  background: #7f00ff;
+  background: #440789;
   color: #ffffff;
   font-weight: 720;
   cursor: pointer;
@@ -679,12 +679,12 @@ input {
 .layout-toggle button:hover {
   transform: translateY(-1px);
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
 }
 
 .layout-toggle button.active {
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
 }
 
 .layout-toggle .material-symbols-outlined {
@@ -740,7 +740,7 @@ input {
 }
 
 .dashboard-filters button.active {
-  color: #7f00ff;
+  color: #440789;
   border-color: #e7e0ec;
   background: #f9f5ff;
 }
@@ -780,9 +780,9 @@ input {
 }
 
 .new-survey-tile:hover {
-  border-color: #7f00ff;
+  border-color: #440789;
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
   transform: translateY(-4px);
   box-shadow: 0 12px 24px -10px rgba(127, 0, 255, 0.18);
 }
@@ -794,12 +794,12 @@ input {
   display: grid;
   place-items: center;
   background: #dce9ff;
-  color: #7f00ff;
+  color: #440789;
   transition: all var(--vp-transition);
 }
 
 .new-survey-tile:hover .new-survey-icon {
-  background: #7f00ff;
+  background: #440789;
   color: #ffffff;
 }
 
@@ -900,7 +900,7 @@ input {
   position: absolute;
   inset: 0;
   opacity: 0.36;
-  background-image: radial-gradient(color-mix(in srgb, var(--tile-accent) 44%, #7f00ff) 0.7px, transparent 0.7px);
+  background-image: radial-gradient(color-mix(in srgb, var(--tile-accent) 44%, #440789) 0.7px, transparent 0.7px);
   background-size: 12px 12px;
   pointer-events: none;
 }
@@ -973,7 +973,7 @@ input {
 }
 
 .survey-tile:hover .tile-body h2 {
-  color: #7f00ff;
+  color: #440789;
 }
 
 .tile-quick-actions {
@@ -1009,7 +1009,7 @@ input {
 
 .tile-quick-actions button:hover {
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
   transform: translateY(-1px);
 }
 
@@ -1164,7 +1164,7 @@ input {
 
 .tile-menu button:hover {
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
   transform: translateX(2px);
 }
 
@@ -1228,7 +1228,7 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #7f00ff;
+  background: #440789;
   color: #ffffff;
   font-size: 24px;
   font-weight: 720;
@@ -1382,7 +1382,7 @@ input {
 .modal-backdrop::before {
   left: -90px;
   top: -90px;
-  background: #7f00ff;
+  background: #440789;
 }
 
 .modal-backdrop::after {
@@ -1497,7 +1497,7 @@ input {
 }
 
 .create-mode-grid button.active {
-  border: 2px solid #7f00ff;
+  border: 2px solid #440789;
   background: linear-gradient(135deg, rgba(127, 0, 255, 0.05) 0%, rgba(167, 139, 250, 0.12) 100%);
   box-shadow: none;
 }
@@ -1517,11 +1517,11 @@ input {
 
 .create-mode-grid button:hover .material-symbols-outlined {
   background: rgba(127, 0, 255, 0.12);
-  color: #7f00ff;
+  color: #440789;
 }
 
 .create-mode-grid button.active .material-symbols-outlined {
-  background: #7f00ff;
+  background: #440789;
   color: #ffffff;
 }
 
@@ -1539,7 +1539,7 @@ input {
 }
 
 .create-mode-grid button.active strong {
-  color: #7f00ff;
+  color: #440789;
 }
 
 .modal-field {
@@ -1635,7 +1635,7 @@ input {
 
 .modal-field input:focus,
 .modal-field textarea:focus {
-  border-color: #7f00ff;
+  border-color: #440789;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(127, 0, 255, 0.1);
 }
@@ -1690,7 +1690,7 @@ input {
   min-height: 48px;
   border: 0;
   border-radius: 999px;
-  background: #7f00ff;
+  background: #440789;
   color: white;
   font-size: 14px;
   font-weight: 760;
@@ -1880,7 +1880,7 @@ input {
 
 .notification-icon-wrapper.system {
   background: #f3ebff;
-  color: #7f00ff;
+  color: #440789;
 }
 
 .notification-content {
@@ -2762,7 +2762,7 @@ input {
 }
 
 .custom-dialog-input:focus {
-  border-color: #7f00ff;
+  border-color: #440789;
   box-shadow: 0 0 0 4px rgba(127, 0, 255, 0.12);
   background: #ffffff;
 }
@@ -2799,7 +2799,7 @@ input {
   padding: 0 24px;
   border: 0;
   border-radius: 12px;
-  background: #7f00ff;
+  background: #440789;
   color: #ffffff;
   font-size: 14px;
   font-weight: 750;

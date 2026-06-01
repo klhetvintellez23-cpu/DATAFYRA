@@ -19,7 +19,7 @@ import { AuthModalService } from '../../services/auth-modal.service';
     }
 
     .showcase-hero h1 span {
-      color: #7F00FF;
+      color: #440789;
     }
 
     .showcase-panel {

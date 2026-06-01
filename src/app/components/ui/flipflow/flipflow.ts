@@ -55,18 +55,18 @@ export class FlipFlowComponent {
 
   // Colores basados en la paleta Violet Prism de DataEncuestas
   colors = [
-    'linear-gradient(135deg, #A78BFA, #7C3AED)', // Primary Brand
-    'linear-gradient(135deg, #7C3AED, #5B21B6)', // Deep Purple
+    'linear-gradient(135deg, #A78BFA, #440789)', // Primary Brand
+    'linear-gradient(135deg, #440789, #330568)', // Deep Purple
     'linear-gradient(135deg, #C4B5FD, #A78BFA)', // Light Purple
-    'linear-gradient(135deg, #8B5CF6, #6D28D9)', // Vibrant Purple
+    'linear-gradient(135deg, #440789, #330568)', // Vibrant Purple
     'linear-gradient(135deg, #DDD6FE, #C4B5FD)', // Soft Lavender
   ];
 
   backColors = [
     'linear-gradient(135deg, #F3F4F6, #E5E7EB)', // Neutral Light
     'linear-gradient(135deg, #E9D5FF, #D8B4FE)', // Very Light Purple
-    'linear-gradient(135deg, #7C3AED, #A78BFA)', // Reverse primary
-    'linear-gradient(135deg, #5B21B6, #7C3AED)', // Reverse deep
+    'linear-gradient(135deg, #440789, #A78BFA)', // Reverse primary
+    'linear-gradient(135deg, #330568, #440789)', // Reverse deep
     'linear-gradient(135deg, #A78BFA, #DDD6FE)', // Reverse light
   ];
 

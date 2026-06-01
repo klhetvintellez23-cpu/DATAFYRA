@@ -58,14 +58,14 @@ import { QuestionOption } from '../../../services/survey.service';
 
     .option-button:hover {
       transform: translateY(-1px);
-      border-color: color-mix(in srgb, var(--response-primary, #7c3aed) 42%, white);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 42%, white);
       box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
     }
 
     .option-button.selected {
-      background: color-mix(in srgb, var(--response-primary, #7c3aed) 10%, white);
-      border-color: var(--response-primary, #7c3aed);
-      box-shadow: 0 14px 30px color-mix(in srgb, var(--response-primary, #7c3aed) 18%, transparent);
+      background: color-mix(in srgb, var(--response-primary, #440789) 10%, white);
+      border-color: var(--response-primary, #440789);
+      box-shadow: 0 14px 30px color-mix(in srgb, var(--response-primary, #440789) 18%, transparent);
     }
 
     .option-marker {
@@ -87,8 +87,8 @@ import { QuestionOption } from '../../../services/survey.service';
     }
 
     .option-button.selected .option-marker {
-      border-color: var(--response-primary, #7c3aed);
-      background: var(--response-primary, #7c3aed);
+      border-color: var(--response-primary, #440789);
+      background: var(--response-primary, #440789);
     }
 
     .option-list:not(.multi) .option-button.selected .option-marker {

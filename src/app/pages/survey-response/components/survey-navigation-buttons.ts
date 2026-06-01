@@ -41,8 +41,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       margin-left: auto;
       min-width: 170px;
       color: var(--response-button-text, #ffffff);
-      background: linear-gradient(135deg, var(--response-button, #7c3aed), var(--response-secondary, #06b6d4));
-      box-shadow: 0 14px 34px color-mix(in srgb, var(--response-primary, #7c3aed) 28%, transparent);
+      background: linear-gradient(135deg, var(--response-button, #440789), var(--response-secondary, #06b6d4));
+      box-shadow: 0 14px 34px color-mix(in srgb, var(--response-primary, #440789) 28%, transparent);
     }
 
     .nav-button.secondary {

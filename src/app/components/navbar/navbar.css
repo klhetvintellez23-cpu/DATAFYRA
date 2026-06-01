@@ -80,7 +80,7 @@
 .site-nav-link:hover,
 .site-nav-login:hover {
   background: #f4ecff;
-  color: #7f00ff;
+  color: #440789;
 }
 
 .site-nav-item:hover .site-nav-link .material-symbols-outlined {
@@ -132,7 +132,7 @@
   display: grid;
   place-items: center;
   background: #f3e8ff;
-  color: #7f00ff;
+  color: #440789;
   font-size: 1.25rem;
   flex: 0 0 auto;
 }
@@ -188,7 +188,7 @@
 }
 
 .editorial-gradient {
-  background: linear-gradient(45deg, #7f00ff, #9b30ff);
+  background: linear-gradient(45deg, #440789, #9b30ff);
 }
 
 .mobile-nav-link {
@@ -205,11 +205,11 @@
 
 .mobile-nav-link:hover {
   background: #f9f5ff;
-  color: #7f00ff;
+  color: #440789;
 }
 
 .mobile-nav-link .material-symbols-outlined {
-  color: #7f00ff;
+  color: #440789;
 }
 
 .site-mobile-actions {
@@ -233,7 +233,7 @@
 }
 
 .mobile-nav-primary {
-  background: linear-gradient(45deg, #7f00ff, #9b30ff);
+  background: linear-gradient(45deg, #440789, #9b30ff);
   color: #fff;
   margin-bottom: 0.65rem;
 }

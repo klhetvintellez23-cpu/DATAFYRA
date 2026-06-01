@@ -164,7 +164,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       font-family: var(--response-body-font, Inter, "Segoe UI", sans-serif);
       background:
         radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--response-secondary, #06b6d4) 16%, transparent) 0%, transparent 32%),
-        radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--response-primary, #7c3aed) 16%, transparent) 0%, transparent 30%),
+        radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--response-primary, #440789) 16%, transparent) 0%, transparent 30%),
         linear-gradient(135deg, var(--response-bg, #f5f3ff), color-mix(in srgb, var(--response-bg, #f5f3ff) 78%, white));
     }
 
@@ -213,7 +213,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     .simulator-progress-fill {
       height: 100%;
       width: 0;
-      background: linear-gradient(90deg, var(--response-primary, #7c3aed), var(--response-secondary, #06b6d4));
+      background: linear-gradient(90deg, var(--response-primary, #440789), var(--response-secondary, #06b6d4));
       transition: width 220ms ease;
     }
 
@@ -234,7 +234,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       overflow: visible;
       background:
         radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--response-secondary, #06b6d4) 16%, transparent) 0%, transparent 32%),
-        radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--response-primary, #7c3aed) 16%, transparent) 0%, transparent 30%),
+        radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--response-primary, #440789) 16%, transparent) 0%, transparent 30%),
         linear-gradient(135deg, var(--response-bg, #f5f3ff), color-mix(in srgb, var(--response-bg, #f5f3ff) 78%, white));
     }
 
@@ -263,7 +263,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     .empty-question-page > .material-symbols-outlined {
-      color: var(--response-primary, #4f46e5);
+      color: var(--response-primary, #440789);
       font-size: 34px;
     }
 
@@ -288,7 +288,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       align-items: center;
       gap: 7px;
       padding: 0 14px;
-      background: var(--response-primary, #4f46e5);
+      background: var(--response-primary, #440789);
       color: #ffffff;
       font: inherit;
       font-size: 13px;
@@ -315,7 +315,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     :host ::ng-deep .design-clickable-question:hover app-survey-question-card .question-card {
-      border-color: color-mix(in srgb, var(--response-primary, #4f46e5) 28%, rgba(15, 23, 42, 0.08));
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 28%, rgba(15, 23, 42, 0.08));
       box-shadow: 0 28px 76px rgba(15, 23, 42, 0.14);
     }
 
@@ -406,7 +406,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     .design-page-add-btn {
-      background: #7f00ff;
+      background: #440789;
       color: white;
       border: none;
       border-radius: 999px;
@@ -422,7 +422,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     }
 
     .design-page-add-btn:hover {
-      background: #6a00d6;
+      background: #330568;
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(127,0,255,0.35);
     }
@@ -449,8 +449,8 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     :host ::ng-deep .simulator-page.question-style-soft app-survey-question-card .question-card {
       background:
-        linear-gradient(180deg, color-mix(in srgb, var(--response-primary, #4f46e5) 6%, #ffffff), #ffffff 62%);
-      border-color: color-mix(in srgb, var(--response-primary, #4f46e5) 14%, #ffffff);
+        linear-gradient(180deg, color-mix(in srgb, var(--response-primary, #440789) 6%, #ffffff), #ffffff 62%);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 14%, #ffffff);
       box-shadow: 0 20px 54px rgba(79, 70, 229, 0.1);
       overflow: hidden;
       text-align: center;
@@ -463,7 +463,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       left: 0;
       right: 0;
       height: 5px;
-      background: linear-gradient(90deg, var(--response-primary, #4f46e5), var(--response-secondary, #06b6d4));
+      background: linear-gradient(90deg, var(--response-primary, #440789), var(--response-secondary, #06b6d4));
     }
 
     :host ::ng-deep .simulator-page.question-style-soft app-survey-question-card .question-meta {
@@ -478,7 +478,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     :host ::ng-deep .simulator-page.question-style-outlined app-survey-question-card .question-card {
       background: #ffffff;
-      border: 1.5px solid color-mix(in srgb, var(--response-primary, #4f46e5) 22%, #d1d5db);
+      border: 1.5px solid color-mix(in srgb, var(--response-primary, #440789) 22%, #d1d5db);
       box-shadow: none;
     }
 
@@ -540,7 +540,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     :host ::ng-deep .simulator-page.question-style-boxed app-survey-question-card .question-card {
       background: #ffffff;
-      border: 1px solid color-mix(in srgb, var(--response-primary, #4f46e5) 18%, #e5e7eb);
+      border: 1px solid color-mix(in srgb, var(--response-primary, #440789) 18%, #e5e7eb);
       box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
     }
 
@@ -556,7 +556,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       min-height: 86px;
       align-items: start;
       border-radius: 14px;
-      background: color-mix(in srgb, var(--response-primary, #4f46e5) 6%, #ffffff);
+      background: color-mix(in srgb, var(--response-primary, #440789) 6%, #ffffff);
     }
 
     :host ::ng-deep .simulator-page.question-style-glass app-survey-question-card .question-card {
@@ -579,7 +579,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
     :host ::ng-deep .simulator-page.question-style-solid app-survey-question-card .question-pill,
     :host ::ng-deep .simulator-page.question-style-solid app-survey-question-card .required-pill {
-      background: color-mix(in srgb, var(--response-primary, #4f46e5) 18%, transparent);
+      background: color-mix(in srgb, var(--response-primary, #440789) 18%, transparent);
     }
 
     :host ::ng-deep .simulator-page.question-style-underline app-survey-question-card .question-card {
@@ -771,7 +771,7 @@ export class SurveySimulatorComponent implements OnChanges {
 
   themeStyle(): Record<string, string> {
     const brand = this.brand();
-    const primary = brand.primaryColor || '#7c3aed';
+    const primary = brand.primaryColor || '#440789';
     const secondary = brand.secondaryColor || '#06b6d4';
     const background = brand.backgroundColor || '#f5f3ff';
     const text = brand.textColor || '#111827';

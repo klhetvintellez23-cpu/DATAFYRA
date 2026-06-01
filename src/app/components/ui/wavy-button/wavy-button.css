@@ -14,7 +14,7 @@
   overflow: hidden;
   text-decoration: none;
   background-color: rgba(167, 139, 250, 0.15);
-  color: #7C3AED;
+  color: #440789;
   white-space: nowrap;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -31,7 +31,9 @@
 }
 
 .wavy-btn[style*="background-color: rgb(29, 27, 32)"],
-.wavy-btn[style*="background-color: #1d1b20"] {
+.wavy-btn[style*="background-color: #1d1b20"],
+.wavy-btn[style*="background-color: rgb(68, 7, 137)"],
+.wavy-btn[style*="background-color: #440789"] {
   color: white;
 }
 
@@ -44,7 +46,8 @@
 /* ===== OUTLINE VARIANT ===== */
 .wavy-btn-outline {
   background: transparent !important;
-  border: 2px solid #6b7280; /* gray-500 */
+  border: 2px solid #6b7280;
+  /* gray-500 */
   color: #000;
 }
 
@@ -83,17 +86,25 @@
 }
 
 /* Reverse Trial: text turns white on hover because background is purple */
-.wavy-btn:not(.wavy-btn-outline) .wavy-text-hovered,
-.wavy-btn:not(.wavy-btn-outline) .wavy-text-hovered .wavy-char {
+.wavy-btn:not(.wavy-btn-outline):not(.wavy-btn-inverted) .wavy-text-hovered,
+.wavy-btn:not(.wavy-btn-outline):not(.wavy-btn-inverted) .wavy-text-hovered .wavy-char {
   color: white !important;
+}
+
+/* Inverted Trial: text turns dark purple on hover because background is light */
+.wavy-btn-inverted .wavy-text-hovered,
+.wavy-btn-inverted .wavy-text-hovered .wavy-char {
+  color: #440789 !important;
 }
 
 /* Outline variant: text turns white on hover */
 .wavy-btn-outline .wavy-text {
   color: #000;
 }
+
 .wavy-btn-outline .wavy-text-hovered {
-  color: #000; /* stays dark for outline since bg is transparent */
+  color: #000;
+  /* stays dark for outline since bg is transparent */
 }
 
 /* ===== CHARACTER JUMP ANIMATION ===== */
@@ -106,7 +117,15 @@
 }
 
 @keyframes wavy-jump {
-  0% { transform: translateY(0); }
-  40% { transform: translateY(-8px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }

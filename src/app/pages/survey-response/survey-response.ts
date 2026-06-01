@@ -43,7 +43,7 @@ export class SurveyResponsePage implements OnInit {
   private readonly partialStoragePrefix = 'dataencuestas-partial-response';
 
   readonly publicThemePresets: PublicThemePreset[] = [
-    { name: 'Lila moderno', primary: '#7c3aed', secondary: '#06b6d4', background: '#f5f3ff', surface: '#ffffff', text: '#111827' },
+    { name: 'Lila moderno', primary: '#440789', secondary: '#06b6d4', background: '#f5f3ff', surface: '#ffffff', text: '#111827' },
     { name: 'Azul corporativo', primary: '#2563eb', secondary: '#0ea5e9', background: '#eff6ff', surface: '#ffffff', text: '#0f172a' },
     { name: 'Verde salud', primary: '#059669', secondary: '#14b8a6', background: '#ecfdf5', surface: '#ffffff', text: '#064e3b' },
     { name: 'Cafe elegante', primary: '#8b5e34', secondary: '#c08457', background: '#f7f2ec', surface: '#ffffff', text: '#2f1f17' },
@@ -52,7 +52,7 @@ export class SurveyResponsePage implements OnInit {
     { name: 'Naranja energetico', primary: '#ea580c', secondary: '#f59e0b', background: '#fff7ed', surface: '#ffffff', text: '#431407' },
     { name: 'Minimal blanco', primary: '#18181b', secondary: '#71717a', background: '#ffffff', surface: '#ffffff', text: '#09090b' },
     { name: 'Gris profesional', primary: '#475569', secondary: '#0284c7', background: '#f1f5f9', surface: '#ffffff', text: '#0f172a' },
-    { name: 'Morado tecnologico', primary: '#6d28d9', secondary: '#22d3ee', background: '#120f24', surface: '#ffffff', text: '#111827' }
+    { name: 'Morado tecnologico', primary: '#330568', secondary: '#22d3ee', background: '#120f24', surface: '#ffffff', text: '#111827' }
   ];
 
   pages = computed(() => {
@@ -278,7 +278,7 @@ export class SurveyResponsePage implements OnInit {
     const brand = this.brand();
     // Use values directly with simple fallbacks — identical to simulator logic.
     // Avoid clamping or regex-based rejection that would cause visual divergence.
-    const primary = brand.primaryColor || '#7c3aed';
+    const primary = brand.primaryColor || '#440789';
     const secondary = brand.secondaryColor || '#06b6d4';
     const background = brand.backgroundColor || '#f5f3ff';
     const surface = brand.surfaceColor || '#ffffff';

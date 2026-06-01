@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
        class="wavy-btn"
        [class.wavy-btn-outline]="variant === 'outline'"
        [class.wavy-btn-lg]="size === 'lg'"
+       [class.wavy-btn-inverted]="colorScheme === 'primary-inverted'"
        [ngClass]="className"
        [style.background-color]="isHovered ? colors.toBg : colors.fromBg"
        (mouseenter)="isHovered = true"
@@ -59,13 +60,13 @@ export class WavyButtonComponent implements OnInit, OnChanges {
   @Input() className: string = '';
   @Input() variant: 'default' | 'outline' = 'default';
   @Input() size: 'default' | 'lg' = 'default';
-  @Input() colorScheme: 'primary' | 'secondary' | 'dark' = 'primary';
+  @Input() colorScheme: 'primary' | 'secondary' | 'dark' | 'primary-solid' | 'primary-inverted' = 'primary';
 
   characters: string[] = [];
   isHovered = false;
 
   // Colors matching the original ScrollX UI source code exactly
-  colors = { fromBg: '#7C3AED', toBg: '#A78BFA', stroke: '#A78BFA' };
+  colors = { fromBg: '#440789', toBg: '#A78BFA', stroke: '#A78BFA' };
 
   ngOnInit() {
     this.splitText();
@@ -107,15 +108,29 @@ export class WavyButtonComponent implements OnInit, OnChanges {
         this.colors = {
           fromBg: '#1d1b20',
           toBg: '#3c393f',
-          stroke: '#7F00FF',
+          stroke: '#440789',
+        };
+        break;
+      case 'primary-solid':
+        this.colors = {
+          fromBg: '#440789',
+          toBg: '#440789',
+          stroke: 'transparent',
+        };
+        break;
+      case 'primary-inverted':
+        this.colors = {
+          fromBg: '#440789',
+          toBg: '#F2EDFE',
+          stroke: '#F2EDFE',
         };
         break;
       case 'primary':
       default:
         this.colors = {
           fromBg: 'rgba(167, 139, 250, 0.15)', // Soft purple tint
-          toBg: '#7C3AED',                     // Deep Purple target
-          stroke: '#7C3AED',                   // Deep Purple wave
+          toBg: '#440789',                     // Deep Purple target
+          stroke: '#440789',                   // Deep Purple wave
         };
         break;
     }

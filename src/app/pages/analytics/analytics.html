@@ -22,148 +22,259 @@
             Editar
           </a>
         </div>
-      </header>
-
-      <!-- Metrics Cards (Bento Box) -->
+      </header>      <!-- KPI GRID -->
       @if (metrics(); as m) {
-        <section class="metrics-grid vp-animate-fade-in-delay-1">
-          <div class="metric-card vp-glass metric-primary">
-            <div class="metric-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vp-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-            </div>
-            <div class="metric-data">
-              <span class="metric-value">{{ m.totalResponses | number }}</span>
-              <span class="metric-label">Total Respuestas</span>
-            </div>
-          </div>
-          <div class="metric-card vp-glass metric-secondary">
-            <div class="metric-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vp-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </div>
-            <div class="metric-data">
-              <span class="metric-value">{{ m.completionRate }}%</span>
-              <span class="metric-label">Tasa de Completado</span>
-            </div>
-          </div>
-          <div class="metric-card vp-glass">
-            <div class="metric-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vp-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </div>
-            <div class="metric-data">
-              <span class="metric-value">{{ m.avgDurationFormatted }}</span>
-              <span class="metric-label">Tiempo Promedio</span>
-            </div>
-          </div>
-          <div class="metric-card vp-glass metric-nps">
-            <div class="metric-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--vp-stitch-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-            </div>
-            <div class="metric-data">
-              <span class="metric-value" [class.positive]="m.npsScore > 0" [class.negative]="m.npsScore < 0">
-                {{ m.npsScore > 0 ? '+' : '' }}{{ m.npsScore }}
+        <div class="kpi-grid vp-animate-fade-in-delay-1 mt-6">
+          <div class="kpi-card teal">
+            <div class="kpi-top">
+              <div class="kpi-icon teal">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H2v12l2-2 2 2 2-2 2 2 2-2 2 2V2z"/><path d="M5 6h6M5 9h4"/></svg>
+              </div>
+              <span class="kpi-trend up">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,8 6,4 10,8"/></svg>
+                Óptimo
               </span>
-              <span class="metric-label">NPS Score</span>
+            </div>
+            <div>
+              <div class="kpi-value">{{ m.totalResponses | number }}</div>
+              <div class="kpi-label">Total respuestas</div>
+            </div>
+            <div class="kpi-sub">Histórico completo</div>
+          </div>
+
+          <div class="kpi-card cyan">
+            <div class="kpi-top">
+              <div class="kpi-icon cyan">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M5 8l2 2 4-4"/></svg>
+              </div>
+              <span class="kpi-trend up">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,8 6,4 10,8"/></svg>
+                Óptimo
+              </span>
+            </div>
+            <div>
+              <div class="kpi-value">{{ m.completionRate }}%</div>
+              <div class="kpi-label">Tasa de finalización</div>
+            </div>
+            <div class="kpi-sub">Buen estado</div>
+          </div>
+
+          <div class="kpi-card purple">
+            <div class="kpi-top">
+              <div class="kpi-icon purple">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+              </div>
+              <span class="kpi-trend neutral">—</span>
+            </div>
+            <div>
+              <div class="kpi-value">{{ m.avgDurationFormatted }}</div>
+              <div class="kpi-label">Tiempo promedio</div>
+            </div>
+            <div class="kpi-sub">Rápido · {{ survey.questions.length || 0 }} preguntas</div>
+          </div>
+
+          <div class="kpi-card amber">
+            <div class="kpi-top">
+              <div class="kpi-icon amber">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2l1.5 4h4L10 9l1.5 4L8 11l-3.5 2L6 9 2.5 6h4z"/></svg>
+              </div>
+              <span class="kpi-trend neutral">0</span>
+            </div>
+            <div>
+              <div class="kpi-value">0</div>
+              <div class="kpi-label">Abandonos</div>
+            </div>
+            <div class="kpi-sub">Sin abandonos</div>
+          </div>
+
+          <div class="kpi-card green">
+            <div class="kpi-top">
+              <div class="kpi-icon green">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 14a6 6 0 0112 0"/></svg>
+              </div>
+              <span class="kpi-trend up">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,8 6,4 10,8"/></svg>
+                Hoy
+              </span>
+            </div>
+            <div>
+              <div class="kpi-value">{{ m.totalResponses | number }}</div>
+              <div class="kpi-label">Participantes únicos</div>
+            </div>
+            <div class="kpi-sub">Anónimos</div>
+          </div>
+
+          <div class="kpi-card slate">
+            <div class="kpi-top">
+              <div class="kpi-icon slate">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,12 5,8 8,10 11,5 14,7"/><path d="M2 14h12"/></svg>
+              </div>
+              <span class="kpi-trend neutral">NPS</span>
+            </div>
+            <div>
+              <div class="kpi-value" [class.text-success]="m.npsScore > 0" [class.text-danger]="m.npsScore < 0">{{ m.npsScore > 0 ? '+' : '' }}{{ m.npsScore }}</div>
+              <div class="kpi-label">NPS Score</div>
+            </div>
+            <div class="kpi-sub">Basado en respuestas</div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-row vp-animate-fade-in-delay-2 mt-6">
+
+          <!-- MAIN CHART -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Respuestas en el tiempo</div>
+                <div class="chart-subtitle">Actividad de participación — últimos 14 días</div>
+              </div>
+            </div>
+            
+            <div class="trend-chart" style="height: 200px; margin-top: 1rem;">
+              <div class="trend-bars">
+                @for (val of trendData().data; track $index) {
+                  <div class="trend-bar-group">
+                    <div class="trend-bar-track">
+                      <div class="trend-bar-fill" [style.height]="(val / maxTrend()) * 100 + '%'"></div>
+                    </div>
+                    <span class="trend-label" style="font-size: 10px;">{{ trendData().labels[$index] }}</span>
+                  </div>
+                }
+              </div>
             </div>
           </div>
-        </section>
+
+          <!-- SIDE PANEL -->
+          <div class="stat-panel">
+            <!-- Completion ring -->
+            <div class="stat-card">
+              <div class="stat-card-title">Tasa de finalización</div>
+              <div class="completion-ring">
+                <div class="ring-wrap">
+                  <svg viewBox="0 0 72 72">
+                    <circle class="ring-bg" cx="36" cy="36" r="30"/>
+                    <circle class="ring-fill" cx="36" cy="36" r="30" [style.strokeDashoffset]="188 * (1 - (m.completionRate / 100))"/>
+                  </svg>
+                  <div class="ring-label">{{ m.completionRate }}%</div>
+                </div>
+                <div class="ring-meta">
+                  <strong>{{ m.totalResponses }}</strong>
+                  <span>encuestas completadas</span>
+                </div>
+              </div>
+              <div class="stat-rows mt-2">
+                <div class="stat-row">
+                  <span class="stat-row-label">Completadas</span>
+                  <span class="stat-row-val">{{ m.totalResponses }}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-row-label">Abandonos</span>
+                  <span class="stat-row-val">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Funnel -->
+            <div class="stat-card">
+              <div class="stat-card-title">Embudo de participación</div>
+              <div class="funnel-bars">
+                <div class="funnel-row">
+                  <div class="funnel-top">
+                    <span class="funnel-name">Vista la encuesta</span>
+                    <span class="funnel-pct">100%</span>
+                  </div>
+                  <div class="funnel-bar"><div class="funnel-fill" style="width:100%"></div></div>
+                </div>
+                <div class="funnel-row">
+                  <div class="funnel-top">
+                    <span class="funnel-name">Comenzó a responder</span>
+                    <span class="funnel-pct">100%</span>
+                  </div>
+                  <div class="funnel-bar"><div class="funnel-fill cyan" style="width:100%"></div></div>
+                </div>
+                <div class="funnel-row">
+                  <div class="funnel-top">
+                    <span class="funnel-name">Completó encuesta</span>
+                    <span class="funnel-pct">{{ m.completionRate }}%</span>
+                  </div>
+                  <div class="funnel-bar"><div class="funnel-fill" [style.width]="m.completionRate + '%'"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       }
 
-      <!-- Charts Section -->
-      <div class="charts-layout vp-animate-fade-in-delay-2">
-        <!-- Daily Responses Chart -->
-        <section class="chart-card vp-glass">
-          <div class="chart-header">
-            <h3>Respuestas por día</h3>
-            <span class="chart-period">Últimos 7 días</span>
+      <!-- SECTION TABS & TABS CONTENT -->
+      <div class="vp-animate-fade-in-delay-3 mt-8">
+        <div class="section-tabs">
+          <div class="section-tab active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="6" r="3"/><path d="M8 9v2M8 13h.01"/></svg>
+            Análisis por pregunta
+            <span class="tab-cnt">{{ survey.questions.length || 0 }}</span>
           </div>
-          <div class="bar-chart">
-            @for (item of dailyData(); track item.label) {
-              <div class="bar-group">
-                <div class="bar-value">{{ item.count }}</div>
-                <div class="bar-track">
-                  <div class="bar-fill" [style.height]="(item.count / maxDaily()) * 100 + '%'"></div>
-                </div>
-                <div class="bar-label">{{ item.label }}</div>
-              </div>
+        </div>
+
+        <div class="tab-panel active" style="padding-top:24px">
+          <div class="question-tabs mb-6">
+            @for (q of survey.questions; track q.id; let i = $index) {
+              <button
+                class="q-tab"
+                [class.active]="selectedQuestion() === q.id"
+                (click)="selectQuestion(q.id)">
+                <span class="q-tab-num">{{ i + 1 }}</span>
+                <span class="q-tab-text">{{ q.text || 'Pregunta ' + (i + 1) }}</span>
+              </button>
             }
           </div>
-        </section>
 
-        <!-- Trend Chart -->
-        <section class="chart-card vp-glass">
-          <div class="chart-header">
-            <h3>Tendencia 14 días</h3>
-            <span class="chart-period">Respuestas acumuladas</span>
-          </div>
-          <div class="trend-chart">
-            <div class="trend-bars">
-              @for (val of trendData().data; track $index) {
-                <div class="trend-bar-group">
-                  <div class="trend-bar-track">
-                    <div class="trend-bar-fill" [style.height]="(val / maxTrend()) * 100 + '%'"></div>
-                  </div>
-                  <span class="trend-label">{{ trendData().labels[$index] }}</span>
+          @if (distribution().length > 0) {
+            <div class="question-card">
+              <div class="question-head">
+                <div class="q-meta">
+                  <div class="q-text">{{ getQuestionText(selectedQuestion()) }}</div>
                 </div>
-              }
+              </div>
+              <div class="question-body">
+                <div class="option-bars">
+                  @for (item of distribution(); track item.label; let i = $index) {
+                    <div class="option-row">
+                      <span class="option-label" [title]="item.label">{{ item.label }}</span>
+                      <div class="option-bar-wrap">
+                        <div class="option-bar-fill" [class.v2]="i%4===1" [class.v3]="i%4===2" [class.v4]="i%4===3" [style.width]="item.percentage + '%'"></div>
+                      </div>
+                      <span class="option-pct">{{ item.percentage }}%</span>
+                      <span class="option-cnt">{{ item.count }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
+          }
 
-      <!-- Question Analysis -->
-      <section class="question-analysis vp-animate-fade-in-delay-3">
-        <div class="qa-header">
-          <h2>Análisis por pregunta</h2>
-        </div>
-
-        <!-- Question Tabs -->
-        <div class="question-tabs">
-          @for (q of survey.questions; track q.id; let i = $index) {
-            <button
-              class="q-tab"
-              [class.active]="selectedQuestion() === q.id"
-              (click)="selectQuestion(q.id)">
-              <span class="q-tab-num">{{ i + 1 }}</span>
-              <span class="q-tab-text">{{ q.text || 'Pregunta ' + (i + 1) }}</span>
-            </button>
+          @if (textResponses().length > 0) {
+            <div class="question-card mt-6">
+              <div class="question-head">
+                <div class="q-meta">
+                  <div class="q-text">{{ getQuestionText(selectedQuestion()) }}</div>
+                  <div class="q-type-row">
+                    <span class="q-type-badge">Respuestas de texto</span>
+                    <span class="q-responses-label">{{ textResponses().length }} respuestas</span>
+                  </div>
+                </div>
+              </div>
+              <div class="question-body" style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                @for (text of textResponses(); track $index) {
+                  <div style="background: var(--bg-base); padding: 16px; border-radius: var(--r-md); border: 1px solid var(--border);">
+                    <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">"{{ text }}"</p>
+                  </div>
+                }
+              </div>
+            </div>
           }
         </div>
-
-        <!-- Distribution Chart -->
-        @if (distribution().length > 0) {
-          <div class="distribution-card vp-glass">
-            <h3>{{ getQuestionText(selectedQuestion()) }}</h3>
-            <div class="distribution-chart">
-              @for (item of distribution(); track item.label) {
-                <div class="dist-row">
-                  <span class="dist-label">{{ item.label }}</span>
-                  <div class="dist-bar-track">
-                    <div class="dist-bar-fill" [style.width]="item.percentage + '%'"></div>
-                  </div>
-                  <span class="dist-value">{{ item.count }}</span>
-                  <span class="dist-pct">{{ item.percentage }}%</span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Text Responses (Verbatims) -->
-        @if (textResponses().length > 0) {
-          <div class="verbatims-section">
-            <h3>{{ getQuestionText(selectedQuestion()) }}</h3>
-            <p class="verbatims-count">{{ textResponses().length }} respuestas de texto</p>
-            <div class="verbatims-grid">
-              @for (text of textResponses(); track $index) {
-                <div class="verbatim-card vp-glass">
-                  <span class="verbatim-quote">"</span>
-                  <p>{{ text }}</p>
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </section>
+      </div>
     }
   </div>
 </main>
