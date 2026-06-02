@@ -706,4 +706,54 @@
       </div>
     </div>
   }
+
+  <!-- Perfil de Usuario Modal -->
+  @if (showProfileModal()) {
+  <div class="modal-backdrop" (click)="closeProfileModal()">
+    <div class="modal-content profile-modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="closeProfileModal()" aria-label="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="profile-card-header">
+        <div class="profile-cover"></div>
+        <div class="profile-avatar-large">
+          {{ (auth.user()?.name || 'Usuario').charAt(0).toUpperCase() }}
+        </div>
+      </div>
+
+      <div class="profile-card-body">
+        <h2 class="profile-name">{{ auth.user()?.name || 'Usuario' }}</h2>
+        <span class="profile-email">{{ auth.user()?.email || 'usuario@dataencuesta.com' }}</span>
+        
+        <div class="profile-badges">
+          <span class="role-badge creator-badge">Creador</span>
+          <span class="status-badge status-active">Activo</span>
+        </div>
+
+        <div class="profile-details-list">
+          <div class="profile-detail-item">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <div>
+              <strong>Miembro desde</strong>
+              <span>2026</span>
+            </div>
+          </div>
+          <div class="profile-detail-item">
+            <span class="material-symbols-outlined">workspace_premium</span>
+            <div>
+              <strong>Plan actual</strong>
+              <span>Plan Gratuito</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions profile-actions">
+        <button class="btn-cancel" type="button" (click)="closeProfileModal()">Cerrar</button>
+        <button class="btn-confirm" type="button" (click)="openSettingsModal(); closeProfileModal()">Configuración</button>
+      </div>
+    </div>
+  </div>
+  }
 </main>

@@ -42,7 +42,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
         <div class="design-box" data-design-kind="question-title" [class.design-active]="designMode" [class.design-selected]="isSelected('question-title')" [ngStyle]="boxStyle('question-title')" (mousedown)="selectBox($event, 'question-title')">
           <button class="move-handle" type="button" aria-label="Mover titulo de pregunta" (mousedown)="beginTransform($event, 'question-title', 'move')"></button>
           <h2
-            [style.font-size.px]="fontSize('question-title')"
+            [style.font-size]="dynamicFontSize('question-title', 24, 6)"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (keydown)="designMode && preventEditableEnter($event)"
@@ -55,7 +55,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
         <div class="design-box" data-design-kind="question-help" [class.design-active]="designMode" [class.design-selected]="isSelected('question-help')" [ngStyle]="boxStyle('question-help')" (mousedown)="selectBox($event, 'question-help')">
           <button class="move-handle" type="button" aria-label="Mover ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'move')"></button>
-          <p class="question-help" [style.font-size.px]="fontSize('question-help')">{{ helperText }}</p>
+          <p class="question-help" [style.font-size]="dynamicFontSize('question-help', 14, 3)">{{ helperText }}</p>
           <button class="resize-handle" type="button" aria-label="Redimensionar ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'resize')"></button>
           <button class="stretch-handle" type="button" aria-label="Estirar ayuda de pregunta" (mousedown)="beginTransform($event, 'question-help', 'stretch')"></button>
         </div>
@@ -70,7 +70,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
         <div class="design-box" data-design-kind="question-answer" [class.design-active]="designMode" [class.design-selected]="isSelected('question-answer')" [ngStyle]="boxStyle('question-answer')" (mousedown)="selectBox($event, 'question-answer')">
           <button class="move-handle" type="button" aria-label="Mover respuestas" (mousedown)="beginTransform($event, 'question-answer', 'move')"></button>
-          <div class="answer-area" [style.font-size.px]="fontSize('question-answer')">
+          <div class="answer-area" [style.font-size]="dynamicFontSize('question-answer', 16, 4)">
             @switch (questionType) {
               @case ('multiple-choice') {
                 <app-survey-option-input
@@ -168,6 +168,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     :host {
       display: block;
       width: 100%;
+      container-type: inline-size;
     }
 
     .question-shell {
@@ -401,7 +402,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       }
     }
 
-    @media (max-width: 640px) {
+    @container (max-width: 640px) {
       .question-shell {
         min-height: auto;
         padding-top: 18px;
@@ -489,6 +490,12 @@ export class SurveyQuestionCardComponent {
 
   fontSize(kind: QuestionDesignKind): number | null {
     return this.configFor(kind).fontSize ?? null;
+  }
+
+  dynamicFontSize(kind: QuestionDesignKind, minPx: number, cqi: number): string | null {
+    const size = this.fontSize(kind);
+    if (!size) return null;
+    return `clamp(${minPx}px, ${cqi}cqi, ${size}px)`;
   }
 
   boxStyle(kind: QuestionDesignKind): Record<string, string> {

@@ -115,15 +115,16 @@ export class AdminDataService {
         const surveysCount = userSurveys.length;
         const responsesCount = userSurveys.reduce((sum, s) => sum + s.responsesCount, 0);
 
+        const email = p.email || '';
         // Security role resolution: klhetvintellez23@gmail.com is SuperAdmin by default
-        const defaultRole = p.email.toLowerCase() === 'klhetvintellez23@gmail.com' ? 'SuperAdmin' : 'User';
+        const defaultRole = email.toLowerCase() === 'klhetvintellez23@gmail.com' ? 'SuperAdmin' : 'User';
         const role = rolesOverrides[p.id] || defaultRole;
         const status = statusesOverrides[p.id] || 'activo';
 
         return {
           id: p.id,
-          name: p.nombre_completo || p.email.split('@')[0],
-          email: p.email,
+          name: p.nombre_completo || email.split('@')[0] || 'Usuario',
+          email: email,
           createdAt: p.creado_el,
           lastLoginAt: p.creado_el, // Fallback to registration date
           status: status,

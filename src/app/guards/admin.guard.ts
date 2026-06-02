@@ -32,7 +32,8 @@ export const adminGuard: CanActivateFn = (route, state) => {
 
   // 3. Verify status is active
   if (adminUser.status !== 'activo') {
-    alert(`Tu cuenta se encuentra en estado '${adminUser.status}'. Acceso denegado.`);
+    // No alert needed, just redirect or show a soft notification later
+
     void router.navigate(['/']);
     return false;
   }

@@ -11,6 +11,7 @@
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  container-type: inline-size;
   color: var(--response-heading, #111827);
   font-family: var(--response-body-font, Inter, "Segoe UI", sans-serif);
   background:
@@ -267,7 +268,7 @@
   font-weight: 850;
 }
 
-@media (max-width: 640px) {
+@container (max-width: 640px) {
   .response-background {
     background-size: 30px 30px;
   }

@@ -98,7 +98,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       font-weight: 700;
     }
 
-    @media (max-width: 520px) {
+    @container (max-width: 520px) {
       .scale-grid,
       .scale-grid.ten-grid {
         grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));

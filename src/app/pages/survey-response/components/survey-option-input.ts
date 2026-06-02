@@ -106,7 +106,7 @@ import { QuestionOption } from '../../../services/survey.service';
       line-height: 1.35;
     }
 
-    @media (max-width: 520px) {
+    @container (max-width: 520px) {
       .option-button {
         grid-template-columns: 22px 1fr;
         gap: 12px;

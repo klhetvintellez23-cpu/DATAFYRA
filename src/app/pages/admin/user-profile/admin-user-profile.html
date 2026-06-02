@@ -259,6 +259,10 @@
         <div class="modal-alert-box alert-warning" *ngIf="selectedNewRole() === 'SuperAdmin'">
           <strong>Atención:</strong> Asignar el rol SuperAdmin otorga control absoluto sobre el sistema, incluyendo la capacidad de promover y suspender otros administradores.
         </div>
+        
+        <div class="modal-alert-box alert-danger" *ngIf="permissionError()">
+          <strong>Error de Permisos:</strong> {{ permissionError() }}
+        </div>
       </div>
       <div class="modal-footer">
         <button class="modal-btn secondary" (click)="closeModal()">Cancelar</button>

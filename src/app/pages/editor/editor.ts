@@ -4891,23 +4891,23 @@ export class EditorPage implements OnInit, OnDestroy {
     return `${count} pregunta${count === 1 ? '' : 's'}`;
   }
 
-  getSurveyPageCount(): number {
+  getSurveyPageCount = computed(() => {
     return this.questionPageSummaries().length + 2;
-  }
+  });
 
   choiceOptionCount(question: Question): number {
     if (!this.isChoiceType(question.type)) return 0;
     return question.options.filter((option) => option.texto.trim().length > 0).length;
   }
 
-  questionPageSummaries(): { index: number; start: number; end: number; count: number }[] {
+  questionPageSummaries = computed(() => {
     const total = this.survey()?.questions.length ?? 0;
     const breaks = this.normalizePageBreaks(total, this.survey()?.metadata?.questionPageBreaks);
     return breaks.map((start, index) => {
       const end = breaks[index + 1] ?? total;
       return { index, start, end, count: Math.max(0, end - start) };
     });
-  }
+  });
 
   pageTitle(pageIndex: number): string {
     return this.survey()?.metadata?.questionPageTitles?.[pageIndex]?.trim() || `Página ${pageIndex + 1}`;

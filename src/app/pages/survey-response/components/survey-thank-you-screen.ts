@@ -44,7 +44,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
         <div class="design-box" data-design-kind="end-title" [class.design-active]="designMode" [class.design-selected]="isSelected('end-title')" [ngStyle]="boxStyle('end-title')" (mousedown)="selectBox($event, 'end-title')">
           <button class="move-handle" type="button" aria-label="Mover titulo final" (mousedown)="beginTransform($event, 'end-title', 'move')"></button>
           <h1
-            [style.font-size.px]="fontSize('end-title')"
+            [style.font-size]="dynamicFontSize('end-title', 32, 8)"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (keydown)="designMode && preventEditableEnter($event)"
@@ -58,7 +58,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
         <div class="design-box" data-design-kind="end-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('end-desc')" [ngStyle]="boxStyle('end-desc')" (mousedown)="selectBox($event, 'end-desc')">
           <button class="move-handle" type="button" aria-label="Mover descripcion final" (mousedown)="beginTransform($event, 'end-desc', 'move')"></button>
           <p
-            [style.font-size.px]="fontSize('end-desc')"
+            [style.font-size]="dynamicFontSize('end-desc', 16, 4)"
             [attr.contenteditable]="designMode ? 'true' : null"
             [class.design-editable]="designMode"
             (blur)="designMode && emitEditable($event, descriptionChange)">
@@ -70,7 +70,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
         <div class="design-box" data-design-kind="end-summary" [class.design-active]="designMode" [class.design-selected]="isSelected('end-summary')" [ngStyle]="boxStyle('end-summary')" (mousedown)="selectBox($event, 'end-summary')">
           <button class="move-handle" type="button" aria-label="Mover resumen" (mousedown)="beginTransform($event, 'end-summary', 'move')"></button>
-          <div class="thanks-summary" [style.font-size.px]="fontSize('end-summary')">
+          <div class="thanks-summary" [style.font-size]="dynamicFontSize('end-summary', 14, 3)">
             <span>Respuesta recibida</span>
             <span>Envio seguro</span>
           </div>
@@ -80,7 +80,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
         <div class="design-box" data-design-kind="end-brand" [class.design-active]="designMode" [class.design-selected]="isSelected('end-brand')" [ngStyle]="boxStyle('end-brand')" (mousedown)="selectBox($event, 'end-brand')">
           <button class="move-handle" type="button" aria-label="Mover marca" (mousedown)="beginTransform($event, 'end-brand', 'move')"></button>
-          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by DataEncuesta</div>
+          <div class="thanks-brand" [style.font-size]="dynamicFontSize('end-brand', 12, 2)">Powered by DataEncuesta</div>
           <button class="resize-handle" type="button" aria-label="Redimensionar marca" (mousedown)="beginTransform($event, 'end-brand', 'resize')"></button>
           <button class="stretch-handle" type="button" aria-label="Estirar marca" (mousedown)="beginTransform($event, 'end-brand', 'stretch')"></button>
         </div>
@@ -91,6 +91,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     :host {
       display: block;
       width: 100%;
+      container-type: inline-size;
     }
 
     .thanks-shell {
@@ -534,7 +535,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       font-size: 15px;
     }
 
-    @media (max-width: 640px) {
+    @container (max-width: 640px) {
       .layout-split .thanks-card,
       .layout-timeline .thanks-card,
       .layout-compact .thanks-card {
@@ -624,6 +625,12 @@ export class SurveyThankYouScreenComponent {
 
   fontSize(kind: EndDesignKind): number | null {
     return this.configFor(kind).fontSize ?? null;
+  }
+
+  dynamicFontSize(kind: EndDesignKind, minPx: number, cqi: number): string | null {
+    const size = this.fontSize(kind);
+    if (!size) return null;
+    return `clamp(${minPx}px, ${cqi}cqi, ${size}px)`;
   }
 
   boxStyle(kind: EndDesignKind): Record<string, string> {

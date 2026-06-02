@@ -160,6 +160,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       position: relative;
       min-height: 100%;
       overflow: auto;
+      container-type: inline-size;
       color: var(--response-heading, #111827);
       font-family: var(--response-body-font, Inter, "Segoe UI", sans-serif);
       background:

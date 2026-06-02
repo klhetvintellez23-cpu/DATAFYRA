@@ -61,7 +61,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       box-shadow: none;
     }
 
-    @media (max-width: 560px) {
+    @container (max-width: 560px) {
       .survey-nav {
         display: grid;
         grid-template-columns: 1fr;

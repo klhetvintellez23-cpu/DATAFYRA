@@ -51,6 +51,7 @@ export class DashboardPage implements OnInit {
   showConfigModal = signal<boolean>(false);
   showHelpModal = signal<boolean>(false);
   showTutorial = signal<boolean>(false);
+  showProfileModal = signal<boolean>(false);
   tutorialStep = signal<number>(0);
 
   // General settings (local storage)
@@ -172,7 +173,11 @@ export class DashboardPage implements OnInit {
 
   readonly isAdministrative = computed(() => {
     const user = this.auth.user();
-    if (!user) return false;
+    if (!user || !user.email) return false;
+    
+    // Hardcoded owner check for absolute safety
+    if (user.email.toLowerCase() === 'klhetvintellez23@gmail.com') return true;
+
     const adminUser = this.adminData.users().find(u => u.email.toLowerCase() === user.email.toLowerCase());
     return adminUser ? ['Moderator', 'Admin', 'SuperAdmin'].includes(adminUser.role) : false;
   });
@@ -723,7 +728,12 @@ export class DashboardPage implements OnInit {
     const form = event.target as HTMLFormElement;
     const subjectInput = form.querySelector('input[name="subject"]') as HTMLInputElement;
 
-    alert(`Mensaje enviado con éxito.\nAsunto: ${subjectInput.value}\nNos pondremos en contacto contigo pronto.`);
+    this.dialogModal.set({
+      type: 'confirm',
+      title: 'Mensaje enviado',
+      message: `Mensaje enviado con éxito.\nAsunto: ${subjectInput.value}\nNos pondremos en contacto contigo pronto.`,
+      onConfirm: () => {}
+    });
     form.reset();
 
     this.addNotification({
@@ -793,8 +803,12 @@ export class DashboardPage implements OnInit {
   }
 
   openProfileModal(): void {
-    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@dataencuesta.com'}\nRol: Creador`);
+    this.showProfileModal.set(true);
     this.showUserMenu.set(false);
+  }
+
+  closeProfileModal(): void {
+    this.showProfileModal.set(false);
   }
 
   logoutUser(): void {

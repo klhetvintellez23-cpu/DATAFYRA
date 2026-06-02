@@ -60,6 +60,7 @@ export class AdminUserProfileComponent {
   readonly blockReason = signal<string>('');
   readonly unpublishReason = signal<string>('');
   readonly targetSurveyId = signal<string>('');
+  readonly permissionError = signal<string | null>(null);
 
   // Initializing role select dropdown
   initializeRoleModal(): void {
@@ -75,13 +76,15 @@ export class AdminUserProfileComponent {
     const target = this.userProfile();
     if (!admin || !target) return;
 
+    this.permissionError.set(null);
+
     // Security requirement check: only SuperAdmin can promote/demote to SuperAdmin or edit SuperAdmins
     if (target.role === 'SuperAdmin' && admin.role !== 'SuperAdmin') {
-      alert('Acceso Denegado. Solo un SuperAdministrador puede modificar una cuenta SuperAdmin.');
+      this.permissionError.set('Acceso Denegado. Solo un SuperAdministrador puede modificar una cuenta SuperAdmin.');
       return;
     }
     if (this.selectedNewRole() === 'SuperAdmin' && admin.role !== 'SuperAdmin') {
-      alert('Acceso Denegado. Solo un SuperAdministrador puede ascender cuentas a SuperAdmin.');
+      this.permissionError.set('Acceso Denegado. Solo un SuperAdministrador puede ascender cuentas a SuperAdmin.');
       return;
     }
 
@@ -203,6 +206,7 @@ export class AdminUserProfileComponent {
 
   closeModal(): void {
     this.activeModal.set(null);
+    this.permissionError.set(null);
   }
 
   getRoleBadgeClass(role: UserRole): string {

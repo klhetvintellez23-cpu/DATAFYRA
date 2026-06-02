@@ -39,9 +39,8 @@
         </button>
       </div>
       <div class="topbar-divider"></div>
-      <button class="btn-actualizar" type="button" (click)="publish()" [disabled]="isSaving()">Actualizar</button>
-      <button class="topbar-profile-btn" type="button" aria-label="Perfil">
-        <span class="material-symbols-outlined">account_circle</span>
+      <button class="btn-actualizar" type="button" (click)="publish()" [disabled]="isSaving()">
+        {{ survey()?.status === 'borrador' ? 'Publicar' : 'Actualizar' }}
       </button>
     </div>
   </nav>

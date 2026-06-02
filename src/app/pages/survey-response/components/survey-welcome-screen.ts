@@ -43,7 +43,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
             <div class="design-box" data-design-kind="welcome-title" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-title')" [ngStyle]="boxStyle('welcome-title')" (mousedown)="selectBox($event, 'welcome-title')">
               <button class="move-handle" type="button" aria-label="Mover titulo" (mousedown)="beginTransform($event, 'welcome-title', 'move')"></button>
               <h1
-                [style.font-size.px]="fontSize('welcome-title')"
+                [style.font-size]="dynamicFontSize('welcome-title', 32, 8)"
                 [attr.contenteditable]="designMode ? 'true' : null"
                 [class.design-editable]="designMode"
                 (keydown)="designMode && preventEditableEnter($event)"
@@ -59,7 +59,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
             <div class="design-box" data-design-kind="welcome-desc" [class.design-active]="designMode" [class.design-selected]="isSelected('welcome-desc')" [ngStyle]="boxStyle('welcome-desc')" (mousedown)="selectBox($event, 'welcome-desc')">
               <button class="move-handle" type="button" aria-label="Mover descripcion" (mousedown)="beginTransform($event, 'welcome-desc', 'move')"></button>
               <p
-                [style.font-size.px]="fontSize('welcome-desc')"
+                [style.font-size]="dynamicFontSize('welcome-desc', 16, 4)"
                 [attr.contenteditable]="designMode ? 'true' : null"
                 [class.design-editable]="designMode"
                 (blur)="designMode && emitEditable($event, descriptionChange)">
@@ -80,7 +80,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
                    (mousedown)="selectBox($event, extra.id)">
                 <button class="move-handle" type="button" aria-label="Mover texto extra" (mousedown)="beginTransform($event, extra.id, 'move')"></button>
                 <p
-                  [style.font-size.px]="fontSize(extra.id)"
+                  [style.font-size]="dynamicFontSize(extra.id, 14, 3)"
                   [attr.contenteditable]="designMode ? 'true' : null"
                   [class.design-editable]="designMode"
                   (blur)="designMode && emitExtraTextChange($event, extra.id)">
@@ -117,7 +117,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
                   <span
                     contenteditable="true"
                     class="button-editable"
-                    [style.font-size.px]="fontSize('welcome-cta')"
+                    [style.font-size]="dynamicFontSize('welcome-cta', 14, 3)"
                     (click)="$event.stopPropagation()"
                     (mousedown)="$event.stopPropagation()"
                     (keydown)="preventEditableEnter($event)"
@@ -125,7 +125,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
                     {{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}
                   </span>
                 } @else {
-                  <span [style.font-size.px]="fontSize('welcome-cta')">{{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}</span>
+                  <span [style.font-size]="dynamicFontSize('welcome-cta', 14, 3)">{{ survey.metadata?.ctaText || 'Iniciar Encuesta Ahora' }}</span>
                 }
               </button>
               <button class="resize-handle" type="button" aria-label="Redimensionar boton" (mousedown)="beginTransform($event, 'welcome-cta', 'resize')"></button>
@@ -159,6 +159,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
     :host {
       display: block;
       width: 100%;
+      container-type: inline-size;
     }
 
     .welcome-shell {
@@ -782,7 +783,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       min-width: 6ch;
     }
 
-    @media (max-width: 640px) {
+    @container (max-width: 640px) {
       .welcome-shell {
         align-items: stretch;
         padding: 18px;
@@ -884,6 +885,12 @@ export class SurveyWelcomeScreenComponent {
 
   fontSize(kind: WelcomeDesignKind): number | null {
     return this.configFor(kind).fontSize ?? null;
+  }
+
+  dynamicFontSize(kind: WelcomeDesignKind, minPx: number, cqi: number): string | null {
+    const size = this.fontSize(kind);
+    if (!size) return null;
+    return `clamp(${minPx}px, ${cqi}cqi, ${size}px)`;
   }
 
   private readonly defaults: Record<WelcomeDesignKind, SurveyElementConfig> = {
