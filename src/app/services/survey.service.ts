@@ -203,7 +203,7 @@ export class SurveyService {
   private readonly repository = inject(SurveyRepositoryService);
   private readonly mapper = inject(SurveyMapperService);
   private readonly surveys = signal<Survey[]>([]);
-  private readonly metadataStorageKey = 'dataencuestas-survey-metadata';
+  private readonly metadataStorageKey = 'dataencuesta-survey-metadata';
 
   readonly allSurveys = this.surveys.asReadonly();
 

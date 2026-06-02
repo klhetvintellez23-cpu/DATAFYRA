@@ -80,7 +80,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 
         <div class="design-box" data-design-kind="end-brand" [class.design-active]="designMode" [class.design-selected]="isSelected('end-brand')" [ngStyle]="boxStyle('end-brand')" (mousedown)="selectBox($event, 'end-brand')">
           <button class="move-handle" type="button" aria-label="Mover marca" (mousedown)="beginTransform($event, 'end-brand', 'move')"></button>
-          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by DataEncuestas</div>
+          <div class="thanks-brand" [style.font-size.px]="fontSize('end-brand')">Powered by DataEncuesta</div>
           <button class="resize-handle" type="button" aria-label="Redimensionar marca" (mousedown)="beginTransform($event, 'end-brand', 'resize')"></button>
           <button class="stretch-handle" type="button" aria-label="Estirar marca" (mousedown)="beginTransform($event, 'end-brand', 'stretch')"></button>
         </div>

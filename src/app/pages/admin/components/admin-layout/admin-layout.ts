@@ -27,7 +27,7 @@ export class AdminLayoutComponent {
 
   readonly isDarkMode = signal<boolean>(
     document.documentElement.classList.contains('dark') || 
-    localStorage.getItem('dataencuestas-theme') === 'dark'
+    localStorage.getItem('dataencuesta-theme') === 'dark'
   );
 
   readonly showMobileSidebar = signal<boolean>(false);
@@ -36,7 +36,7 @@ export class AdminLayoutComponent {
   toggleDarkMode(): void {
     const next = !this.isDarkMode();
     this.isDarkMode.set(next);
-    localStorage.setItem('dataencuestas-theme', next ? 'dark' : 'light');
+    localStorage.setItem('dataencuesta-theme', next ? 'dark' : 'light');
     if (next) {
       document.documentElement.classList.add('dark');
     } else {

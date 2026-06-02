@@ -89,7 +89,7 @@ export class DashboardPage implements OnInit {
     },
     {
       id: '3',
-      title: '¡Bienvenido a DataEncuestas!',
+      title: '¡Bienvenido a DataEncuesta!',
       description: 'Comienza creando tu primera encuesta o usando una plantilla.',
       date: new Date(Date.now() - 1000 * 60 * 60 * 24),
       read: true,
@@ -116,8 +116,8 @@ export class DashboardPage implements OnInit {
     this.closeDialogModal();
   }
 
-  private readonly foldersStorageKey = 'dataencuestas-dashboard-folders';
-  private readonly surveyFoldersStorageKey = 'dataencuestas-dashboard-survey-folders';
+  private readonly foldersStorageKey = 'dataencuesta-dashboard-folders';
+  private readonly surveyFoldersStorageKey = 'dataencuesta-dashboard-survey-folders';
 
   readonly filterOptions: { value: DashboardFilter; label: string }[] = [
     { value: 'all', label: 'Todas' },
@@ -633,7 +633,7 @@ export class DashboardPage implements OnInit {
 
   // Load preferences from local storage
   private loadUserPreferences(): void {
-    const savedTheme = localStorage.getItem('dataencuestas-theme') as 'light' | 'dark' || 'light';
+    const savedTheme = localStorage.getItem('dataencuesta-theme') as 'light' | 'dark' || 'light';
     this.themePreference.set(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -641,13 +641,13 @@ export class DashboardPage implements OnInit {
       document.documentElement.classList.remove('dark');
     }
 
-    const savedLang = localStorage.getItem('dataencuestas-lang') as 'es' | 'en' || 'es';
+    const savedLang = localStorage.getItem('dataencuesta-lang') as 'es' | 'en' || 'es';
     this.languagePreference.set(savedLang);
 
-    const savedEmailNotifs = localStorage.getItem('dataencuestas-email-notifs') !== 'false';
+    const savedEmailNotifs = localStorage.getItem('dataencuesta-email-notifs') !== 'false';
     this.enableEmailNotifications.set(savedEmailNotifs);
 
-    const savedSysNotifs = localStorage.getItem('dataencuestas-sys-notifs') !== 'false';
+    const savedSysNotifs = localStorage.getItem('dataencuesta-sys-notifs') !== 'false';
     this.enableSystemNotifications.set(savedSysNotifs);
   }
 
@@ -667,8 +667,8 @@ export class DashboardPage implements OnInit {
   // Settings modal
   openSettingsModal(): void {
     const user = this.auth.user();
-    this.accountName.set(user?.name || 'Usuario DataEncuestas');
-    this.accountEmail.set(user?.email || 'usuario@dataencuestas.com');
+    this.accountName.set(user?.name || 'Usuario DataEncuesta');
+    this.accountEmail.set(user?.email || 'usuario@dataencuesta.com');
     this.accountRole.set('Creador');
 
     this.showConfigModal.set(true);
@@ -688,10 +688,10 @@ export class DashboardPage implements OnInit {
   }
 
   saveSettings(): void {
-    localStorage.setItem('dataencuestas-theme', this.themePreference());
-    localStorage.setItem('dataencuestas-lang', this.languagePreference());
-    localStorage.setItem('dataencuestas-email-notifs', String(this.enableEmailNotifications()));
-    localStorage.setItem('dataencuestas-sys-notifs', String(this.enableSystemNotifications()));
+    localStorage.setItem('dataencuesta-theme', this.themePreference());
+    localStorage.setItem('dataencuesta-lang', this.languagePreference());
+    localStorage.setItem('dataencuesta-email-notifs', String(this.enableEmailNotifications()));
+    localStorage.setItem('dataencuesta-sys-notifs', String(this.enableSystemNotifications()));
     
     if (this.themePreference() === 'dark') {
       document.documentElement.classList.add('dark');
@@ -753,7 +753,7 @@ export class DashboardPage implements OnInit {
       this.closeTutorial();
       this.addNotification({
         title: 'Tutorial completado',
-        description: '¡Felicidades! Ya conoces las herramientas básicas de DataEncuestas.',
+        description: '¡Felicidades! Ya conoces las herramientas básicas de DataEncuesta.',
         type: 'system'
       });
     }
@@ -793,7 +793,7 @@ export class DashboardPage implements OnInit {
   }
 
   openProfileModal(): void {
-    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@dataencuestas.com'}\nRol: Creador`);
+    alert(`Mi perfil:\nNombre: ${this.auth.user()?.name || 'Usuario'}\nEmail: ${this.auth.user()?.email || 'usuario@dataencuesta.com'}\nRol: Creador`);
     this.showUserMenu.set(false);
   }
 

@@ -53,7 +53,7 @@ export class FlipFlowComponent {
     { reverse: true }
   ];
 
-  // Colores basados en la paleta Violet Prism de DataEncuestas
+  // Colores basados en la paleta Violet Prism de DataEncuesta
   colors = [
     'linear-gradient(135deg, #A78BFA, #440789)', // Primary Brand
     'linear-gradient(135deg, #440789, #330568)', // Deep Purple

@@ -1,8 +1,8 @@
 <nav class="site-navbar" [class.site-navbar-transparent]="transparent()">
   <div class="site-navbar-inner">
     <a routerLink="/" class="site-brand" (click)="closeMobileMenu()">
-      <img class="site-brand-logo" src="assets/dataencuestas-logo.png" alt="DataEncuestas Logo" />
-      <span class="site-brand-name">DataEncuestas</span>
+      <img class="site-brand-logo" src="assets/dataencuesta-logo.png" alt="DataEncuesta Logo" />
+      <span class="site-brand-name">DataEncuesta</span>
     </a>
 
     <div class="site-nav-links">
@@ -12,14 +12,14 @@
           <span class="material-symbols-outlined">expand_more</span>
         </button>
         <div class="site-dropdown">
-          <a routerLink="/editor/new">
+          <a [routerLink]="auth.isLoggedIn() ? '/editor/new' : null" (click)="handleProtectedLink('/editor/new', $event)">
             <span class="material-symbols-outlined">edit_square</span>
             <span>
               <strong>Editor visual</strong>
               <small>Crea formularios sin fricción</small>
             </span>
           </a>
-          <a routerLink="/dashboard">
+          <a [routerLink]="auth.isLoggedIn() ? '/dashboard' : null" (click)="handleProtectedLink('/dashboard', $event)">
             <span class="material-symbols-outlined">monitoring</span>
             <span>
               <strong>Analítica</strong>
@@ -74,6 +74,22 @@
           </a>
         </div>
       </div>
+
+      <div class="site-nav-item">
+        <button type="button" class="site-nav-link">
+          Novedades
+          <span class="material-symbols-outlined">expand_more</span>
+        </button>
+        <div class="site-dropdown">
+          <a routerLink="/novedades">
+            <span class="material-symbols-outlined">newspaper</span>
+            <span>
+              <strong>Novedades y Actualizaciones</strong>
+              <small>Mejoras, funciones y más</small>
+            </span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="site-nav-actions">
@@ -119,6 +135,10 @@
     <a routerLink="/showcase" (click)="closeMobileMenu()" class="mobile-nav-link">
       <span class="material-symbols-outlined">visibility</span>
       Ejemplos
+    </a>
+    <a routerLink="/novedades" (click)="closeMobileMenu()" class="mobile-nav-link">
+      <span class="material-symbols-outlined">newspaper</span>
+      Novedades
     </a>
 
     <div class="site-mobile-actions">

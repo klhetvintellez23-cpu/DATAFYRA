@@ -159,7 +159,7 @@ export class AdminDataService {
         id: 'log_init',
         timestamp: new Date().toISOString(),
         adminName: 'Sistema de Seguridad',
-        adminEmail: 'security@dataencuestas.com',
+        adminEmail: 'security@dataencuesta.com',
         adminRole: 'SuperAdmin',
         action: 'USER_ACTIVATION',
         target: 'Consola Administrativa',

@@ -1,0 +1,67 @@
+<app-navbar />
+
+<main class="magazine-layout">
+  <header class="magazine-header">
+    <div class="magazine-subtitle">Edición Especial</div>
+    <h1 class="magazine-title">Novedades</h1>
+    <h1 class="magazine-title">& Actualizaciones</h1>
+  </header>
+
+  <div class="magazine-grid">
+    <!-- Featured Article (First item) -->
+    <article class="magazine-article featured">
+      <div>
+        <span class="article-tag">{{ updatesList[0].tag }}</span>
+        <h2 class="article-title">{{ updatesList[0].title }}</h2>
+        <p class="article-excerpt drop-cap">{{ updatesList[0].description }}</p>
+        <div class="article-date">{{ updatesList[0].date }}</div>
+      </div>
+      <div>
+        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200" alt="Editor de encuestas" class="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700" style="aspect-ratio: 4/3;">
+      </div>
+    </article>
+
+    <!-- Secondary Articles (Second & Third items) -->
+    <article class="magazine-article secondary">
+      <span class="article-tag">{{ updatesList[1].tag }}</span>
+      <h2 class="article-title">{{ updatesList[1].title }}</h2>
+      <p class="article-excerpt">{{ updatesList[1].description }}</p>
+      <div class="article-date">{{ updatesList[1].date }}</div>
+    </article>
+
+    <article class="magazine-article secondary">
+      <span class="article-tag">{{ updatesList[2].tag }}</span>
+      <h2 class="article-title">{{ updatesList[2].title }}</h2>
+      <p class="article-excerpt">{{ updatesList[2].description }}</p>
+      <div class="article-date">{{ updatesList[2].date }}</div>
+    </article>
+
+    <!-- Tertiary Articles (Fourth item onwards) -->
+    <article class="magazine-article tertiary">
+      <span class="article-tag">{{ updatesList[3].tag }}</span>
+      <h2 class="article-title">{{ updatesList[3].title }}</h2>
+      <p class="article-excerpt" style="font-size: 1rem;">{{ updatesList[3].description }}</p>
+      <div class="article-date">{{ updatesList[3].date }}</div>
+    </article>
+    
+    <article class="magazine-article tertiary" style="display: flex; align-items: center; justify-content: center; background: #1877F2; color: white; padding: 2rem; text-align: center;">
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; color: white;">MANTENTE CONECTADO</h2>
+        <p style="font-size: 0.95rem; color: #e1effe; margin-bottom: 1.5rem;">Síguenos para más novedades, actualizaciones y consejos sobre cómo crear mejores encuestas.</p>
+        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style="display: inline-block; border: 2px solid white; padding: 0.6rem 1.8rem; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; color: white; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.backgroundColor='white'; this.style.color='#1877F2'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='white'">
+          Síguenos en Facebook
+        </a>
+      </div>
+    </article>
+
+    <article class="magazine-article tertiary">
+      <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=600" alt="Estadísticas" class="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-700" style="aspect-ratio: 1; margin-bottom: 1rem;">
+      <span class="article-tag">ANÁLISIS</span>
+      <h2 class="article-title" style="font-size: 1.2rem;">Los datos que importan</h2>
+      <p class="article-excerpt" style="font-size: 0.9rem;">Próximamente estaremos liberando nuevos gráficos de barras horizontales y mapas de calor.</p>
+    </article>
+
+  </div>
+</main>
+
+<app-footer />

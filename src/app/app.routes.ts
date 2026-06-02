@@ -43,6 +43,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/templates/templates').then(m => m.TemplatesPage)
   },
   {
+    path: 'nosotros',
+    loadComponent: () => import('./pages/about/about').then(m => m.AboutPage)
+  },
+  {
+    path: 'novedades',
+    loadComponent: () => import('./pages/updates/updates').then(m => m.UpdatesPage)
+  },
+  {
     path: 'terminos',
     loadComponent: () => import('./pages/terms/terms').then(m => m.TermsPage)
   },

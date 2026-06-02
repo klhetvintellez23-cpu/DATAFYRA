@@ -40,7 +40,7 @@ export class SurveyResponsePage implements OnInit {
   isSubmitting = signal(false);
   validationError = signal('');
   submitError = signal('');
-  private readonly partialStoragePrefix = 'dataencuestas-partial-response';
+  private readonly partialStoragePrefix = 'dataencuesta-partial-response';
 
   readonly publicThemePresets: PublicThemePreset[] = [
     { name: 'Lila moderno', primary: '#440789', secondary: '#06b6d4', background: '#f5f3ff', surface: '#ffffff', text: '#111827' },

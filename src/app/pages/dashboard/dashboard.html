@@ -1,8 +1,8 @@
 <main class="dashboard-shell" (click)="closeCardMenu()">
   <aside class="dashboard-sidebar">
     <a routerLink="/" class="dashboard-brand" aria-label="Volver al inicio">
-      <img src="assets/dataencuestas-logo.png" alt="DataEncuestas Logo" style="width: 2.2rem; height: 2.2rem; object-fit: contain;" />
-      <span>DataEncuestas</span>
+      <img src="assets/dataencuesta-logo.png" alt="DataEncuesta Logo" style="width: 2.2rem; height: 2.2rem; object-fit: contain;" />
+      <span>DataEncuesta</span>
     </a>
     <div class="brand-space" aria-hidden="true">
       <span class="brand-check">✓</span>
@@ -141,8 +141,8 @@
               <div class="user-dropdown-header">
                 <div class="user-dropdown-avatar">{{ userInitial() }}</div>
                 <div class="user-dropdown-info">
-                  <strong>{{ auth.user()?.name || 'Usuario DataEncuestas' }}</strong>
-                  <span>{{ auth.user()?.email || 'usuario@dataencuestas.com' }}</span>
+                  <strong>{{ auth.user()?.name || 'Usuario DataEncuesta' }}</strong>
+                  <span>{{ auth.user()?.email || 'usuario@dataencuesta.com' }}</span>
                   <span class="user-role-badge">Creador / Plan Free</span>
                 </div>
               </div>
@@ -424,7 +424,7 @@
       </button>
 
       <h2>Configuración General</h2>
-      <p>Personaliza tu experiencia en DataEncuestas y administra tus preferencias.</p>
+      <p>Personaliza tu experiencia en DataEncuesta y administra tus preferencias.</p>
 
       <div class="modal-body settings-modal-body">
         <div class="settings-grid-layout">
@@ -536,7 +536,7 @@
       </button>
 
       <h2>Centro de Ayuda y Soporte</h2>
-      <p>Encuentra respuestas a tus preguntas y aprende a usar DataEncuestas como un experto.</p>
+      <p>Encuentra respuestas a tus preguntas y aprende a usar DataEncuesta como un experto.</p>
 
       <div class="modal-body help-modal-body">
         <div class="help-grid-layout">
@@ -633,7 +633,7 @@
         @if (tutorialStep() === 0) {
           <div class="tutorial-step-content">
             <span class="material-symbols-outlined tutorial-icon">waving_hand</span>
-            <h2>¡Te damos la bienvenida a DataEncuestas!</h2>
+            <h2>¡Te damos la bienvenida a DataEncuesta!</h2>
             <p>Este breve recorrido te mostrará cómo crear, diseñar y analizar tus encuestas rápidamente. ¡Es muy fácil!</p>
           </div>
         }

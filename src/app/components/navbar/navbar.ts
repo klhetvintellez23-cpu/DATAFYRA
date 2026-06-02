@@ -38,6 +38,17 @@ export class NavbarComponent {
     }
   }
 
+  handleProtectedLink(route: string, event: Event) {
+    if (!this.auth.isLoggedIn()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.triggerAuth(true, event);
+    } else {
+      this.closeMobileMenu();
+      this.router.navigate([route]);
+    }
+  }
+
   async logout(): Promise<void> {
     this.mobileMenuOpen.set(false);
     await this.auth.logout();

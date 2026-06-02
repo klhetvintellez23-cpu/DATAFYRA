@@ -69,37 +69,6 @@ export class LandingPage implements OnInit {
     }
   ];
 
-  readonly updatesList = [
-    {
-      type: 'new',
-      tag: 'Nueva Función',
-      title: 'Nuevo editor de encuestas v2',
-      description: 'Hemos rediseñado por completo el editor de encuestas. Ahora incluye una barra lateral premium inspirada en herramientas modernas de diseño, soporte para personalización avanzada de temas y vistas en tiempo real con micro-animaciones.',
-      date: '30 de Mayo, 2026'
-    },
-    {
-      type: 'improvement',
-      tag: 'Mejora',
-      title: 'Optimización de rendimiento y velocidad',
-      description: 'Redujimos el tamaño de los recursos CSS principales del editor, logrando cargar y compilar estilos de manera instantánea por debajo de los límites presupuestarios establecidos.',
-      date: '24 de Mayo, 2026'
-    },
-    {
-      type: 'new',
-      tag: 'Nueva Función',
-      title: 'Nuevas opciones de exportación',
-      description: 'Exporta las respuestas recopiladas en formatos adicionales como PDF optimizado para reportes ejecutivos, Excel con tipado automático y JSON estructurado para integración.',
-      date: '18 de Mayo, 2026'
-    },
-    {
-      type: 'fix',
-      tag: 'Corrección',
-      title: 'Corrección de errores reportados',
-      description: 'Corregimos la visualización de imágenes decorativas en ciertos navegadores móviles e implementamos mejoras de estabilidad y persistencia local en el almacenamiento.',
-      date: '10 de Mayo, 2026'
-    }
-  ];
-
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const authParam = params['auth'];

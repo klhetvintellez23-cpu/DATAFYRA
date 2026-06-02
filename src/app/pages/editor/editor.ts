@@ -4227,7 +4227,7 @@ export class EditorPage implements OnInit, OnDestroy {
     const url = this.getShareLink();
     if (!url) return;
 
-    const embed = `<iframe src="${url}" title="Encuesta DataEncuestas" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
+    const embed = `<iframe src="${url}" title="Encuesta DataEncuesta" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
     navigator.clipboard.writeText(embed);
     this.recordShareCopy('Embed copiado');
     this.copied.set(true);
@@ -4267,7 +4267,7 @@ export class EditorPage implements OnInit, OnDestroy {
       return;
     }
 
-    const subject = encodeURIComponent(`Encuesta: ${survey.title || 'DataEncuestas'}`);
+    const subject = encodeURIComponent(`Encuesta: ${survey.title || 'DataEncuesta'}`);
     const body = encodeURIComponent(this.getShareMessage());
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
@@ -4733,12 +4733,12 @@ export class EditorPage implements OnInit, OnDestroy {
 
   getEmbedCode(): string {
     const url = this.getShareLink();
-    return `<iframe src="${url}" title="Encuesta DataEncuestas" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
+    return `<iframe src="${url}" title="Encuesta DataEncuesta" style="width:100%;height:720px;border:0;border-radius:16px;" loading="lazy"></iframe>`;
   }
 
   getShareMessage(): string {
     const survey = this.survey();
-    const title = survey?.title?.trim() || 'Encuesta DataEncuestas';
+    const title = survey?.title?.trim() || 'Encuesta DataEncuesta';
     return `Hola, te comparto esta encuesta: ${title}\n${this.getShareLink()}`;
   }
 
@@ -4776,7 +4776,7 @@ export class EditorPage implements OnInit, OnDestroy {
     const survey = this.survey();
     if (!survey) return;
     const lines = [
-      survey.title || 'Encuesta DataEncuestas',
+      survey.title || 'Encuesta DataEncuesta',
       this.qrCtaText(),
       `QR activo: ${this.activeQrPreset().name}`,
       `Link: ${this.getTrackedShareLink()}`,
@@ -4790,7 +4790,7 @@ export class EditorPage implements OnInit, OnDestroy {
   exportQrCampaignKit(): void {
     const survey = this.survey();
     if (!survey) return;
-    const title = this.htmlEscape(survey.title || 'Encuesta DataEncuestas');
+    const title = this.htmlEscape(survey.title || 'Encuesta DataEncuesta');
     const cta = this.htmlEscape(this.qrCtaText());
     const qr = this.htmlEscape(this.getQrCodeUrl());
     const variants = this.qrPresets.map((preset) => `

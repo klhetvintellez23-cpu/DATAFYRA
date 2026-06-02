@@ -47,17 +47,18 @@
         <figure
           class="absolute left-[8%] lg:left-[12%] top-[0%] lg:top-[1%] w-[70%] lg:w-[66%] z-10 rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
           <img src="assets/landing/arriba.png" alt="Persona trabajando feliz"
-            class="w-full h-auto object-cover aspect-[5/4]" />
+            class="w-full h-auto object-cover aspect-[5/4]" fetchpriority="high" loading="eager" />
         </figure>
         <!-- Bottom Image -->
         <figure
           class="absolute right-[5%] lg:right-[0%] bottom-[0%] lg:bottom-[5%] w-[55%] lg:w-[48%] z-20 rounded-3xl overflow-hidden shadow-xl">
           <img src="assets/landing/abajo.png" alt="Equipo analizando datos"
-            class="w-full h-auto object-cover aspect-[5/4]" />
+            class="w-full h-auto object-cover aspect-[5/4]" fetchpriority="high" loading="eager" />
         </figure>
       </div>
     </div>
   </section>
+
 
   <section class="py-24 lg:py-28 bg-white">
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
@@ -108,7 +109,7 @@
     <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-14 items-start">
         <div>
-          <p class="section-kicker">Por qué DataEncuestas</p>
+          <p class="section-kicker">Por qué DataEncuesta</p>
           <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] leading-tight">Todo lo que necesitas para lanzar
             encuestas sin fricción</h2>
         </div>
@@ -216,39 +217,7 @@
     </div>
   </section>
 
-  <section class="updates-section">
-    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
-      <div class="text-center max-w-4xl mx-auto mb-16">
-        <p class="section-kicker justify-center">Novedades</p>
-        <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] mb-6">Novedades y Actualizaciones</h2>
-        <p class="text-xl text-[#49454e] font-light">
-          Mantente al día con las últimas mejoras, características y optimizaciones del sistema.
-        </p>
-      </div>
 
-      <div class="updates-grid">
-        @for (update of updatesList; track update.title) {
-        <article class="update-card">
-          <div>
-            <span class="update-tag" [class.tag-new]="update.type === 'new'"
-              [class.tag-improvement]="update.type === 'improvement'" [class.tag-fix]="update.type === 'fix'">
-              {{ update.tag }}
-            </span>
-            <h3>{{ update.title }}</h3>
-            <p>{{ update.description }}</p>
-          </div>
-          <div class="update-footer">
-            <span class="update-date">{{ update.date }}</span>
-            <span class="update-more-link">
-              Detalles
-              <span class="material-symbols-outlined">arrow_right_alt</span>
-            </span>
-          </div>
-        </article>
-        }
-      </div>
-    </div>
-  </section>
 
   <section class="final-cta-section">
     <div class="final-cta-inner">
