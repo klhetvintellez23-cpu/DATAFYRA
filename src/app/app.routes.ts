@@ -43,6 +43,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/templates/templates').then(m => m.TemplatesPage)
   },
   {
+    path: 'terminos',
+    loadComponent: () => import('./pages/terms/terms').then(m => m.TermsPage)
+  },
+  {
+    path: 'privacidad',
+    loadComponent: () => import('./pages/privacy/privacy').then(m => m.PrivacyPage)
+  },
+  {
     path: 'templates/:id',
     loadComponent: () => import('./pages/template-details/template-details').then(m => m.TemplateDetailsPage)
   },
