@@ -12,14 +12,14 @@
           <span class="material-symbols-outlined">expand_more</span>
         </button>
         <div class="site-dropdown">
-          <a [routerLink]="auth.isLoggedIn() ? '/editor/new' : null" (click)="handleProtectedLink('/editor/new', $event)">
+          <a routerLink="/editor/new" (click)="handleProtectedLink('/editor/new', $event)">
             <span class="material-symbols-outlined">edit_square</span>
             <span>
               <strong>Editor visual</strong>
               <small>Crea formularios sin fricción</small>
             </span>
           </a>
-          <a [routerLink]="auth.isLoggedIn() ? '/dashboard' : null" (click)="handleProtectedLink('/dashboard', $event)">
+          <a routerLink="/dashboard" (click)="handleProtectedLink('/dashboard', $event)">
             <span class="material-symbols-outlined">monitoring</span>
             <span>
               <strong>Analítica</strong>
