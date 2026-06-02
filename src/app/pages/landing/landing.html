@@ -105,24 +105,44 @@
     </div>
   </section>
 
-  <section class="py-24 lg:py-28 bg-[#F9F5FF]">
-    <div class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-14 items-start">
-        <div>
-          <p class="section-kicker">Por qué DataEncuesta</p>
-          <h2 class="text-4xl md:text-5xl font-bold text-[#1d1b20] leading-tight">Todo lo que necesitas para lanzar
-            encuestas sin fricción</h2>
+  <section class="py-24 lg:py-28 bg-[#f9f5ff] border-t border-b border-[#e7e0ec]">
+    <div class="max-w-[85rem] mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="text-center mb-16 lg:mb-20">
+        <p class="section-kicker justify-center uppercase tracking-widest font-bold text-[#1d1b20]">SOBRE NOSOTROS</p>
+      </div>
+
+      <!-- Mission Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+        <div class="order-2 lg:order-1 relative rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800" alt="Equipo colaborando" class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
         </div>
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
-          @for (feature of featureList; track feature.title) {
-          <div class="feature-card">
-            <span class="material-symbols-outlined">{{ feature.icon }}</span>
-            <h4>{{ feature.title }}</h4>
-            <p>{{ feature.description }}</p>
-          </div>
-          }
+        <div class="order-1 lg:order-2">
+          <h2 class="text-4xl font-bold text-[#1d1b20] mb-6">Nuestra Misión</h2>
+          <p class="text-lg text-[#49454e] font-light leading-relaxed mb-4">
+            <strong>dataencuesta</strong> es una plataforma para crear encuestas, recopilar respuestas y analizar resultados en tiempo real.
+          </p>
+          <p class="text-lg text-[#49454e] font-light leading-relaxed">
+            Nuestra misión es ayudar a pequeños emprendimientos, negocios locales y creadores a diseñar formularios, distribuirlos y centralizar métricas sin costos absurdos ni la complejidad de las herramientas tradicionales.
+          </p>
         </div>
       </div>
+
+      <!-- Story Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div>
+          <h2 class="text-4xl font-bold text-[#1d1b20] mb-6">Nuestra Historia</h2>
+          <p class="text-lg text-[#49454e] font-light leading-relaxed mb-4">
+            No somos una corporación sin rostro. Sabemos que detrás de cada encuesta hay una persona intentando entender mejor a su audiencia.
+          </p>
+          <p class="text-lg text-[#49454e] font-light leading-relaxed">
+            Por eso hemos construido un espacio seguro donde tú tienes el control total. Los datos de tu cuenta se usan exclusivamente para la autenticación y el registro seguro. No vendemos ni compartimos información de los usuarios.
+          </p>
+        </div>
+        <div class="relative rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="Reunión de equipo analizando métricas" class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
+        </div>
+      </div>
+      
     </div>
   </section>
 
@@ -235,17 +255,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN REQUERIDA POR GOOGLE OAUTH -->
-  <section class="py-12 bg-white border-t border-gray-100 text-center">
-    <div class="max-w-4xl mx-auto px-6">
-      <h2 class="text-lg font-bold text-[#1d1b20] mb-3">Sobre dataencuesta</h2>
-      <p class="text-[#49454e] text-sm leading-relaxed">
-        <strong>dataencuesta</strong> es una plataforma para crear encuestas, recopilar respuestas y analizar resultados en tiempo real. 
-        Nuestro propósito es permitir a equipos e individuos diseñar formularios, distribuirlos y centralizar las métricas. 
-        Los datos de tu cuenta se usan exclusivamente para la autenticación y el registro seguro. No vendemos ni compartimos información de los usuarios.
-      </p>
-    </div>
-  </section>
+
 
   <app-footer />
 </main>
