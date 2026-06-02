@@ -7,17 +7,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <a [routerLink]="routerLink || null" 
-       [queryParams]="queryParams"
-       class="wavy-btn"
-       [class.wavy-btn-outline]="variant === 'outline'"
-       [class.wavy-btn-lg]="size === 'lg'"
-       [class.wavy-btn-inverted]="colorScheme === 'primary-inverted'"
-       [ngClass]="className"
-       [style.background-color]="isHovered ? colors.toBg : colors.fromBg"
-       (mouseenter)="isHovered = true"
-       (mouseleave)="isHovered = false">
-      
+    <ng-template #btnContent>
       <!-- SVG wave overlay (z-index 10, BELOW text) -->
       <svg class="wavy-svg"
            viewBox="0 0 260 64"
@@ -48,7 +38,33 @@ import { RouterLink } from '@angular/router';
               [class.wavy-char-active]="isHovered"
               [style.animation-delay]="isHovered ? (i * 0.04) + 's' : '0s'">{{ char === ' ' ? '\u00A0' : char }}</span>
       </span>
-    </a>
+    </ng-template>
+
+    @if (routerLink) {
+      <a [routerLink]="routerLink" 
+         [queryParams]="queryParams"
+         class="wavy-btn"
+         [class.wavy-btn-outline]="variant === 'outline'"
+         [class.wavy-btn-lg]="size === 'lg'"
+         [class.wavy-btn-inverted]="colorScheme === 'primary-inverted'"
+         [ngClass]="className"
+         [style.background-color]="isHovered ? colors.toBg : colors.fromBg"
+         (mouseenter)="isHovered = true"
+         (mouseleave)="isHovered = false">
+        <ng-container *ngTemplateOutlet="btnContent"></ng-container>
+      </a>
+    } @else {
+      <button class="wavy-btn border-none appearance-none outline-none"
+         [class.wavy-btn-outline]="variant === 'outline'"
+         [class.wavy-btn-lg]="size === 'lg'"
+         [class.wavy-btn-inverted]="colorScheme === 'primary-inverted'"
+         [ngClass]="className"
+         [style.background-color]="isHovered ? colors.toBg : colors.fromBg"
+         (mouseenter)="isHovered = true"
+         (mouseleave)="isHovered = false">
+        <ng-container *ngTemplateOutlet="btnContent"></ng-container>
+      </button>
+    }
   `,
   styleUrl: './wavy-button.css',
   changeDetection: ChangeDetectionStrategy.OnPush
