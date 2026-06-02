@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* GLOBAL THEME TOKENS - VIOLET PRISM (DIGITAL MARKETING SAAS THEME) */
 :root {
   /* Core Brand Colors - Soft Purple & Deep Purple */

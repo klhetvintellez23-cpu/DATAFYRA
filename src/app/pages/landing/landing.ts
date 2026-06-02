@@ -51,7 +51,7 @@ export class LandingPage implements OnInit {
   readonly popularTemplates = [
     {
       id: 'satisfaccion-cliente',
-      image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=1000',
+      image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&q=80&w=400',
       alt: 'Persona evaluando una experiencia de cliente en una pantalla',
       badge: 'NPS y feedback',
       title: 'Satisfacción del cliente',
@@ -60,7 +60,7 @@ export class LandingPage implements OnInit {
     },
     {
       id: 'business',
-      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=1000',
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=400',
       alt: 'Equipo revisando datos y prioridades de negocio',
       badge: 'Operaciones',
       title: 'Crecimiento del negocio',
