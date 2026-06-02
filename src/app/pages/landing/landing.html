@@ -5,8 +5,14 @@
     <div
       class="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
       <div class="z-10 hero-copy pt-10 lg:pt-0">
-        <h1 class="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold text-[#1d1b20] leading-[1.05] mb-8 tracking-tight">
-          <app-lustre-text text="Crea encuestas<br />gratis" [speed]="6"></app-lustre-text>
+        <h1
+          class="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold text-[#1d1b20] leading-[1.05] mb-8 tracking-tight flex flex-col items-start">
+          <app-lustre-text text="Crea encuestas" [speed]="6"></app-lustre-text>
+          <span class="flex flex-wrap items-center gap-4 mt-2">
+            <app-lustre-text text="gratis" [speed]="6"></app-lustre-text>
+            <span
+              class="inline-flex items-center justify-center px-3 py-1 lg:px-4 lg:py-1.5 rounded-full bg-[#eaddff] text-[#440789] text-[10px] lg:text-sm font-black tracking-widest uppercase shadow-sm transform translate-y-1">ONLINE</span>
+          </span>
         </h1>
 
         <div class="ag-checklist mb-10 text-[#49454e] text-lg sm:text-xl space-y-5">
@@ -42,18 +48,25 @@
         </div>
       </div>
 
-      <div class="hero-gallery relative w-full h-full min-h-[500px] lg:min-h-[600px] flex items-center justify-center">
+      <div
+        class="hero-gallery relative w-full h-full min-h-[500px] lg:min-h-[600px] flex items-center justify-center mt-8 lg:mt-0">
         <!-- Top Image -->
         <figure
-          class="absolute left-[8%] lg:left-[12%] top-[0%] lg:top-[1%] w-[70%] lg:w-[66%] z-10 rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
-          <img src="assets/landing/arriba.webp" alt="Persona trabajando feliz"
-            class="w-full h-auto object-cover aspect-[5/4]" fetchpriority="high" loading="eager" />
+          class="absolute left-[10%] lg:left-[15%] top-[0%] lg:top-[2%] w-[80%] lg:w-[75%] z-10 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+          <img src="assets/landing/arriba.webp" alt="Persona trabajando"
+            class="w-full h-auto object-cover aspect-[16/11]" fetchpriority="high" loading="eager" />
         </figure>
-        <!-- Bottom Image -->
+        <!-- Bottom Left Image -->
         <figure
-          class="absolute right-[5%] lg:right-[0%] bottom-[0%] lg:bottom-[5%] w-[55%] lg:w-[48%] z-20 rounded-3xl overflow-hidden shadow-xl">
-          <img src="assets/landing/abajo.webp" alt="Equipo analizando datos"
-            class="w-full h-auto object-cover aspect-[5/4]" fetchpriority="high" loading="eager" />
+          class="absolute left-[5%] lg:left-[2%] bottom-[12%] lg:bottom-[8%] w-[50%] lg:w-[45%] z-20 rounded-2xl overflow-hidden shadow-2xl">
+          <img src="assets/dataencuesta-logo.webp" alt="Equipo analizando datos 1"
+            class="w-full h-auto object-cover aspect-[4/3]" fetchpriority="high" loading="lazy" />
+        </figure>
+        <!-- Bottom Right Image -->
+        <figure
+          class="absolute right-[0%] lg:right-[5%] bottom-[0%] lg:bottom-[-2%] w-[55%] lg:w-[48%] z-30 rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.15)]">
+          <img src="assets/landing/abajo.webp" alt="Equipo analizando datos 2"
+            class="w-full h-auto object-cover aspect-[4/3] scale-x-[-1]" fetchpriority="high" loading="lazy" />
         </figure>
       </div>
     </div>
@@ -114,15 +127,20 @@
       <!-- Mission Row -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
         <div class="order-2 lg:order-1 relative rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=60&w=600" alt="Equipo colaborando" class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=60&w=600"
+            alt="Equipo colaborando"
+            class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
         </div>
         <div class="order-1 lg:order-2">
           <h2 class="text-4xl font-bold text-[#1d1b20] mb-6">Nuestra Misión</h2>
           <p class="text-lg text-[#49454e] font-light leading-relaxed mb-4">
-            <strong>dataencuesta</strong> es una plataforma para crear encuestas, recopilar respuestas y analizar resultados en tiempo real.
+            <strong>dataencuesta</strong> es una plataforma para crear encuestas, recopilar respuestas y analizar
+            resultados en tiempo real.
           </p>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Nuestra misión es ayudar a pequeños emprendimientos, negocios locales y creadores a diseñar formularios, distribuirlos y centralizar métricas sin costos absurdos ni la complejidad de las herramientas tradicionales.
+            Nuestra misión es ayudar a pequeños emprendimientos, negocios locales y creadores a diseñar formularios,
+            distribuirlos y centralizar métricas sin costos absurdos ni la complejidad de las herramientas
+            tradicionales.
           </p>
         </div>
       </div>
@@ -132,17 +150,22 @@
         <div>
           <h2 class="text-4xl font-bold text-[#1d1b20] mb-6">Nuestra Historia</h2>
           <p class="text-lg text-[#49454e] font-light leading-relaxed mb-4">
-            No somos una corporación sin rostro. Sabemos que detrás de cada encuesta hay una persona intentando entender mejor a su audiencia.
+            No somos una corporación sin rostro. Sabemos que detrás de cada encuesta hay una persona intentando entender
+            mejor a su audiencia.
           </p>
           <p class="text-lg text-[#49454e] font-light leading-relaxed">
-            Por eso hemos construido un espacio seguro donde tú tienes el control total. Los datos de tu cuenta se usan exclusivamente para la autenticación y el registro seguro. No vendemos ni compartimos información de los usuarios.
+            Por eso hemos construido un espacio seguro donde tú tienes el control total. Los datos de tu cuenta se usan
+            exclusivamente para la autenticación y el registro seguro. No vendemos ni compartimos información de los
+            usuarios.
           </p>
         </div>
         <div class="relative rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
-          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=60&w=600" alt="Reunión de equipo analizando métricas" class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=60&w=600"
+            alt="Reunión de equipo analizando métricas"
+            class="w-full object-cover aspect-[4/3] transition-transform duration-700 hover:scale-105" loading="lazy" />
         </div>
       </div>
-      
+
     </div>
   </section>
 

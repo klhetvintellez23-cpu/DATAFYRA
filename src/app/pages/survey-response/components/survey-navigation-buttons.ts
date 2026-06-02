@@ -7,7 +7,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   imports: [CommonModule],
   template: `
     <nav class="survey-nav" aria-label="Navegacion de encuesta">
-      <button class="nav-button secondary" type="button" (click)="previous.emit()" [disabled]="isFirst">
+      <button class="nav-button secondary" type="button" (click)="previous.emit()">
         Anterior
       </button>
       <button class="nav-button primary" type="button" (click)="next.emit()" [disabled]="busy">
@@ -41,7 +41,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       margin-left: auto;
       min-width: 170px;
       color: var(--response-button-text, #ffffff);
-      background: linear-gradient(135deg, var(--response-button, #440789), var(--response-secondary, #06b6d4));
+      background: var(--response-button, #440789);
       box-shadow: 0 14px 34px color-mix(in srgb, var(--response-primary, #440789) 28%, transparent);
     }
 

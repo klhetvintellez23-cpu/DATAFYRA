@@ -32,13 +32,6 @@
         (start)="startSurvey()">
       </app-survey-welcome-screen>
     } @else if (currentPageQuestions().length) {
-      @if (progressMode() !== 'hidden') {
-        <div class="response-progress" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
-          <div class="response-progress-fill" [style.width]="progress() + '%'"></div>
-          <span class="response-progress-label">{{ progressLabel() }}</span>
-        </div>
-      }
-
       <section class="response-question-page" [class.multi-question-page]="currentPageQuestions().length > 1">
         @for (question of currentPageQuestions(); track question.id) {
           <app-survey-question-card

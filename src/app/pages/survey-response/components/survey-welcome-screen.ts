@@ -370,7 +370,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       border-radius: var(--response-button-radius, 18px);
       padding: 18px 32px;
       color: var(--response-button-text, #ffffff);
-      background: linear-gradient(135deg, var(--response-button, #440789), var(--response-secondary, #06b6d4));
+      background: var(--response-button, #440789);
       box-shadow: 0 18px 42px color-mix(in srgb, var(--response-primary, #440789) 30%, transparent);
       font: inherit;
       font-weight: 850;

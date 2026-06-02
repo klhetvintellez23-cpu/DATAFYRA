@@ -188,6 +188,9 @@ export class SurveyResponsePage implements OnInit {
       this.validationError.set('');
       this.submitError.set('');
       this.persistPartialResponse();
+    } else {
+      this.started.set(false);
+      this.persistPartialResponse();
     }
   }
 

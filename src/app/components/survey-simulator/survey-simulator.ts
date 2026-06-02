@@ -85,10 +85,6 @@ type TransformMode = 'move' | 'resize' | 'stretch';
           (start)="startSurvey()">
         </app-survey-welcome-screen>
       } @else if (shouldShowQuestions()) {
-        <div class="simulator-progress" aria-hidden="true">
-          <div class="simulator-progress-fill" [style.width]="progress() + '%'"></div>
-        </div>
-
         <section class="simulator-question-page" [class.multi-question-page]="currentPageQuestions().length > 1">
           @if (designMode && currentPageQuestions().length === 0) {
             <div class="empty-question-page">
@@ -754,6 +750,8 @@ export class SurveySimulatorComponent implements OnChanges {
     if (!this.isFirst()) {
       this.currentPageIndex.update((index) => index - 1);
       this.validationError.set('');
+    } else {
+      this.started.set(false);
     }
   }
 
