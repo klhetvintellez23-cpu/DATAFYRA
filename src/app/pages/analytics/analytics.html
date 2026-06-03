@@ -235,20 +235,84 @@
                 <div class="q-meta">
                   <div class="q-text">{{ getQuestionText(selectedQuestion()) }}</div>
                 </div>
+                <div class="chart-type-toggle">
+                  <button [class.active]="getChartViewType(selectedQuestion()) === 'bars'" (click)="setChartViewType(selectedQuestion(), 'bars')" title="Barras">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                  </button>
+                  <button [class.active]="getChartViewType(selectedQuestion()) === 'donut'" (click)="setChartViewType(selectedQuestion(), 'donut')" title="Donas">
+                    <span class="material-symbols-outlined">donut_large</span>
+                  </button>
+                  <button [class.active]="getChartViewType(selectedQuestion()) === 'pie'" (click)="setChartViewType(selectedQuestion(), 'pie')" title="Pastel">
+                    <span class="material-symbols-outlined">pie_chart</span>
+                  </button>
+                </div>
               </div>
               <div class="question-body">
-                <div class="option-bars">
-                  @for (item of distribution(); track item.label; let i = $index) {
-                    <div class="option-row">
-                      <span class="option-label" [title]="item.label">{{ item.label }}</span>
-                      <div class="option-bar-wrap">
-                        <div class="option-bar-fill" [class.v2]="i%4===1" [class.v3]="i%4===2" [class.v4]="i%4===3" [style.width]="item.percentage + '%'"></div>
+                @if (getChartViewType(selectedQuestion()) === 'bars') {
+                  <div class="option-bars vp-animate-fade-in">
+                    @for (item of distribution(); track item.label; let i = $index) {
+                      <div class="option-row">
+                        <span class="option-label" [title]="item.label">{{ item.label }}</span>
+                        <div class="option-bar-wrap">
+                          <div class="option-bar-fill" [style.background]="chartColors[i % chartColors.length]" [style.width]="item.percentage + '%'" [style.animation-delay.ms]="i * 80"></div>
+                        </div>
+                        <span class="option-pct">{{ item.percentage }}%</span>
+                        <span class="option-cnt">{{ item.count }}</span>
                       </div>
-                      <span class="option-pct">{{ item.percentage }}%</span>
-                      <span class="option-cnt">{{ item.count }}</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="pie-chart-view vp-animate-fade-in">
+                    <div class="pie-chart-wrapper" (mouseleave)="hoveredSlice.set(null)">
+                      <div class="pie-chart" style="background: none; box-shadow: none;">
+                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; overflow: visible;">
+                          @for (slice of getPieChartSlices(distribution()); track slice.label; let i = $index) {
+                            @if (slice.isFull) {
+                              <circle cx="50" cy="50" r="50" [attr.fill]="slice.color" class="pie-slice"
+                                [style.animation-delay.ms]="i * 80"
+                                (mouseenter)="hoveredSlice.set(slice)"
+                                (mouseleave)="hoveredSlice.set(null)">
+                              </circle>
+                            } @else {
+                              <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice"
+                                [style.animation-delay.ms]="i * 80"
+                                (mouseenter)="hoveredSlice.set(slice)"
+                                (mouseleave)="hoveredSlice.set(null)">
+                              </path>
+                            }
+                          }
+                        </svg>
+                        @if (getChartViewType(selectedQuestion()) === 'donut') {
+                          <div class="donut-hole" style="z-index: 10; pointer-events: none;">
+                            @if (hoveredSlice()) {
+                              <span class="donut-total" style="font-size: 20px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}%</span>
+                              <span class="donut-label" style="font-size: 10px; margin-top: 2px; text-align: center; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ hoveredSlice()!.label }}</span>
+                            } @else {
+                              <span class="donut-total">{{ getTotalDistributionCount(distribution()) }}</span>
+                              <span class="donut-label">Total</span>
+                            }
+                          </div>
+                        }
+                        @if (getChartViewType(selectedQuestion()) === 'pie' && hoveredSlice()) {
+                          <div class="pie-hover-badge" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; animation: animScaleIn 0.15s ease-out; white-space: nowrap;">
+                            <strong style="font-weight: 600;">{{ hoveredSlice()!.label }}</strong>
+                            <span style="opacity: 0.8; font-size: 11px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}% ({{ hoveredSlice()!.count }})</span>
+                          </div>
+                        }
+                      </div>
                     </div>
-                  }
-                </div>
+                    <div class="pie-legend">
+                      @for (dist of distribution(); track dist.label; let i = $index) {
+                        <div class="legend-item">
+                          <span class="legend-color" [style.background]="chartColors[i % chartColors.length]"></span>
+                          <span class="legend-label">{{ dist.label }}</span>
+                          <span class="legend-pct">{{ dist.percentage }}%</span>
+                          <span class="legend-cnt">({{ dist.count }})</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
             </div>
           }

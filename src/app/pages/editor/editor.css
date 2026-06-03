@@ -6305,31 +6305,17 @@
   justify-content: center;
 }
 
-.topbar-survey-title-input {
-  min-width: 120px;
-  width: clamp(150px, 20vw, 280px);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  outline: none;
-  background: #f8fafc;
-  color: #111827;
-  padding: 10px 12px;
-  font: inherit;
+.topbar-survey-title {
   font-size: 15px;
-  font-weight: 850;
-  line-height: 1.2;
+  font-weight: 750;
+  color: #111827;
+  margin-left: 14px;
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.topbar-survey-title-input:hover {
-  border-color: #e2e8f0;
-  background: #ffffff;
-}
-
-.topbar-survey-title-input:focus {
-  border-color: #a5b4fc;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+  max-width: 280px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 @media (max-width: 900px) {

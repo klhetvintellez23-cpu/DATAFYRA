@@ -11,9 +11,7 @@
         <span class="editor-logo-text">Volver</span>
       </a>
       @if (survey(); as topSurvey) {
-      <input class="topbar-survey-title-input" type="text" [ngModel]="topSurvey.title"
-        (ngModelChange)="updateTitle($event)" placeholder="Nombre de tu encuesta..."
-        aria-label="Nombre de la encuesta" />
+      <span class="topbar-survey-title">{{ topSurvey.title }}</span>
       }
     </div>
     <div class="editor-topbar-tabs builder-stepper">
@@ -742,7 +740,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
       <header class="inline-analytics-header">
         <div>
           <span class="collect-label">Resumen de resultados</span>
-          <h2>El sentimiento general es positivo.</h2>
+          <h2>{{ filteredAnalyticsSurvey()?.title || survey()?.title || 'Resultados de la encuesta' }}</h2>
           <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} personas han respondido hasta ahora, y la mayoría completó todo en menos de {{ analyticsMetrics()?.avgDurationFormatted || '2 mins' }}.</p>
         </div>
         
@@ -757,12 +755,34 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
           </div>
           
           <div class="inline-analytics-actions">
-            <button type="button" (click)="exportInlineAnalyticsCSV()">
-              <span class="material-symbols-outlined">download</span>
-              CSV
-            </button>
-            <button type="button" (click)="exportInlineAnalyticsExcel()">Excel</button>
-            <button type="button" (click)="printInlineAnalytics()">PDF</button>
+            <div class="inline-export-menu" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="inline-export-trigger"
+                [class.open]="showExportDropdown()"
+                [attr.aria-expanded]="showExportDropdown()"
+                aria-haspopup="menu"
+                (click)="toggleExportDropdown($event)">
+                <span class="material-symbols-outlined">download</span>
+                Exportar
+                <span class="material-symbols-outlined chevron">keyboard_arrow_down</span>
+              </button>
+
+              <div class="inline-export-dropdown" [class.open]="showExportDropdown()" role="menu">
+                <button type="button" class="csv" role="menuitem" (click)="exportInlineAnalyticsCSV(); showExportDropdown.set(false)">
+                  <span class="material-symbols-outlined">description</span>
+                  <strong>Exportar como CSV</strong>
+                </button>
+                <button type="button" class="excel" role="menuitem" (click)="exportInlineAnalyticsExcel(); showExportDropdown.set(false)">
+                  <span class="material-symbols-outlined">table_chart</span>
+                  <strong>Exportar como Excel</strong>
+                </button>
+                <button type="button" class="pdf" role="menuitem" (click)="printInlineAnalytics(); showExportDropdown.set(false)">
+                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                  <strong>Exportar como PDF</strong>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -824,34 +844,41 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
               </div>
             </div>
             <div class="inline-area-chart-container">
-              <svg viewBox="0 -10 400 110" preserveAspectRatio="none">
-                <!-- Líneas de cuadrícula de fondo -->
-                <g stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4,4">
-                  <line x1="0" y1="15" x2="400" y2="15" />
-                  <line x1="0" y1="50" x2="400" y2="50" />
-                  <line x1="0" y1="85" x2="400" y2="85" />
-                </g>
-                
-                <!-- Gradiente de Area -->
-                <defs>
-                  <linearGradient id="areaGradient1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#440789" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#440789" stop-opacity="0.01" />
-                  </linearGradient>
-                </defs>
-                
-                <path [attr.d]="dailyResponsesSvgData().area" fill="url(#areaGradient1)" />
-                <path [attr.d]="dailyResponsesSvgData().line" fill="none" stroke="#440789" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                
-                <!-- Punto único al final de la línea -->
-                <circle 
-                  [attr.cx]="dailyResponsesSvgData().endX" 
-                  [attr.cy]="dailyResponsesSvgData().endY" 
-                  r="5" 
-                  fill="#ffffff" 
-                  stroke="#440789" 
-                  stroke-width="2.5" />
-              </svg>
+              <div class="inline-area-plot" style="position: relative; height: 100px;">
+                <svg viewBox="0 0 400 100" preserveAspectRatio="none" style="overflow: hidden; width: 100%; height: 100%;">
+                  <!-- Grid lines -->
+                  <g stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4,4">
+                    <line x1="0" y1="15" x2="400" y2="15" />
+                    <line x1="0" y1="50" x2="400" y2="50" />
+                    <line x1="0" y1="85" x2="400" y2="85" />
+                  </g>
+
+                  <defs>
+                    <linearGradient id="areaGradient1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#440789" stop-opacity="0.25" />
+                      <stop offset="100%" stop-color="#440789" stop-opacity="0.01" />
+                    </linearGradient>
+                  </defs>
+
+                  <path [attr.d]="dailyResponsesSvgData().area" fill="url(#areaGradient1)" />
+                  <path [attr.d]="dailyResponsesSvgData().line" fill="none" stroke="#440789" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+
+                <!-- HTML overlay for interactive points -->
+                <div class="chart-points-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;">
+                  @for (item of dailyResponses(); track item.label; let i = $index) {
+                    <div class="chart-point"
+                      style="position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); pointer-events: auto; cursor: crosshair;"
+                      [style.left.%]="((dailyResponsesSvgData().points[i]?.x ?? 0) / 400) * 100"
+                      [style.top.%]="dailyResponsesSvgData().points[i]?.y ?? 100"
+                      onmouseover="this.querySelector('.chart-point-dot').style.transform='scale(1.4)'; this.querySelector('.chart-value-tooltip').style.opacity='1'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(1)';"
+                      onmouseout="this.querySelector('.chart-point-dot').style.transform='scale(1)'; this.querySelector('.chart-value-tooltip').style.opacity='0'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(0.95)';">
+                      <div class="chart-point-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #ffffff; border: 2.5px solid #440789; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+                      <div class="chart-value-tooltip chart-point-label" style="position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -8px) scale(0.95); opacity: 0; background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; pointer-events: none; z-index: 10;">{{ item.count }} {{ item.count === 1 ? 'respuesta' : 'respuestas' }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
               
               <div class="inline-chart-x-axis">
                 @for (item of dailyResponses(); track item.label) {
@@ -873,8 +900,10 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
             </div>
             <div class="inline-trend-chart">
               @for (val of responseTrend().data; track $index) {
-              <div>
-                <span [style.height.%]="(val / maxTrendResponses()) * 100"></span>
+              <div class="trend-col" [attr.data-picks]="val">
+                <span [style.height.%]="(val / maxTrendResponses()) * 100">
+                  <em class="chart-value-tooltip trend-pick-tooltip">{{ val }} {{ val === 1 ? 'respuesta' : 'respuestas' }}</em>
+                </span>
                 <small>{{ responseTrend().labels[$index] }}</small>
               </div>
               }
@@ -915,7 +944,22 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
           <div class="analytics-feed analytics-feed-grid">
             @for (item of getSelectedQuestionsAnalytics(); track item.question.id) {
               <div class="inline-distribution-card single-focus-card">
-                <h4>{{ item.question.text || 'Pregunta sin título' }}</h4>
+                <div class="inline-card-header-with-toggle" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+                  <h4 style="margin: 0;">{{ item.question.text || 'Pregunta sin título' }}</h4>
+                  @if (!item.isText) {
+                    <div class="chart-type-toggle">
+                      <button [class.active]="getQuestionChartView(item.question.id) === 'bars'" (click)="setQuestionChartView(item.question.id, 'bars')" title="Barras">
+                        <span class="material-symbols-outlined">bar_chart</span>
+                      </button>
+                      <button [class.active]="getQuestionChartView(item.question.id) === 'donut'" (click)="setQuestionChartView(item.question.id, 'donut')" title="Donas">
+                        <span class="material-symbols-outlined">donut_large</span>
+                      </button>
+                      <button [class.active]="getQuestionChartView(item.question.id) === 'pie'" (click)="setQuestionChartView(item.question.id, 'pie')" title="Pastel">
+                        <span class="material-symbols-outlined">pie_chart</span>
+                      </button>
+                    </div>
+                  }
+                </div>
                 
                 @if (item.isText) {
                   @if (item.textResponses.length > 0) {
@@ -938,6 +982,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
                 } @else {
                   @if (item.distribution.length > 0) {
                   <div class="panel-recharts-view">
+                    @if (getQuestionChartView(item.question.id) === 'bars') {
                     <div class="recharts-bars">
                       @for (dist of item.distribution; track dist.label; let i = $index) {
                         <div class="recharts-row">
@@ -946,7 +991,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
                           </div>
                           <div class="recharts-bar-area">
                             <div class="recharts-row-highlight"></div>
-                            <div class="recharts-bar-fill color-{{ i % 6 }}" [style.width.%]="(dist.count / (item.maxDist || 1)) * 100">
+                            <div class="recharts-bar-fill color-{{ i % 6 }}" [style.width.%]="(dist.count / (item.maxDist || 1)) * 100" [style.animation-delay.ms]="i * 80">
                               <div class="recharts-tooltip">
                                 <strong>{{ dist.count }} respuesta(s)</strong>
                                 <span>{{ dist.percentage }}%</span>
@@ -956,6 +1001,58 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
                         </div>
                       }
                     </div>
+                    } @else {
+                    <div class="pie-chart-view">
+                      <div class="pie-chart-wrapper" (mouseleave)="hoveredSlice.set(null)">
+                        <div class="pie-chart" style="background: none; box-shadow: none;">
+                          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; overflow: visible;">
+                            @for (slice of getPieChartSlices(item.distribution); track slice.label; let i = $index) {
+                              @if (slice.isFull) {
+                                <circle cx="50" cy="50" r="50" [attr.fill]="slice.color" class="pie-slice"
+                                  [style.animation-delay.ms]="i * 80"
+                                  (mouseenter)="hoveredSlice.set(slice)"
+                                  (mouseleave)="hoveredSlice.set(null)">
+                                </circle>
+                              } @else {
+                                <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice"
+                                  [style.animation-delay.ms]="i * 80"
+                                  (mouseenter)="hoveredSlice.set(slice)"
+                                  (mouseleave)="hoveredSlice.set(null)">
+                                </path>
+                              }
+                            }
+                          </svg>
+                          @if (getQuestionChartView(item.question.id) === 'donut') {
+                            <div class="donut-hole" style="z-index: 10; pointer-events: none;">
+                              @if (hoveredSlice()) {
+                                <span class="donut-total" style="font-size: 20px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}%</span>
+                                <span class="donut-label" style="font-size: 10px; margin-top: 2px; text-align: center; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ hoveredSlice()!.label }}</span>
+                              } @else {
+                                <span class="donut-total">{{ getTotalDistributionCount(item.distribution) }}</span>
+                                <span class="donut-label">Total</span>
+                              }
+                            </div>
+                          }
+                          @if (getQuestionChartView(item.question.id) === 'pie' && hoveredSlice()) {
+                            <div class="pie-hover-badge" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; animation: animScaleIn 0.15s ease-out; white-space: nowrap;">
+                              <strong style="font-weight: 600;">{{ hoveredSlice()!.label }}</strong>
+                              <span style="opacity: 0.8; font-size: 11px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}% ({{ hoveredSlice()!.count }})</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="pie-legend">
+                        @for (dist of item.distribution; track dist.label; let i = $index) {
+                          <div class="legend-item">
+                            <span class="legend-color color-{{ i % 6 }}"></span>
+                            <span class="legend-label">{{ dist.label }}</span>
+                            <span class="legend-value">{{ dist.percentage }}%</span>
+                            <span class="legend-count">({{ dist.count }})</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    }
                   </div>
                   } @else {
                   <div class="inline-empty-analytics">
@@ -1764,6 +1861,8 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
     </section>
     }
   </main>
+
+  <!-- Removed pieTooltip -->
 
 </div>
 }

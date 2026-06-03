@@ -25,7 +25,7 @@ type EditorTab = 'design' | 'preview' | 'collect' | 'analyze';
 type DesignCenterTab = 'combine' | 'base' | 'presentation' | 'visual' | 'questions' | 'completion';
 type ShareSection = 'dashboard' | 'link' | 'qr' | 'channels' | 'embed' | 'checklist' | 'analytics' | 'settings';
 type AnalyticsRange = '7d' | '14d' | '30d' | 'all';
-type QuestionChartView = 'bars' | 'donut' | 'ranking';
+type QuestionChartView = 'bars' | 'donut' | 'pie';
 type ResultsSection = 'analysis' | 'responses' | 'report';
 type QrPresetId = 'flyer' | 'counter' | 'screen' | 'sticker' | 'event';
 type AssetKind =
@@ -274,10 +274,12 @@ export class EditorPage implements OnInit, OnDestroy {
   activeQuestionPageIndex = signal(0);
   activeResultsSection = signal<ResultsSection>('analysis');
   showAnalyticsModal = signal(false);
+  showExportDropdown = signal(false);
   selectedAnalyticsQuestions = signal<string[]>([]);  selectedResponseId = signal('');
   analyticsRange = signal<AnalyticsRange>('all');
   analyticsTextSearch = signal('');
-  questionChartView = signal<QuestionChartView>('bars');
+  questionChartViews = signal<Record<string, QuestionChartView>>({});
+  hoveredSlice = signal<{ label: string; percentage: number; count: number } | null>(null);
   addQuestionPanel = false;
   questionEditorOpen = false;
   editingQuestionIndex = 0;
@@ -445,6 +447,19 @@ export class EditorPage implements OnInit, OnDestroy {
     } else {
       this.selectionVisible = false;
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.inline-export-menu')) {
+      this.showExportDropdown.set(false);
+    }
+  }
+
+  toggleExportDropdown(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showExportDropdown.update((open) => !open);
   }
 
   onFontChange(font: string) {
@@ -4401,19 +4416,21 @@ export class EditorPage implements OnInit, OnDestroy {
     return Math.max(...this.responseTrend().data, 1);
   }
 
-  generateSmoothSvgData(data: number[], max: number, width: number, height: number): { line: string, area: string, endX: number, endY: number } {
-    if (data.length === 0) return { line: '', area: '', endX: 0, endY: 0 };
+  generateSmoothSvgData(data: number[], max: number, width: number, height: number): { line: string, area: string, endX: number, endY: number, points: { x: number, y: number }[] } {
+    if (data.length === 0) return { line: '', area: '', endX: 0, endY: 0, points: [] };
 
     const xOffset = 6; // Padding on left/right edges
     const effectiveWidth = width - (xOffset * 2);
     
     if (data.length === 1) {
       const y = height - (data[0] / (max || 1)) * height * 0.85;
+      const pts = [{ x: xOffset, y }, { x: width - xOffset, y }];
       return { 
         line: `M ${xOffset},${y} L ${width - xOffset},${y}`, 
         area: `M ${xOffset},${y} L ${width - xOffset},${y} L ${width - xOffset},${height} L ${xOffset},${height} Z`, 
         endX: width - xOffset, 
-        endY: y 
+        endY: y,
+        points: pts
       };
     }
 
@@ -4440,7 +4457,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
     const areaPath = linePath + ` L ${points[points.length - 1].x},${height} L ${points[0].x},${height} Z`;
     
-    return { line: linePath, area: areaPath, endX: points[points.length - 1].x, endY: points[points.length - 1].y };
+    return { line: linePath, area: areaPath, endX: points[points.length - 1].x, endY: points[points.length - 1].y, points };
   }
 
   dailyResponsesSvgData = computed(() => {
@@ -4466,6 +4483,66 @@ export class EditorPage implements OnInit, OnDestroy {
       current.push(questionId);
     }
     this.selectedAnalyticsQuestions.set(current);
+  }
+
+  getQuestionChartView(questionId: string): QuestionChartView {
+    return this.questionChartViews()[questionId] || 'bars';
+  }
+
+  setQuestionChartView(questionId: string, view: QuestionChartView): void {
+    this.questionChartViews.update(views => ({...views, [questionId]: view}));
+  }
+
+  getPieChartGradient(distribution: any[]): string {
+    const chartColors = [
+      '#440789', '#9333ea', '#c084fc', '#e9d5ff', '#6d28d9', '#a78bfa', '#ddd6fe'
+    ];
+    let currentPercentage = 0;
+    const stops = distribution.map((item, i) => {
+      const color = chartColors[i % chartColors.length];
+      const start = currentPercentage;
+      const end = currentPercentage + item.percentage;
+      currentPercentage = end;
+      return `${color} ${start}% ${end}%`;
+    });
+    if (currentPercentage < 100 && currentPercentage > 0) {
+      stops.push(`#f1f5f9 ${currentPercentage}% 100%`);
+    } else if (currentPercentage === 0) {
+       stops.push(`#f1f5f9 0% 100%`);
+    }
+    return `conic-gradient(${stops.join(', ')})`;
+  }
+
+  getPieChartSlices(distribution: any[]) {
+    const chartColors = ['#440789', '#9333ea', '#c084fc', '#e9d5ff', '#6d28d9', '#a78bfa', '#ddd6fe'];
+    let currentAngle = -90; 
+    const totalCount = this.getTotalDistributionCount(distribution);
+    
+    return distribution.map((item, i) => {
+      const percentage = totalCount ? (item.count / totalCount) : 0;
+      const angle = percentage * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + angle;
+      currentAngle = endAngle;
+
+      if (percentage === 1 || percentage > 0.999) {
+        return { color: chartColors[i % chartColors.length], isFull: true, path: '', label: item.label, count: item.count, percentage: item.percentage };
+      }
+
+      const x1 = 50 + 50 * Math.cos((Math.PI * startAngle) / 180);
+      const y1 = 50 + 50 * Math.sin((Math.PI * startAngle) / 180);
+      const x2 = 50 + 50 * Math.cos((Math.PI * endAngle) / 180);
+      const y2 = 50 + 50 * Math.sin((Math.PI * endAngle) / 180);
+      
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+
+      return { color: chartColors[i % chartColors.length], isFull: false, path: pathData, label: item.label, count: item.count, percentage: item.percentage };
+    });
+  }
+
+  getTotalDistributionCount(distribution: any[]): number {
+    return distribution.reduce((acc, cur) => acc + (cur.count || 0), 0);
   }
 
   setActiveResultsSection(section: ResultsSection): void {
@@ -4502,22 +4579,31 @@ export class EditorPage implements OnInit, OnDestroy {
       }
       
       const maxDist = Math.max(...dist.map(item => item.count), 1);
+      const totalDist = dist.reduce((sum, item) => sum + item.count, 0);
       
       const colors = ['#440789', '#6d28d9', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#e0e7ff'];
       let cursor = 0;
-      const segments = dist.map((item, index) => {
+      const distributionWithColors = dist.map((item, index) => ({
+        ...item,
+        color: colors[index % colors.length]
+      }));
+      const segments = distributionWithColors.map((item) => {
         const start = cursor;
         cursor += item.percentage;
-        return `${colors[index % colors.length]} ${start}% ${cursor}%`;
+        return `${item.color} ${start}% ${cursor}%`;
       });
-      const donutGradient = `conic-gradient(${segments.join(', ')})`;
+      const donutGradient = segments.length > 0
+        ? `conic-gradient(${segments.join(', ')})`
+        : 'conic-gradient(#e2e8f0 0 100%)';
 
       return {
         question: q,
         isText,
         distribution: dist,
+        distributionWithColors,
         textResponses: textRes,
         maxDist,
+        totalDist,
         donutGradient
       };
     });
@@ -4560,7 +4646,197 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   printInlineAnalytics(): void {
-    window.print();
+    const survey = this.survey();
+    if (!survey) return;
+    this.openAnalyticsPdfReport(survey);
+  }
+
+  private openAnalyticsPdfReport(survey: Survey): void {
+    const reportWindow = window.open('', '_blank', 'width=1100,height=800');
+    const html = this.buildAnalyticsReportHtml(survey);
+
+    if (!reportWindow) {
+      this.downloadAnalyticsBlob(new Blob([html], { type: 'text/html' }), `${this.slugifyFileName(survey.title)}_informe.html`);
+      this.showInfo('Se descargo el informe. Abre el archivo y guardalo como PDF.');
+      return;
+    }
+
+    reportWindow.document.open();
+    reportWindow.document.write(html);
+    reportWindow.document.close();
+    reportWindow.focus();
+    setTimeout(() => reportWindow.print(), 350);
+  }
+
+  private buildAnalyticsReportHtml(survey: Survey): string {
+    const metrics = this.analyticsService.getMetrics(survey);
+    const generatedAt = new Date().toLocaleString();
+    const latestResponse = survey.responses
+      .map((response) => response.completedAt)
+      .sort()
+      .at(-1);
+    const latestLabel = latestResponse ? new Date(latestResponse).toLocaleString() : 'Sin respuestas';
+    const trend = this.analyticsService.getResponseTrend(survey.responses, 14);
+    const maxTrend = Math.max(...trend.data, 1);
+    const requiredCount = survey.questions.filter((question) => question.required).length;
+    const tableHeaders = ['#', 'Fecha', 'Duracion', 'Nombre', 'Email', ...survey.questions.map((question) => question.text || 'Pregunta')];
+
+    const trendRows = trend.data.map((value, index) => `
+      <tr>
+        <td>${this.htmlEscape(trend.labels[index] ?? '')}</td>
+        <td>${value}</td>
+        <td>${value === 0 ? 'Sin actividad' : value === maxTrend ? 'Pico del periodo' : 'Actividad registrada'}</td>
+      </tr>
+    `).join('');
+
+    const questionSections = survey.questions.map((question, index) => {
+      const answered = survey.responses.filter((response) => response.answers.some((answer) => answer.questionId === question.id));
+      const distribution = this.analyticsService.getQuestionDistribution(survey, question.id);
+      const textResponses = this.analyticsService.getTextResponses(survey, question.id);
+      const maxDistribution = Math.max(...distribution.map((item) => item.count), 1);
+      const body = distribution.length > 0
+        ? distribution.map((item) => `
+            <div class="dist-row">
+              <span>${this.htmlEscape(item.label)}</span>
+              <div><i style="width:${Math.max((item.count / maxDistribution) * 100, item.count > 0 ? 4 : 0)}%"></i></div>
+              <strong>${item.count}</strong>
+              <em>${item.percentage}%</em>
+            </div>
+          `).join('')
+        : textResponses.length > 0
+          ? textResponses.slice(0, 12).map((text) => `<blockquote>${this.htmlEscape(text)}</blockquote>`).join('')
+          : '<p class="muted">No hay respuestas registradas para esta pregunta.</p>';
+
+      return `
+        <section class="question-card">
+          <div class="question-head">
+            <span>Pregunta ${index + 1}</span>
+            <strong>${answered.length} respuesta${answered.length === 1 ? '' : 's'}</strong>
+          </div>
+          <h3>${this.htmlEscape(question.text || 'Pregunta sin titulo')}</h3>
+          ${question.description ? `<p class="muted">${this.htmlEscape(question.description)}</p>` : ''}
+          ${body}
+        </section>
+      `;
+    }).join('');
+
+    const responseRows = survey.responses.map((response, index) => {
+      const name = this.formatAnalyticsCell(response.answers.find((answer) => answer.questionId === '__participant_name')?.value ?? '');
+      const email = this.formatAnalyticsCell(response.answers.find((answer) => answer.questionId === '__participant_email')?.value ?? '');
+      const answers = survey.questions.map((question) => this.formatAnalyticsCell(response.answers.find((answer) => answer.questionId === question.id)?.value ?? 'Sin respuesta'));
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${this.htmlEscape(new Date(response.completedAt).toLocaleString())}</td>
+          <td>${this.htmlEscape(this.formatDuration(response.duration))}</td>
+          <td>${this.htmlEscape(name || '-')}</td>
+          <td>${this.htmlEscape(email || '-')}</td>
+          ${answers.map((answer) => `<td>${this.htmlEscape(answer)}</td>`).join('')}
+        </tr>
+      `;
+    }).join('');
+
+    return `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Informe - ${this.htmlEscape(survey.title || 'Encuesta')}</title>
+  <style>
+    @page { size: A4; margin: 16mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #111827; background: #f8fafc; font-family: Inter, Arial, sans-serif; line-height: 1.45; }
+    .report { max-width: 1100px; margin: 0 auto; padding: 32px; background: #fff; }
+    .hero { border: 1px solid #e5e7eb; border-radius: 18px; padding: 28px; background: linear-gradient(135deg, #ffffff, #f3f0ff); }
+    .eyebrow { margin: 0 0 8px; color: #440789; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; color: #111827; font-size: 34px; line-height: 1.1; }
+    h2 { margin: 32px 0 12px; font-size: 20px; }
+    h3 { margin: 8px 0; font-size: 16px; }
+    p { margin: 8px 0 0; }
+    .muted { color: #64748b; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; color: #475569; font-size: 12px; }
+    .meta span { border: 1px solid #e5e7eb; border-radius: 999px; padding: 6px 10px; background: #fff; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
+    .metric { border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px; background: #fff; }
+    .metric small { display: block; color: #64748b; font-size: 11px; font-weight: 700; }
+    .metric strong { display: block; margin-top: 6px; color: #440789; font-size: 24px; line-height: 1; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .panel, .question-card { break-inside: avoid; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; background: #fff; }
+    .question-card { margin-bottom: 12px; }
+    .question-head { display: flex; justify-content: space-between; gap: 12px; color: #64748b; font-size: 12px; font-weight: 700; }
+    .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+    .report-table th, .report-table td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; vertical-align: top; }
+    .report-table th { background: #f8fafc; color: #334155; font-weight: 800; }
+    .dist-row { display: grid; grid-template-columns: minmax(150px, 1fr) 2fr 48px 48px; gap: 10px; align-items: center; margin-top: 9px; font-size: 12px; }
+    .dist-row div { height: 8px; border-radius: 999px; background: #eef2ff; overflow: hidden; }
+    .dist-row i { display: block; height: 100%; border-radius: inherit; background: #440789; }
+    .dist-row strong, .dist-row em { text-align: right; font-style: normal; }
+    blockquote { margin: 10px 0 0; border-left: 3px solid #c4b5fd; padding: 8px 10px; background: #f8fafc; color: #334155; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 10px; }
+    th, td { border: 1px solid #e5e7eb; padding: 7px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; color: #334155; font-weight: 800; }
+    td { color: #1f2937; }
+    .footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid #e5e7eb; color: #64748b; font-size: 11px; }
+    @media print {
+      body { background: #fff; }
+      .report { padding: 0; max-width: none; }
+      .hero, .panel, .question-card, .metric { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="report">
+    <section class="hero">
+      <p class="eyebrow">Informe de resultados</p>
+      <h1>${this.htmlEscape(survey.title || 'Encuesta sin titulo')}</h1>
+      ${survey.description ? `<p class="muted">${this.htmlEscape(survey.description)}</p>` : ''}
+      <div class="meta">
+        <span>Generado: ${this.htmlEscape(generatedAt)}</span>
+        <span>Ultima respuesta: ${this.htmlEscape(latestLabel)}</span>
+        <span>Estado: ${this.htmlEscape(String(survey.status))}</span>
+        <span>${survey.questions.length} pregunta${survey.questions.length === 1 ? '' : 's'} (${requiredCount} requerida${requiredCount === 1 ? '' : 's'})</span>
+      </div>
+      <div class="metrics">
+        <article class="metric"><small>Total respuestas</small><strong>${metrics.totalResponses}</strong></article>
+        <article class="metric"><small>Tasa de completado</small><strong>${metrics.completionRate}%</strong></article>
+        <article class="metric"><small>Tiempo promedio</small><strong>${this.htmlEscape(metrics.avgDurationFormatted)}</strong></article>
+        <article class="metric"><small>NPS</small><strong>${metrics.npsScore > 0 ? '+' : ''}${metrics.npsScore}</strong></article>
+      </div>
+    </section>
+
+    <h2>Resumen ejecutivo</h2>
+    <section class="summary-grid">
+      <article class="panel">
+        <h3>Lectura general</h3>
+        <p class="muted">La encuesta registra ${metrics.totalResponses} respuesta${metrics.totalResponses === 1 ? '' : 's'}, con una tasa de completado de ${metrics.completionRate}% y un tiempo promedio de ${this.htmlEscape(metrics.avgDurationFormatted)}.</p>
+      </article>
+      <article class="panel">
+        <h3>Movimiento de respuestas, ultimos 14 dias</h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Dia</th>
+              <th>Respuestas</th>
+              <th>Lectura</th>
+            </tr>
+          </thead>
+          <tbody>${trendRows}</tbody>
+        </table>
+      </article>
+    </section>
+
+    <h2>Analisis por pregunta</h2>
+    ${questionSections || '<p class="muted">No hay preguntas configuradas.</p>'}
+
+    <h2>Base completa de respuestas</h2>
+    <table>
+      <thead><tr>${tableHeaders.map((header) => `<th>${this.htmlEscape(header)}</th>`).join('')}</tr></thead>
+      <tbody>${responseRows || `<tr><td colspan="${tableHeaders.length}">Sin respuestas registradas.</td></tr>`}</tbody>
+    </table>
+
+    <p class="footer">Informe generado por DataEncuesta. Revise los datos personales antes de compartir este documento externamente.</p>
+  </main>
+</body>
+</html>`;
   }
 
   latestResponseDate(): string {
@@ -4946,6 +5222,20 @@ export class EditorPage implements OnInit, OnDestroy {
     if (Array.isArray(value)) return value.join(' | ');
     if (value && typeof value === 'object') return JSON.stringify(value);
     return String(value ?? '');
+  }
+
+  private formatDuration(seconds: number): string {
+    const safeSeconds = Math.max(0, Math.floor(seconds || 0));
+    const mins = Math.floor(safeSeconds / 60);
+    const secs = safeSeconds % 60;
+    return `${mins}m ${secs}s`;
+  }
+
+  private slugifyFileName(value: string): string {
+    return (value || 'encuesta')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '') || 'encuesta';
   }
 
   private csvEscape(value: string): string {
