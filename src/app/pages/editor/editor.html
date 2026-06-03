@@ -738,28 +738,24 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
 
   @if (currentTab === 'analyze') {
   <div class="editor-stage inline-analytics-stage">
-    <div class="inline-results-dashboard">
-      <aside class="inline-results-sidebar" aria-label="Dashboard de resultados">
-        <nav class="inline-results-nav" aria-label="Secciones de resultados">
-          @for (section of resultsSections; track section.id) {
-          <button type="button" [class.active]="activeResultsSection() === section.id"
-            (click)="setActiveResultsSection(section.id)">
-            <span class="material-symbols-outlined">{{ section.icon }}</span>
-            <strong>{{ section.label }}</strong>
-            <small>{{ section.description }}</small>
-          </button>
-          }
-        </nav>
-      </aside>
-
-      <div class="inline-results-content">
-        <header class="inline-analytics-header">
-          <div>
-            <span class="collect-label">Resultados y análisis</span>
-            <h2>{{ s.title || 'Encuesta' }}</h2>
-            <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} respuestas registradas · Última respuesta: {{
-              latestResponseDate() }}</p>
+    <div class="inline-results-content">
+      <header class="inline-analytics-header">
+        <div>
+          <span class="collect-label">Resumen de resultados</span>
+          <h2>El sentimiento general es positivo.</h2>
+          <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} personas han respondido hasta ahora, y la mayoría completó todo en menos de {{ analyticsMetrics()?.avgDurationFormatted || '2 mins' }}.</p>
+        </div>
+        
+        <div class="inline-analytics-controls">
+          <div class="analytics-pill-nav">
+            <button [class.active]="activeResultsSection() === 'analysis'" (click)="setActiveResultsSection('analysis')">
+              <span class="material-symbols-outlined">analytics</span> Análisis
+            </button>
+            <button [class.active]="activeResultsSection() === 'responses'" (click)="setActiveResultsSection('responses')">
+              <span class="material-symbols-outlined">receipt_long</span> Respuestas
+            </button>
           </div>
+          
           <div class="inline-analytics-actions">
             <button type="button" (click)="exportInlineAnalyticsCSV()">
               <span class="material-symbols-outlined">download</span>
@@ -768,7 +764,8 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
             <button type="button" (click)="exportInlineAnalyticsExcel()">Excel</button>
             <button type="button" (click)="printInlineAnalytics()">PDF</button>
           </div>
-        </header>
+        </div>
+      </header>
 
         @if (activeResultsSection() === 'analysis') {
         @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
@@ -826,14 +823,44 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
                 <h3>Respuestas por día</h3>
               </div>
             </div>
-            <div class="inline-bar-chart">
-              @for (item of dailyResponses(); track item.label) {
-              <div class="inline-bar-group">
-                <span>{{ item.count }}</span>
-                <div><i [style.height.%]="(item.count / maxDailyResponses()) * 100"></i></div>
-                <small>{{ item.label }}</small>
+            <div class="inline-area-chart-container">
+              <svg viewBox="0 -10 400 110" preserveAspectRatio="none">
+                <!-- Líneas de cuadrícula de fondo -->
+                <g stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4,4">
+                  <line x1="0" y1="15" x2="400" y2="15" />
+                  <line x1="0" y1="50" x2="400" y2="50" />
+                  <line x1="0" y1="85" x2="400" y2="85" />
+                </g>
+                
+                <!-- Gradiente de Area -->
+                <defs>
+                  <linearGradient id="areaGradient1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#440789" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#440789" stop-opacity="0.01" />
+                  </linearGradient>
+                </defs>
+                
+                <path [attr.d]="dailyResponsesSvgData().area" fill="url(#areaGradient1)" />
+                <path [attr.d]="dailyResponsesSvgData().line" fill="none" stroke="#440789" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                
+                <!-- Punto único al final de la línea -->
+                <circle 
+                  [attr.cx]="dailyResponsesSvgData().endX" 
+                  [attr.cy]="dailyResponsesSvgData().endY" 
+                  r="5" 
+                  fill="#ffffff" 
+                  stroke="#440789" 
+                  stroke-width="2.5" />
+              </svg>
+              
+              <div class="inline-chart-x-axis">
+                @for (item of dailyResponses(); track item.label) {
+                  <div class="x-axis-label">
+                    <span>{{ item.count }}</span>
+                    <small>{{ item.label }}</small>
+                  </div>
+                }
               </div>
-              }
             </div>
           </section>
 
@@ -855,118 +882,90 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
           </section>
         </div>
 
-        <section class="inline-question-analysis">
+                <section class="inline-analytics-questions">
+          @if (selectedAnalyticsQuestions().length > 0) {
           <div class="inline-card-head">
             <div>
-              <span class="collect-label">Análisis por pregunta</span>
-              <h3>Distribución de respuestas</h3>
+              <span class="collect-label">Análisis de respuestas</span>
+              <h3 class="truncate-title">{{ selectedAnalyticsQuestions().includes('all') ? 'Todas las preguntas' : (selectedAnalyticsQuestions().length + ' preguntas seleccionadas') }}</h3>
             </div>
-            @if (selectedQuestionDistribution().length > 0) {
-            <div class="question-chart-switch" aria-label="Vista de gráfica">
-              <button type="button" [class.active]="questionChartView() === 'bars'"
-                (click)="setQuestionChartView('bars')">
-                <span class="material-symbols-outlined">bar_chart</span>
-                Barras
-              </button>
-              <button type="button" [class.active]="questionChartView() === 'donut'"
-                (click)="setQuestionChartView('donut')">
-                <span class="material-symbols-outlined">donut_large</span>
-                Dona
-              </button>
-              <button type="button" [class.active]="questionChartView() === 'ranking'"
-                (click)="setQuestionChartView('ranking')">
-                <span class="material-symbols-outlined">leaderboard</span>
-                Ranking
-              </button>
-            </div>
-            }
-          </div>
 
-          @if (s.questions.length > 0) {
-          <div class="inline-question-tabs">
-            @for (q of s.questions; track q.id; let i = $index) {
-            <button type="button" [class.active]="selectedAnalyticsQuestionId() === q.id"
-              (click)="selectAnalyticsQuestion(q.id)">
-              <span>{{ i + 1 }}</span>
-              <strong>{{ q.text || 'Pregunta ' + (i + 1) }}</strong>
-            </button>
-            }
-          </div>
-
-          @if (selectedQuestionDistribution().length > 0) {
-          <div class="inline-distribution-card">
-            <h4>{{ selectedAnalyticsQuestionText() }}</h4>
-            @if (questionChartView() === 'bars') {
-            <div class="question-bars-view">
-              @for (item of selectedQuestionDistribution(); track item.label) {
-              <div class="inline-dist-row">
-                <span>{{ item.label }}</span>
-                <div><i [style.width.%]="item.percentage"></i></div>
-                <strong>{{ item.count }}</strong>
-                <em>{{ item.percentage }}%</em>
-              </div>
-              }
+            <div class="inline-section-controls" style="display: flex; align-items: center; gap: 12px;">
+              <button class="selector-btn" (click)="openAnalyticsModal($event)" style="display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: 500; color: #475569; cursor: pointer; font-size: 14px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">filter_list</span> Seleccionar preguntas
+              </button>
             </div>
-            } @else if (questionChartView() === 'donut') {
-            <div class="question-donut-view">
-              <div class="question-donut-chart" [style.background]="questionDonutGradient()" aria-hidden="true">
-                <strong>{{ selectedQuestionDistribution()[0].percentage }}%</strong>
-                <small>{{ selectedQuestionDistribution()[0].label }}</small>
-              </div>
-              <div class="question-donut-legend">
-                @for (item of selectedQuestionDistribution(); track item.label; let i = $index) {
-                <div>
-                  <i [style.--index]="i"></i>
-                  <span>{{ item.label }}</span>
-                  <strong>{{ item.count }}</strong>
-                  <em>{{ item.percentage }}%</em>
-                </div>
-                }
-              </div>
-            </div>
-            } @else {
-            <div class="question-ranking-view">
-              @for (item of selectedQuestionDistribution(); track item.label; let i = $index) {
-              <article>
-                <span>{{ i + 1 }}</span>
-                <div>
-                  <strong>{{ item.label }}</strong>
-                  <small>{{ item.count }} respuesta{{ item.count === 1 ? '' : 's' }}</small>
-                </div>
-                <em>{{ item.percentage }}%</em>
-              </article>
-              }
-            </div>
-            }
-          </div>
-          } @else if (selectedTextResponses().length > 0) {
-          <div class="inline-text-responses">
-            <div class="inline-text-head">
-              <div>
-                <h4>{{ selectedAnalyticsQuestionText() }}</h4>
-                <p>{{ selectedTextResponses().length }} respuestas de texto</p>
-              </div>
-              <input type="search" [ngModel]="analyticsTextSearch()" (ngModelChange)="updateAnalyticsTextSearch($event)"
-                placeholder="Buscar texto..." />
-            </div>
-            <div>
-              @for (text of selectedTextResponses(); track $index) {
-              <article>{{ text }}</article>
-              }
-            </div>
-          </div>
-          } @else {
-          <div class="inline-empty-analytics">
-            <span class="material-symbols-outlined">insights</span>
-            <strong>Sin datos para esta pregunta</strong>
-            <p>Cuando lleguen respuestas, el análisis aparecerá aquí.</p>
           </div>
           }
+
+          @if (selectedAnalyticsQuestions().length === 0) {
+          <div class="inline-empty-analytics single-focus-card" style="text-align: center; padding: 80px 20px; border-style: dashed; border-width: 2px; border-color: #e2e8f0;">
+            <div style="background: #f1f5f9; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px;">
+              <span class="material-symbols-outlined" style="font-size: 32px; color: #6d28d9;">query_stats</span>
+            </div>
+            <h2 style="font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Vamos a analizar tu encuesta</h2>
+            <p style="color: #64748b; font-size: 15px; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
+              Haz clic en el botón de abajo para seleccionar una o varias preguntas y comenzar a visualizar los datos de tus respuestas.
+            </p>
+            <button (click)="openAnalyticsModal($event)" style="background: #440789; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+              Comenzar a Analizar
+            </button>
+          </div>
           } @else {
-          <div class="inline-empty-analytics">
-            <span class="material-symbols-outlined">help</span>
-            <strong>No hay preguntas todavía</strong>
-            <p>Agrega preguntas para poder analizar resultados.</p>
+          <div class="analytics-feed analytics-feed-grid">
+            @for (item of getSelectedQuestionsAnalytics(); track item.question.id) {
+              <div class="inline-distribution-card single-focus-card">
+                <h4>{{ item.question.text || 'Pregunta sin título' }}</h4>
+                
+                @if (item.isText) {
+                  @if (item.textResponses.length > 0) {
+                  <div class="inline-text-responses">
+                    <div class="inline-text-head">
+                      <p>{{ item.textResponses.length }} respuestas de texto</p>
+                    </div>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                      @for (text of item.textResponses; track $index) {
+                      <article>{{ text }}</article>
+                      }
+                    </div>
+                  </div>
+                  } @else {
+                  <div class="inline-empty-analytics">
+                    <span class="material-symbols-outlined">insights</span>
+                    <strong>Sin datos</strong>
+                  </div>
+                  }
+                } @else {
+                  @if (item.distribution.length > 0) {
+                  <div class="panel-recharts-view">
+                    <div class="recharts-bars">
+                      @for (dist of item.distribution; track dist.label; let i = $index) {
+                        <div class="recharts-row">
+                          <div class="recharts-y-axis">
+                            <span [title]="dist.label">{{ dist.label }}</span>
+                          </div>
+                          <div class="recharts-bar-area">
+                            <div class="recharts-row-highlight"></div>
+                            <div class="recharts-bar-fill color-{{ i % 6 }}" [style.width.%]="(dist.count / (item.maxDist || 1)) * 100">
+                              <div class="recharts-tooltip">
+                                <strong>{{ dist.count }} respuesta(s)</strong>
+                                <span>{{ dist.percentage }}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  } @else {
+                  <div class="inline-empty-analytics">
+                    <span class="material-symbols-outlined">insights</span>
+                    <strong>Sin datos</strong>
+                  </div>
+                  }
+                }
+              </div>
+            }
           </div>
           }
         </section>
@@ -1127,7 +1126,6 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
         </section>
         }
       </div>
-    </div>
   </div>
   }
   }
@@ -1467,6 +1465,79 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
 </div>
 }
 
+  <!-- CUSTOM DIALOG MODAL (Replacing browser prompt/confirm) -->
+  @if (dialogModal(); as modal) {
+  <div class="custom-dialog-backdrop" (click)="closeDialogModal()">
+    <div class="custom-dialog-container" (click)="$event.stopPropagation()">
+      <div class="custom-dialog-header">
+        <h3>{{ modal.title }}</h3>
+        <button class="custom-dialog-close-btn" type="button" aria-label="Cerrar" (click)="closeDialogModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="custom-dialog-body">
+        @if (modal.type === 'prompt') {
+        <input type="text" class="custom-dialog-input" [placeholder]="modal.placeholder || 'Escribe aquí...'"
+          [(ngModel)]="dialogInputValue" (keyup.enter)="confirmDialogModal()" autofocus />
+        } @else {
+        <p class="custom-dialog-message">{{ modal.message }}</p>
+        }
+      </div>
+      <div class="custom-dialog-footer">
+        <button class="custom-dialog-btn-secondary" type="button" (click)="closeDialogModal()">Cancelar</button>
+        <button class="custom-dialog-btn-primary" type="button" (click)="confirmDialogModal()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (showAnalyticsModal()) {
+  <div class="shadcn-dialog-overlay" (click)="closeAnalyticsModal($event)">
+    <div class="shadcn-dialog-content" style="max-width: 900px;" (click)="$event.stopPropagation()">
+      <div class="shadcn-dialog-header">
+        <h2>¿Qué deseas analizar?</h2>
+        <p>Selecciona una o varias preguntas para mostrar en tu análisis.</p>
+        <button class="shadcn-dialog-close" (click)="closeAnalyticsModal($event)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      
+      <div class="shadcn-dialog-body">
+        <button class="shadcn-menu-item primary" [class.active]="selectedAnalyticsQuestions().includes('all')" (click)="toggleAnalyticsQuestion('all')">
+          <span class="material-symbols-outlined">view_stream</span>
+          <div>
+            <strong>Todas las preguntas</strong>
+            <small>Vista de feed continuo</small>
+          </div>
+          <span class="checklist-indicator material-symbols-outlined" *ngIf="selectedAnalyticsQuestions().includes('all')">check_circle</span>
+        </button>
+
+        <div class="shadcn-dialog-separator"></div>
+
+        <div class="analytics-selection-grid">
+          @for (q of survey()?.questions || []; track q.id; let i = $index) {
+          <button class="shadcn-menu-item" [class.active]="selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')" (click)="toggleAnalyticsQuestion(q.id)" [disabled]="selectedAnalyticsQuestions().includes('all')">
+            <span class="material-symbols-outlined">{{ q.type === 'text' || q.type === 'long-text' ? 'short_text' : 'pie_chart' }}</span>
+            <div>
+              <strong>{{ i + 1 }}. {{ q.text || 'Pregunta sin título' }}</strong>
+              <small>{{ q.type === 'text' || q.type === 'long-text' ? 'Respuestas de texto' : 'Opción múltiple' }}</small>
+            </div>
+            @if (selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')) {
+            <span class="checklist-indicator material-symbols-outlined" style="margin-left: auto; color: #6d28d9;">check_circle</span>
+            }
+          </button>
+          }
+        </div>
+      </div>
+      
+      <div class="shadcn-dialog-footer" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+        <button (click)="closeAnalyticsModal($event)" style="background: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; color: #475569;">Cancelar</button>
+        <button (click)="closeAnalyticsModal($event)" style="background: #440789; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar Selección</button>
+      </div>
+    </div>
+  </div>
+  }
+  
 @if (showTemplateModal) {
 <div class="template-modal-backdrop" (click)="showTemplateModal = false"></div>
 <div class="template-modal design-center-modal">
@@ -1694,30 +1765,5 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
     }
   </main>
 
-  <!-- CUSTOM DIALOG MODAL (Replacing browser prompt/confirm) -->
-  @if (dialogModal(); as modal) {
-  <div class="custom-dialog-backdrop" (click)="closeDialogModal()">
-    <div class="custom-dialog-container" (click)="$event.stopPropagation()">
-      <div class="custom-dialog-header">
-        <h3>{{ modal.title }}</h3>
-        <button class="custom-dialog-close-btn" type="button" aria-label="Cerrar" (click)="closeDialogModal()">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <div class="custom-dialog-body">
-        @if (modal.type === 'prompt') {
-        <input type="text" class="custom-dialog-input" [placeholder]="modal.placeholder || 'Escribe aquí...'"
-          [(ngModel)]="dialogInputValue" (keyup.enter)="confirmDialogModal()" autofocus />
-        } @else {
-        <p class="custom-dialog-message">{{ modal.message }}</p>
-        }
-      </div>
-      <div class="custom-dialog-footer">
-        <button class="custom-dialog-btn-secondary" type="button" (click)="closeDialogModal()">Cancelar</button>
-        <button class="custom-dialog-btn-primary" type="button" (click)="confirmDialogModal()">Aceptar</button>
-      </div>
-    </div>
-  </div>
-  }
 </div>
 }

@@ -163,6 +163,22 @@ export class EditorPage implements OnInit, OnDestroy {
   dialogModal = signal<{ type: 'prompt' | 'confirm'; title: string; placeholder?: string; message?: string; value?: string; onConfirm: (val?: string) => void } | null>(null);
   dialogInputValue = '';
 
+  openAnalyticsModal(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.showAnalyticsModal.set(true);
+  }
+
+  closeAnalyticsModal(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.showAnalyticsModal.set(false);
+  }
+
   closeDialogModal(): void {
     this.dialogModal.set(null);
   }
@@ -257,8 +273,8 @@ export class EditorPage implements OnInit, OnDestroy {
   activeQuestionIndex = signal(0);
   activeQuestionPageIndex = signal(0);
   activeResultsSection = signal<ResultsSection>('analysis');
-  selectedAnalyticsQuestion = signal('');
-  selectedResponseId = signal('');
+  showAnalyticsModal = signal(false);
+  selectedAnalyticsQuestions = signal<string[]>([]);  selectedResponseId = signal('');
   analyticsRange = signal<AnalyticsRange>('all');
   analyticsTextSearch = signal('');
   questionChartView = signal<QuestionChartView>('bars');
@@ -4363,6 +4379,12 @@ export class EditorPage implements OnInit, OnDestroy {
     return survey ? this.analyticsService.getMetrics(survey) : null;
   }
 
+  hasNPSQuestion(): boolean {
+    const survey = this.filteredAnalyticsSurvey();
+    if (!survey || !survey.questions) return false;
+    return survey.questions.some((q: any) => q.type === 'rating' || q.type === 'scale' || q.type === 'nps');
+  }
+
   dailyResponses() {
     return this.analyticsService.getDailyResponses(this.filteredAnalyticsResponses(), 7);
   }
@@ -4379,27 +4401,71 @@ export class EditorPage implements OnInit, OnDestroy {
     return Math.max(...this.responseTrend().data, 1);
   }
 
-  selectedAnalyticsQuestionId(): string {
-    const survey = this.survey();
-    if (!survey?.questions.length) return '';
-    const selected = this.selectedAnalyticsQuestion();
-    return survey.questions.some((question) => question.id === selected) ? selected : survey.questions[0].id;
+  generateSmoothSvgData(data: number[], max: number, width: number, height: number): { line: string, area: string, endX: number, endY: number } {
+    if (data.length === 0) return { line: '', area: '', endX: 0, endY: 0 };
+
+    const xOffset = 6; // Padding on left/right edges
+    const effectiveWidth = width - (xOffset * 2);
+    
+    if (data.length === 1) {
+      const y = height - (data[0] / (max || 1)) * height * 0.85;
+      return { 
+        line: `M ${xOffset},${y} L ${width - xOffset},${y}`, 
+        area: `M ${xOffset},${y} L ${width - xOffset},${y} L ${width - xOffset},${height} L ${xOffset},${height} Z`, 
+        endX: width - xOffset, 
+        endY: y 
+      };
+    }
+
+    const step = effectiveWidth / (data.length - 1);
+    const padding = 0.85; // Leave some space at the top
+
+    const points = data.map((val, i) => {
+      const x = xOffset + (i * step);
+      const y = height - (val / (max || 1)) * height * padding;
+      return { x, y };
+    });
+
+    let linePath = `M ${points[0].x},${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const curr = points[i];
+      const next = points[i + 1];
+      const cp1x = curr.x + step / 2;
+      const cp1y = curr.y;
+      const cp2x = curr.x + step / 2;
+      const cp2y = next.y;
+      linePath += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${next.x},${next.y}`;
+    }
+
+    const areaPath = linePath + ` L ${points[points.length - 1].x},${height} L ${points[0].x},${height} Z`;
+    
+    return { line: linePath, area: areaPath, endX: points[points.length - 1].x, endY: points[points.length - 1].y };
   }
 
-  selectAnalyticsQuestion(questionId: string): void {
-    this.selectedAnalyticsQuestion.set(questionId);
-  }
+  dailyResponsesSvgData = computed(() => {
+    const data = this.dailyResponses().map((item: any) => item.count);
+    return this.generateSmoothSvgData(data, this.maxDailyResponses(), 400, 100);
+  });
 
-  setAnalyticsRange(range: AnalyticsRange): void {
-    this.analyticsRange.set(range);
-  }
+  trendResponsesSvgData = computed(() => {
+    const data = this.responseTrend().data;
+    return this.generateSmoothSvgData(data, this.maxTrendResponses(), 400, 100);
+  });
 
-  updateAnalyticsTextSearch(value: string): void {
-    this.analyticsTextSearch.set(value);
-  }
 
-  setQuestionChartView(view: QuestionChartView): void {
-    this.questionChartView.set(view);
+  toggleAnalyticsQuestion(questionId: string): void {
+    if (questionId === 'all') {
+      this.selectedAnalyticsQuestions.set(['all']);
+      return;
+    }
+    let current = this.selectedAnalyticsQuestions().filter(id => id !== 'all');
+    if (current.includes(questionId)) {
+      current = current.filter(id => id !== questionId);
+    } else {
+      current.push(questionId);
+    }
+    this.selectedAnalyticsQuestions.set(current);
   }
 
   setActiveResultsSection(section: ResultsSection): void {
@@ -4410,46 +4476,54 @@ export class EditorPage implements OnInit, OnDestroy {
     this.selectedResponseId.set(responseId);
   }
 
-  selectedAnalyticsQuestionText(): string {
-    const id = this.selectedAnalyticsQuestionId();
-    return this.survey()?.questions.find((question) => question.id === id)?.text || '';
-  }
-
-  selectedAnalyticsQuestionType(): string {
-    const id = this.selectedAnalyticsQuestionId();
-    return this.survey()?.questions.find((question) => question.id === id)?.type || '';
-  }
-
-  selectedQuestionDistribution() {
+  getSelectedQuestionsAnalytics() {
     const survey = this.filteredAnalyticsSurvey();
-    const id = this.selectedAnalyticsQuestionId();
-    if (!survey || !id || this.isTextAnalyticsQuestion(id)) return [];
-    return this.analyticsService.getQuestionDistribution(survey, id);
-  }
+    if (!survey) return [];
+    
+    const selected = this.selectedAnalyticsQuestions();
+    let questionsToAnalyze = survey.questions;
+    
+    if (selected.length > 0 && !selected.includes('all')) {
+      questionsToAnalyze = survey.questions.filter(q => selected.includes(q.id));
+    } else if (selected.length === 0) {
+      return [];
+    }
 
-  selectedTextResponses(): string[] {
-    const survey = this.filteredAnalyticsSurvey();
-    const id = this.selectedAnalyticsQuestionId();
-    if (!survey || !id || !this.isTextAnalyticsQuestion(id)) return [];
-    const query = this.analyticsTextSearch().trim().toLowerCase();
-    const responses = this.analyticsService.getTextResponses(survey, id);
-    return query ? responses.filter((text) => text.toLowerCase().includes(query)) : responses;
-  }
+    return questionsToAnalyze.map(q => {
+      const isText = this.isTextAnalyticsQuestion(q.id);
+      let dist: any[] = [];
+      let textRes: string[] = [];
+      if (!isText) {
+        dist = this.analyticsService.getQuestionDistribution(survey, q.id);
+      } else {
+        const query = this.analyticsTextSearch().trim().toLowerCase();
+        const allText = this.analyticsService.getTextResponses(survey, q.id);
+        textRes = query ? allText.filter((text: string) => text.toLowerCase().includes(query)) : allText;
+      }
+      
+      const maxDist = Math.max(...dist.map(item => item.count), 1);
+      
+      const colors = ['#440789', '#6d28d9', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#e0e7ff'];
+      let cursor = 0;
+      const segments = dist.map((item, index) => {
+        const start = cursor;
+        cursor += item.percentage;
+        return `${colors[index % colors.length]} ${start}% ${cursor}%`;
+      });
+      const donutGradient = `conic-gradient(${segments.join(', ')})`;
 
-  maxSelectedDistribution(): number {
-    return Math.max(...this.selectedQuestionDistribution().map((item) => item.count), 1);
-  }
-
-  questionDonutGradient(): string {
-    const colors = ['#440789', '#22c55e', '#f97316', '#0ea5e9', '#440789', '#14b8a6', '#f43f5e'];
-    let cursor = 0;
-    const segments = this.selectedQuestionDistribution().map((item, index) => {
-      const start = cursor;
-      cursor += item.percentage;
-      return `${colors[index % colors.length]} ${start}% ${cursor}%`;
+      return {
+        question: q,
+        isText,
+        distribution: dist,
+        textResponses: textRes,
+        maxDist,
+        donutGradient
+      };
     });
-    return `conic-gradient(${segments.join(', ')})`;
   }
+
+
 
   exportInlineAnalyticsCSV(): void {
     const survey = this.survey();
