@@ -86,7 +86,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
         </app-survey-welcome-screen>
       } @else if (shouldShowQuestions()) {
         <section class="simulator-question-page" [class.multi-question-page]="currentPageQuestions().length > 1">
-          @if (designMode && currentPageQuestions().length === 0) {
+          @if (designMode && !readonlyDesignMode && currentPageQuestions().length === 0) {
             <div class="empty-question-page">
               <span class="material-symbols-outlined">post_add</span>
               <strong>Página vacía</strong>
@@ -100,10 +100,10 @@ type TransformMode = 'move' | 'resize' | 'stretch';
           @for (question of currentPageQuestions(); track question.id) {
             <div
               class="design-question-card-shell"
-              [class.design-clickable-question]="designMode"
+              [class.design-clickable-question]="designMode && !readonlyDesignMode"
               (click)="openStaticQuestion(question)">
               
-              @if (designMode) {
+              @if (designMode && !readonlyDesignMode) {
                 <div class="design-question-actions-pill" (click)="$event.stopPropagation()">
                   <button type="button" (click)="editQuestion.emit(survey.questions.indexOf(question))" title="Editar"><span class="material-symbols-outlined">edit</span></button>
                   <button type="button" (click)="editQuestionLogic.emit(survey.questions.indexOf(question))" title="Lógica"><span class="material-symbols-outlined">account_tree</span></button>
@@ -123,7 +123,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
               </app-survey-question-card>
             </div>
           }
-          @if (designMode && currentPageQuestions().length > 0) {
+          @if (designMode && !readonlyDesignMode && currentPageQuestions().length > 0) {
             <div class="design-page-add-question">
                <button class="design-page-add-btn" type="button" (click)="addQuestionAfter.emit(survey.questions.length - 1)">
                  <span class="material-symbols-outlined">add</span>
@@ -619,6 +619,7 @@ type TransformMode = 'move' | 'resize' | 'stretch';
 export class SurveySimulatorComponent implements OnChanges {
   @Input({ required: true }) survey!: Survey;
   @Input() designMode = false;
+  @Input() readonlyDesignMode = false;
   @Input() showUtilityToolbar = true;
   @Input() designSection: 'welcome' | 'questions' | 'end' = 'welcome';
   @Input() designQuestionIndex = 0;

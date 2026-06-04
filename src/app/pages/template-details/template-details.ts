@@ -338,11 +338,12 @@ export class TemplateDetailsPage implements OnInit {
       const metadata = this.templateMetadata(this.template);
 
       // 2. Create the survey with questions in a single operation
+      // Passing undefined for metadata ensures it uses the default minimalist style like a new blank survey.
       const survey = await this.surveyService.createSurvey(
         userId,
         this.template.title,
         this.template.description,
-        metadata,
+        undefined,
         questions
       );
 

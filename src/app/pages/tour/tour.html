@@ -14,25 +14,9 @@
 <!-- Product Image Placeholder -->
 <div class="relative max-w-5xl mx-auto mb-20 group">
 <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-container/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-<div class="relative bg-white border border-outline-variant rounded-2xl shadow-2xl overflow-hidden aspect-[16/9]">
-<div class="absolute inset-0 bg-gradient-to-br from-white via-[#fbf9f8] to-[#f5edff] flex items-center justify-center">
-<div class="text-center p-8">
-<div class="mb-4 flex justify-center space-x-2">
-<div class="w-3 h-3 rounded-full bg-red-400"></div>
-<div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-<div class="w-3 h-3 rounded-full bg-green-400"></div>
-</div>
-<span class="material-symbols-outlined text-primary/40 text-8xl mb-4" data-icon="design_services">design_services</span>
-<p class="font-h3 text-h3 text-on-surface-variant">Editor de Encuestas Inteligente</p>
-<p class="text-secondary mt-2">Visualiza tus cambios en tiempo real</p>
-</div>
-</div>
-<!-- Mockup Elements Overlay -->
-<div class="absolute left-8 top-1/2 -translate-y-1/2 w-48 space-y-4 hidden lg:block">
-<div class="h-10 bg-white/60 backdrop-blur border border-white rounded-lg shadow-sm"></div>
-<div class="h-10 bg-white/60 backdrop-blur border border-white rounded-lg shadow-sm w-3/4"></div>
-<div class="h-10 bg-white/60 backdrop-blur border border-white rounded-lg shadow-sm w-5/6"></div>
-</div>
+<div class="relative bg-white border border-outline-variant rounded-2xl shadow-2xl overflow-hidden aspect-video">
+<img src="assets/dashboard-preview.png" alt="Vista previa del panel de DataEncuesta" class="w-full h-full object-cover object-left-top" />
+<div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
 </div>
 </div>
 </header>
@@ -88,52 +72,52 @@
 <div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
 <!-- Grid Items -->
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="radio_button_checked">radio_button_checked</span>
-<span class="font-label-caps text-xs text-center">Elección simple</span>
-</div>
-<div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="checklist">checklist</span>
-<span class="font-label-caps text-xs text-center">Elección múltiple</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="short_text">short_text</span>
+<span class="font-label-caps text-xs text-center">Texto corto</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
 <span class="material-symbols-outlined text-primary mb-sm" data-icon="notes">notes</span>
-<span class="font-label-caps text-xs text-center">Texto de respuesta</span>
+<span class="font-label-caps text-xs text-center">Texto largo</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="image">image</span>
-<span class="font-label-caps text-xs text-center">Imágenes</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="radio_button_checked">radio_button_checked</span>
+<span class="font-label-caps text-xs text-center">Selección única</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="star">star</span>
-<span class="font-label-caps text-xs text-center">Grado de la estrella</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="checklist">checklist</span>
+<span class="font-label-caps text-xs text-center">Selección múltiple</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
 <span class="material-symbols-outlined text-primary mb-sm" data-icon="linear_scale">linear_scale</span>
-<span class="font-label-caps text-xs text-center">Diferencial semántico</span>
+<span class="font-label-caps text-xs text-center">Escala 1-10</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="thumbs_up_down">thumbs_up_down</span>
-<span class="font-label-caps text-xs text-center">Net Promoter Score®</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-xs text-center">NPS</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="format_list_numbered">format_list_numbered</span>
-<span class="font-label-caps text-xs text-center">Escala de puntuación</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="star">star</span>
+<span class="font-label-caps text-xs text-center">Estrellas</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="reorder">reorder</span>
-<span class="font-label-caps text-xs text-center">Orden de preferencia</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="alternate_email">alternate_email</span>
+<span class="font-label-caps text-xs text-center">Email</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="grid_view">grid_view</span>
-<span class="font-label-caps text-xs text-center">Matriz simple</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="call">call</span>
+<span class="font-label-caps text-xs text-center">Teléfono</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="apps">apps</span>
-<span class="font-label-caps text-xs text-center">Matriz múltiple</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-caps text-xs text-center">Fecha</span>
 </div>
 <div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-<span class="material-symbols-outlined text-primary mb-sm" data-icon="text_fields">text_fields</span>
-<span class="font-label-caps text-xs text-center">Propio texto</span>
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="schedule">schedule</span>
+<span class="font-label-caps text-xs text-center">Hora</span>
+</div>
+<div class="flex flex-col items-center p-md bg-white border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+<span class="material-symbols-outlined text-primary mb-sm" data-icon="article">article</span>
+<span class="font-label-caps text-xs text-center">Bloque informativo</span>
 </div>
 </div>
 </div>
@@ -146,7 +130,7 @@
 <h2 class="font-h2 text-h2 mb-4">Exporta tus datos con facilidad</h2>
 <p class="font-body-md text-body-md text-secondary max-w-2xl mx-auto">Toma el control de tu información. Exporta tus resultados en los formatos más populares para integrarlos con tu flujo de trabajo.</p>
 </div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter max-w-4xl mx-auto">
 <div class="flex flex-col items-center p-md bg-surface-container-lowest border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer group">
 <div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-sm group-hover:bg-primary/10 transition-colors">
 <span class="material-symbols-outlined text-primary" data-icon="csv">csv</span>
@@ -167,13 +151,6 @@
 </div>
 <span class="font-label-caps text-sm text-center">Excel</span>
 <span class="text-[10px] text-gray-400 mt-1 uppercase">Análisis avanzado</span>
-</div>
-<div class="flex flex-col items-center p-md bg-surface-container-lowest border border-outline-variant rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer group">
-<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-sm group-hover:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined text-primary" data-icon="data_object">data_object</span>
-</div>
-<span class="font-label-caps text-sm text-center">JSON</span>
-<span class="text-[10px] text-gray-400 mt-1 uppercase">Para desarrolladores</span>
 </div>
 </div>
 </div>
