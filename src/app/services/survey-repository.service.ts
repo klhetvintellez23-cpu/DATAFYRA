@@ -413,7 +413,10 @@ export class SurveyRepositoryService {
       throw new Error('Falta configurar Supabase en public/env.js.');
     }
 
+    const generatedId = crypto.randomUUID();
+
     const payload: any = {
+      id: generatedId,
       encuesta_id: surveyId,
       duracion: duration
     };
@@ -421,17 +424,15 @@ export class SurveyRepositoryService {
       payload.fingerprint = fingerprint;
     }
 
-    const { data, error } = await this.supabase
+    const { error } = await this.supabase
       .from('envios')
-      .insert(payload)
-      .select()
-      .single();
+      .insert(payload);
 
     if (error) {
       throw error;
     }
 
-    return data as { id: string };
+    return { id: generatedId };
   }
 
   async hasResponseWithFingerprint(surveyId: string, fingerprint: string): Promise<boolean> {
