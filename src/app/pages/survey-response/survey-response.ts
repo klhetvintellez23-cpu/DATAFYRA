@@ -38,6 +38,7 @@ export class SurveyResponsePage implements OnInit {
   completed = signal(false);
   startTime = 0;
   notFound = signal(false);
+  surveyClosed = signal(false);
   isSubmitting = signal(false);
   validationError = signal('');
   submitError = signal('');
@@ -119,19 +120,24 @@ export class SurveyResponsePage implements OnInit {
     }
 
     const loadedSurvey = await this.surveyService.getSurvey(id);
-    if (!loadedSurvey || loadedSurvey.status !== 'activo') {
+    if (!loadedSurvey) {
       this.notFound.set(true);
       return;
     }
 
+    if (loadedSurvey.status !== 'activo') {
+      this.surveyClosed.set(true);
+      return;
+    }
+
     if (loadedSurvey.metadata?.closesAt && new Date() >= new Date(loadedSurvey.metadata.closesAt)) {
-      this.notFound.set(true);
+      this.surveyClosed.set(true);
       return;
     }
 
     if (loadedSurvey.metadata?.maxResponses && loadedSurvey.responses_count !== undefined) {
       if (loadedSurvey.responses_count >= loadedSurvey.metadata.maxResponses) {
-        this.notFound.set(true);
+        this.surveyClosed.set(true);
         return;
       }
     }
