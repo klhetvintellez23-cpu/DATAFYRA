@@ -230,7 +230,21 @@ export class SurveyService {
       return undefined;
     }
 
-    return this.hydrateSurvey(this.mapper.mapSurvey(row));
+    const survey = this.mapper.mapSurvey(row);
+
+    // If there is a maxResponses limit, we need the EXACT count.
+    // Since RLS hides 'envios' from anonymous users, survey.responses_count might be 0.
+    // We use an RPC to get the true count securely.
+    if (survey.metadata?.maxResponses) {
+      const { data, error } = await this.repository['supabase']!
+        .rpc('count_survey_responses', { p_survey_id: id });
+      
+      if (!error && typeof data === 'number') {
+        survey.responses_count = data;
+      }
+    }
+
+    return this.hydrateSurvey(survey);
   }
 
   async createSurvey(userId: string, title: string, description: string, initialMetadata?: SurveyMetadata, initialQuestions: Question[] = []): Promise<Survey | null> {
