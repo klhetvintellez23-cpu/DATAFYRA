@@ -384,9 +384,10 @@ export class SurveyResponsePage implements OnInit {
         const cookieName = `dataencuesta_completed_${s.id}`;
         document.cookie = `${cookieName}=true; max-age=31536000; path=/`;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting survey:', error);
-      this.submitError.set('No pudimos enviar la encuesta. Revisa tu conexion e intenta de nuevo.');
+      const errorMsg = error?.message || JSON.stringify(error) || 'Error desconocido';
+      this.submitError.set(`No pudimos enviar la encuesta. Detalles: ${errorMsg}`);
     } finally {
       this.isSubmitting.set(false);
     }
