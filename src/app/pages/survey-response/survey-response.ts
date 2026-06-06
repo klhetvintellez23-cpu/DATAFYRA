@@ -138,7 +138,7 @@ export class SurveyResponsePage implements OnInit {
 
     if (loadedSurvey.metadata?.responsePolicy === 'once-per-browser') {
       const cookieName = `dataencuesta_completed_${id}`;
-      if (document.cookie.includes(`${cookieName}=true`)) {
+      if (document.cookie.includes(`${cookieName}=true`) || localStorage.getItem(cookieName) === 'true') {
         this.alreadyCompleted.set(true);
         return;
       }
@@ -151,6 +151,7 @@ export class SurveyResponsePage implements OnInit {
         const hasSubmitted = await this.surveyService.hasResponseWithFingerprint(id, result.visitorId);
         if (hasSubmitted) {
           document.cookie = `${cookieName}=true; max-age=31536000; path=/`;
+          localStorage.setItem(cookieName, 'true');
           this.alreadyCompleted.set(true);
           return;
         }
@@ -383,6 +384,7 @@ export class SurveyResponsePage implements OnInit {
       if (s.metadata?.responsePolicy === 'once-per-browser') {
         const cookieName = `dataencuesta_completed_${s.id}`;
         document.cookie = `${cookieName}=true; max-age=31536000; path=/`;
+        localStorage.setItem(cookieName, 'true');
       }
     } catch (error: any) {
       console.error('Error submitting survey:', error);
