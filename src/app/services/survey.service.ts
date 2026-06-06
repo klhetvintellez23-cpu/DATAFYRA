@@ -169,6 +169,7 @@ export interface SurveyMetadata {
   maxResponses?: number;
   privacyMode?: 'anonymous' | 'collect-contact';
   responsePolicy?: 'multiple' | 'once-per-browser';
+  skipWelcomePage?: boolean;
 }
 
 export interface Answer {
@@ -359,12 +360,17 @@ export class SurveyService {
     return false;
   }
 
-  async addResponse(surveyId: string, answers: Answer[], duration: number): Promise<void> {
+  async hasResponseWithFingerprint(surveyId: string, fingerprint: string): Promise<boolean> {
+    if (!this.repository.isAvailable()) return false;
+    return await this.repository.hasResponseWithFingerprint(surveyId, fingerprint);
+  }
+
+  async addResponse(surveyId: string, answers: Answer[], duration: number, fingerprint?: string): Promise<void> {
     if (!this.repository.isAvailable()) {
       throw new Error('Falta configurar Supabase en public/env.js.');
     }
 
-    const envio = await this.repository.createSurveyResponse(surveyId, duration);
+    const envio = await this.repository.createSurveyResponse(surveyId, duration, fingerprint);
     await this.repository.insertAnswers(
       envio.id,
       answers.map((answer) => ({

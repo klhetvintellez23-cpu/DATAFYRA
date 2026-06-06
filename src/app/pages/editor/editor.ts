@@ -20,12 +20,13 @@ import {
 import type { CanvasElement, CanvasScreen } from '../../services/survey.service';
 import { AuthService } from '../../services/auth.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 type EditorTab = 'design' | 'preview' | 'collect' | 'analyze';
 type DesignCenterTab = 'combine' | 'base' | 'presentation' | 'visual' | 'questions' | 'completion';
 type ShareSection = 'dashboard' | 'link' | 'qr' | 'channels' | 'embed' | 'checklist' | 'analytics' | 'settings';
 type AnalyticsRange = '7d' | '14d' | '30d' | 'all';
-type QuestionChartView = 'bars' | 'donut' | 'pie';
+type QuestionChartView = 'bars' | 'donut' | 'pie' | 'table';
 type ResultsSection = 'analysis' | 'responses' | 'report';
 type QrPresetId = 'flyer' | 'counter' | 'screen' | 'sticker' | 'event';
 type AssetKind =
@@ -194,9 +195,10 @@ export class EditorPage implements OnInit, OnDestroy {
   showPublishChecklist = signal(false);
   activeShareSection = signal<ShareSection>('link');
   showShareDropdown = signal(false);
-  surveyEmailAlerts = signal(false);
+
   surveyMaxResponses = signal<number | null>(null);
   surveyPreventDuplicates = signal(false);
+  surveySkipWelcome = signal(false);
   surveyCloseDate = signal<string>('');
   qrSize = signal(360);
   qrColor = signal('#111827');
@@ -279,6 +281,13 @@ export class EditorPage implements OnInit, OnDestroy {
   analyticsRange = signal<AnalyticsRange>('all');
   analyticsTextSearch = signal('');
   questionChartViews = signal<Record<string, QuestionChartView>>({});
+  expandedAnalyticsQuestionId = signal<string | null>(null);
+  expandedAnalyticsQuestion = computed(() => {
+    const id = this.expandedAnalyticsQuestionId();
+    if (!id) return null;
+    const all = this.getSelectedQuestionsAnalytics();
+    return all.find((item: any) => item.question.id === id) ?? null;
+  });
   hoveredSlice = signal<{ label: string; percentage: number; count: number } | null>(null);
   addQuestionPanel = false;
   questionEditorOpen = false;
@@ -2168,6 +2177,7 @@ export class EditorPage implements OnInit, OnDestroy {
     { type: 'text', label: 'Texto corto', description: 'Respuesta breve' },
     { type: 'long-text', label: 'Texto largo', description: 'Respuesta detallada' },
     { type: 'multiple-choice', label: 'Selección única', description: 'Una opción a elegir' },
+    { type: 'visual-choice', label: 'Selección visual (Cards)', description: 'Tarjetas grandes' },
     { type: 'multi-select', label: 'Selección múltiple', description: 'Varias opciones a elegir' },
     { type: 'scale', label: 'Escala 1-10', description: 'Nivel numérico' },
     { type: 'nps', label: 'NPS', description: 'Recomendación 0 a 10' },
@@ -2252,6 +2262,7 @@ export class EditorPage implements OnInit, OnDestroy {
       name: 'Basico',
       items: [
         { type: 'multiple-choice', label: 'Selección única', description: 'Una opción', icon: 'radio_button_checked' },
+        { type: 'visual-choice', label: 'Selección visual', description: 'Tarjetas grandes', icon: 'grid_view' },
         { type: 'multi-select', label: 'Selección múltiple', description: 'Varias opciones', icon: 'checklist' }
       ]
     },
@@ -2337,7 +2348,8 @@ export class EditorPage implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly surveyService: SurveyService,
     private readonly auth: AuthService,
-    private readonly analyticsService: AnalyticsService
+    private readonly analyticsService: AnalyticsService,
+    private readonly supabaseService: SupabaseService
   ) {}
 
   ngOnInit(): void {
@@ -2356,6 +2368,7 @@ export class EditorPage implements OnInit, OnDestroy {
     }
 
     void this.loadExistingSurvey(id);
+    this.setupRealtimeSubscription(id);
     // Initial history push
     setTimeout(() => this.pushToHistory(), 1000);
 
@@ -2371,11 +2384,27 @@ export class EditorPage implements OnInit, OnDestroy {
     }
   }
 
+  private realtimeChannel: any;
+
+  private setupRealtimeSubscription(surveyId: string): void {
+    const client = this.supabaseService.client;
+    if (!client) return;
+
+    this.realtimeChannel = client.channel(`editor-responses-${surveyId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'envios', filter: `encuesta_id=eq.${surveyId}` }, () => {
+        void this.loadExistingSurvey(surveyId);
+      })
+      .subscribe();
+  }
+
   ngOnDestroy(): void {
     if (this.survey() && !this.isSaving()) {
       void this.executeSave();
     }
     this.saveSubject.complete();
+    if (this.realtimeChannel && this.supabaseService.client) {
+      void this.supabaseService.client.removeChannel(this.realtimeChannel);
+    }
   }
 
   @HostListener('window:mousemove', ['$event'])
@@ -4493,6 +4522,17 @@ export class EditorPage implements OnInit, OnDestroy {
     this.questionChartViews.update(views => ({...views, [questionId]: view}));
   }
 
+  openExpandedAnalytics(item: any): void {
+    this.expandedAnalyticsQuestionId.set(item.question.id);
+  }
+
+  closeExpandedAnalytics(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.expandedAnalyticsQuestionId.set(null);
+  }
+
   getPieChartGradient(distribution: any[]): string {
     const chartColors = [
       '#440789', '#9333ea', '#c084fc', '#e9d5ff', '#6d28d9', '#a78bfa', '#ddd6fe'
@@ -5005,31 +5045,32 @@ export class EditorPage implements OnInit, OnDestroy {
     const survey = this.survey();
     if (survey) {
       const metadata = (survey.metadata || {}) as any;
-      this.surveyEmailAlerts.set(metadata.emailAlerts ?? false);
+
       this.surveyMaxResponses.set(metadata.maxResponses ?? null);
       this.surveyPreventDuplicates.set(metadata.responsePolicy === 'once-per-browser');
+      this.surveySkipWelcome.set(metadata.skipWelcomePage ?? false);
       this.surveyCloseDate.set(metadata.closesAt ?? '');
     }
     this.setActiveShareSection('settings');
   }
 
   saveSurveySettings(): void {
-    const survey = this.survey();
-    if (survey) {
-      if (!survey.metadata) {
-        survey.metadata = {};
-      }
-      const metadata = survey.metadata as any;
-      metadata.emailAlerts = this.surveyEmailAlerts();
+    this.survey.update(survey => {
+      if (!survey) return survey;
+      const metadata = { ...survey.metadata } as any;
+
       metadata.maxResponses = this.surveyMaxResponses() || undefined;
       metadata.responsePolicy = this.surveyPreventDuplicates() ? 'once-per-browser' : 'multiple';
+      metadata.skipWelcomePage = this.surveySkipWelcome();
       metadata.closesAt = this.surveyCloseDate() || undefined;
+      return { ...survey, metadata };
+    });
 
-      // Sincronizar campo de cierre si existe
-      if (this.surveyCloseDate()) {
-        this.publicationDeadline.set(this.surveyCloseDate());
-      }
+    if (this.surveyCloseDate()) {
+      this.publicationDeadline.set(this.surveyCloseDate());
     }
+
+    this.saveNow();
     this.showInfo('Configuración de encuesta guardada con éxito.');
     this.setActiveShareSection('link');
   }
@@ -6112,6 +6153,7 @@ export class EditorPage implements OnInit, OnDestroy {
 
   private ensureMetadata(metadata?: SurveyMetadata): SurveyMetadata {
     return {
+      ...(metadata || {}),
       canvas: metadata?.canvas,
       brand: this.ensureBrand(metadata?.brand),
       welcomeLayout: metadata?.welcomeLayout ?? 'split',
@@ -6212,8 +6254,8 @@ export class EditorPage implements OnInit, OnDestroy {
     return normalized;
   }
 
-  private isChoiceType(type: QuestionType): boolean {
-    return type === 'multiple-choice' || type === 'multi-select';
+  isChoiceType(type: QuestionType): boolean {
+    return type === 'multiple-choice' || type === 'multi-select' || type === 'visual-choice';
   }
 
   private isScaleType(type: QuestionType): boolean {
@@ -6791,7 +6833,7 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   private getPrettyOptionsPlaceholder(question: Question): string {
-    if (question.type === 'multiple-choice') {
+    if (question.type === 'multiple-choice' || question.type === 'visual-choice') {
       const options = question.options.length
         ? question.options
         : [
@@ -6845,14 +6887,14 @@ export class EditorPage implements OnInit, OnDestroy {
   }
 
   private defaultQuestionTitle(type: QuestionType): string {
-    if (type === 'multiple-choice') return 'Elige una opción';
+    if (type === 'multiple-choice' || type === 'visual-choice') return 'Elige una opción';
     if (type === 'rating') return '¿Cómo calificarías tu experiencia?';
     if (type === 'scale') return 'Selecciona el nivel que mejor te represente';
     return 'Cuéntanos tu respuesta';
   }
 
   private getQuestionHelper(type: QuestionType): string {
-    if (type === 'multiple-choice') return 'Selecciona una de las opciones disponibles.';
+    if (type === 'multiple-choice' || type === 'visual-choice') return 'Selecciona una de las opciones disponibles.';
     if (type === 'rating') return 'Usa una puntuación del 1 al 10.';
     if (type === 'scale') return 'Marca un valor de 1 a 10.';
     return 'Respuesta abierta para capturar más contexto.';

@@ -21,6 +21,14 @@
         <a href="/" class="home-link">Ir al inicio</a>
       </div>
     </section>
+  } @else if (alreadyCompleted()) {
+    <section class="response-center">
+      <div class="not-found-card">
+        <div class="not-found-icon" style="background: #ecfdf5; color: #059669;">✓</div>
+        <h1 style="color: #111827;">Ya respondiste esta encuesta</h1>
+        <p>Esta encuesta solo permite una respuesta por persona. Gracias por tu participación.</p>
+      </div>
+    </section>
   } @else if (survey(); as s) {
     @if (completed()) {
       <app-survey-thank-you-screen [survey]="s" [brand]="brand()"></app-survey-thank-you-screen>

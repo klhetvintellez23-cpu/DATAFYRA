@@ -47,7 +47,8 @@
   @if (currentTab === 'design') {
   <div class="editor-body" [style.--sidebar-right-width.px]="effectiveRightSidebarWidth()">
     <aside class="editor-sidebar-left builder-pages-sidebar">
-      <div class="builder-sidebar-heading" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding-bottom: 12px;">
+      <div class="builder-sidebar-heading"
+        style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding-bottom: 12px;">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
           <h2>Páginas</h2>
           <span>{{ getSurveyPageCount() }}</span>
@@ -653,23 +654,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
         </div>
 
         <div class="settings-modal-body">
-          <!-- 1. Real-time Email Alerts Switch -->
-          <div class="settings-option-item">
-            <div class="settings-option-left">
-              <div class="settings-icon-box">
-                <span class="material-symbols-outlined">mail</span>
-              </div>
-              <div class="settings-option-text">
-                <strong>Alertas por Correo en Tiempo Real</strong>
-                <p>Recibe un correo instantáneo cada vez que un participante registre una nueva respuesta.</p>
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" [checked]="surveyEmailAlerts()"
-                (change)="surveyEmailAlerts.set(!surveyEmailAlerts())" />
-              <span class="slider"></span>
-            </label>
-          </div>
+
 
           <!-- 2. Prevent Duplicates Switch -->
           <div class="settings-option-item">
@@ -685,6 +670,24 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
             <label class="switch">
               <input type="checkbox" [checked]="surveyPreventDuplicates()"
                 (change)="surveyPreventDuplicates.set(!surveyPreventDuplicates())" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Skip Welcome Switch -->
+          <div class="settings-option-item">
+            <div class="settings-option-left">
+              <div class="settings-icon-box">
+                <span class="material-symbols-outlined">fast_forward</span>
+              </div>
+              <div class="settings-option-text">
+                <strong>Saltar Bienvenida</strong>
+                <p>Oculta la pantalla de inicio y va directo a las preguntas.</p>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [checked]="surveySkipWelcome()"
+                (change)="surveySkipWelcome.set(!surveySkipWelcome())" />
               <span class="slider"></span>
             </label>
           </div>
@@ -741,43 +744,44 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
         <div>
           <span class="collect-label">Resumen de resultados</span>
           <h2>{{ filteredAnalyticsSurvey()?.title || survey()?.title || 'Resultados de la encuesta' }}</h2>
-          <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} personas han respondido hasta ahora, y la mayoría completó todo en menos de {{ analyticsMetrics()?.avgDurationFormatted || '2 mins' }}.</p>
+          <p>{{ filteredAnalyticsSurvey()?.responses?.length || 0 }} personas han respondido hasta ahora, y la mayoría
+            completó todo en menos de {{ analyticsMetrics()?.avgDurationFormatted || '2 mins' }}.</p>
         </div>
-        
+
         <div class="inline-analytics-controls">
           <div class="analytics-pill-nav">
-            <button [class.active]="activeResultsSection() === 'analysis'" (click)="setActiveResultsSection('analysis')">
+            <button [class.active]="activeResultsSection() === 'analysis'"
+              (click)="setActiveResultsSection('analysis')">
               <span class="material-symbols-outlined">analytics</span> Análisis
             </button>
-            <button [class.active]="activeResultsSection() === 'responses'" (click)="setActiveResultsSection('responses')">
+            <button [class.active]="activeResultsSection() === 'responses'"
+              (click)="setActiveResultsSection('responses')">
               <span class="material-symbols-outlined">receipt_long</span> Respuestas
             </button>
           </div>
-          
+
           <div class="inline-analytics-actions">
             <div class="inline-export-menu" (click)="$event.stopPropagation()">
-              <button
-                type="button"
-                class="inline-export-trigger"
-                [class.open]="showExportDropdown()"
-                [attr.aria-expanded]="showExportDropdown()"
-                aria-haspopup="menu"
-                (click)="toggleExportDropdown($event)">
+              <button type="button" class="inline-export-trigger" [class.open]="showExportDropdown()"
+                [attr.aria-expanded]="showExportDropdown()" aria-haspopup="menu" (click)="toggleExportDropdown($event)">
                 <span class="material-symbols-outlined">download</span>
                 Exportar
                 <span class="material-symbols-outlined chevron">keyboard_arrow_down</span>
               </button>
 
               <div class="inline-export-dropdown" [class.open]="showExportDropdown()" role="menu">
-                <button type="button" class="csv" role="menuitem" (click)="exportInlineAnalyticsCSV(); showExportDropdown.set(false)">
+                <button type="button" class="csv" role="menuitem"
+                  (click)="exportInlineAnalyticsCSV(); showExportDropdown.set(false)">
                   <span class="material-symbols-outlined">description</span>
                   <strong>Exportar como CSV</strong>
                 </button>
-                <button type="button" class="excel" role="menuitem" (click)="exportInlineAnalyticsExcel(); showExportDropdown.set(false)">
+                <button type="button" class="excel" role="menuitem"
+                  (click)="exportInlineAnalyticsExcel(); showExportDropdown.set(false)">
                   <span class="material-symbols-outlined">table_chart</span>
                   <strong>Exportar como Excel</strong>
                 </button>
-                <button type="button" class="pdf" role="menuitem" (click)="printInlineAnalytics(); showExportDropdown.set(false)">
+                <button type="button" class="pdf" role="menuitem"
+                  (click)="printInlineAnalytics(); showExportDropdown.set(false)">
                   <span class="material-symbols-outlined">picture_as_pdf</span>
                   <strong>Exportar como PDF</strong>
                 </button>
@@ -787,442 +791,504 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
         </div>
       </header>
 
-        @if (activeResultsSection() === 'analysis') {
-        @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
-        <section class="inline-empty-premium">
-          <div class="inline-empty-visual">
-            <span class="material-symbols-outlined">query_stats</span>
+      @if (activeResultsSection() === 'analysis') {
+      @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
+      <section class="inline-empty-premium">
+        <div class="inline-empty-visual">
+          <span class="material-symbols-outlined">query_stats</span>
+        </div>
+        <div>
+          <span class="collect-label">Sin respuestas todavía</span>
+          <h3>Empieza a recolectar para activar el análisis</h3>
+          <p>Comparte el enlace o QR de la encuesta. Cuando lleguen respuestas, verás métricas, tendencias, tabla de
+            respuestas y análisis por pregunta aquí mismo.</p>
+          <div class="inline-empty-actions">
+            <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
+            <button type="button" class="editor-action-btn" (click)="copyShareLink()"
+              [disabled]="s.status !== 'activo'">Copiar enlace</button>
           </div>
-          <div>
-            <span class="collect-label">Sin respuestas todavía</span>
-            <h3>Empieza a recolectar para activar el análisis</h3>
-            <p>Comparte el enlace o QR de la encuesta. Cuando lleguen respuestas, verás métricas, tendencias, tabla de
-              respuestas y análisis por pregunta aquí mismo.</p>
-            <div class="inline-empty-actions">
-              <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
-              <button type="button" class="editor-action-btn" (click)="copyShareLink()"
-                [disabled]="s.status !== 'activo'">Copiar enlace</button>
+        </div>
+      </section>
+      } @else {
+      @if (analyticsMetrics(); as m) {
+      <div class="inline-metrics-grid">
+        <div class="inline-metric-card primary">
+          <span class="material-symbols-outlined">mark_email_read</span>
+          <strong>{{ m.totalResponses | number }}</strong>
+          <small>Total respuestas</small>
+          <em>Histórico completo</em>
+        </div>
+        <div class="inline-metric-card success">
+          <span class="material-symbols-outlined">task_alt</span>
+          <strong>{{ m.completionRate }}%</strong>
+          <small>Tasa de completado</small>
+          <em>{{ m.completionRate >= 70 ? 'Buen estado' : 'Revisar fricción' }}</em>
+        </div>
+        <div class="inline-metric-card blue">
+          <span class="material-symbols-outlined">timer</span>
+          <strong>{{ m.avgDurationFormatted }}</strong>
+          <small>Tiempo promedio</small>
+          <em>{{ m.avgDuration > 180 ? 'Algo largo' : 'Rápido' }}</em>
+        </div>
+        <div class="inline-metric-card orange">
+          <span class="material-symbols-outlined">bar_chart</span>
+          <strong>{{ m.npsScore > 0 ? '+' : '' }}{{ m.npsScore }}</strong>
+          <small>NPS score</small>
+          <em>{{ m.npsScore > 0 ? 'Positivo' : m.npsScore < 0 ? 'Negativo' : 'Neutral' }}</em>
+        </div>
+      </div>
+      }
+
+      <div class="inline-charts-grid">
+        <section class="inline-chart-card">
+          <div class="inline-card-head">
+            <div>
+              <span class="collect-label">Últimos 7 días</span>
+              <h3>Respuestas por día</h3>
+            </div>
+          </div>
+          <div class="inline-area-chart-container">
+            <div class="inline-area-plot" style="position: relative; height: 100px;">
+              <svg viewBox="0 0 400 100" preserveAspectRatio="none"
+                style="overflow: hidden; width: 100%; height: 100%;">
+                <!-- Grid lines -->
+                <g stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4,4">
+                  <line x1="0" y1="15" x2="400" y2="15" />
+                  <line x1="0" y1="50" x2="400" y2="50" />
+                  <line x1="0" y1="85" x2="400" y2="85" />
+                </g>
+
+                <defs>
+                  <linearGradient id="areaGradient1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#440789" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#440789" stop-opacity="0.01" />
+                  </linearGradient>
+                </defs>
+
+                <path [attr.d]="dailyResponsesSvgData().area" fill="url(#areaGradient1)" />
+                <path [attr.d]="dailyResponsesSvgData().line" fill="none" stroke="#440789" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+
+              <!-- HTML overlay for interactive points -->
+              <div class="chart-points-overlay"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;">
+                @for (item of dailyResponses(); track item.label; let i = $index) {
+                <div class="chart-point"
+                  style="position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); pointer-events: auto; cursor: crosshair;"
+                  [style.left.%]="((dailyResponsesSvgData().points[i]?.x ?? 0) / 400) * 100"
+                  [style.top.%]="dailyResponsesSvgData().points[i]?.y ?? 100"
+                  onmouseover="this.querySelector('.chart-point-dot').style.transform='scale(1.4)'; this.querySelector('.chart-value-tooltip').style.opacity='1'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(1)';"
+                  onmouseout="this.querySelector('.chart-point-dot').style.transform='scale(1)'; this.querySelector('.chart-value-tooltip').style.opacity='0'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(0.95)';">
+                  <div class="chart-point-dot"
+                    style="width: 10px; height: 10px; border-radius: 50%; background: #ffffff; border: 2.5px solid #440789; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                  </div>
+                  <div class="chart-value-tooltip chart-point-label"
+                    style="position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -8px) scale(0.95); opacity: 0; background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; pointer-events: none; z-index: 10;">
+                    {{ item.count }} {{ item.count === 1 ? 'respuesta' : 'respuestas' }}</div>
+                </div>
+                }
+              </div>
+            </div>
+
+            <div class="inline-chart-x-axis">
+              @for (item of dailyResponses(); track item.label) {
+              <div class="x-axis-label">
+                <span>{{ item.count }}</span>
+                <small>{{ item.label }}</small>
+              </div>
+              }
             </div>
           </div>
         </section>
-        } @else {
-        @if (analyticsMetrics(); as m) {
-        <div class="inline-metrics-grid">
-          <div class="inline-metric-card primary">
-            <span class="material-symbols-outlined">mark_email_read</span>
-            <strong>{{ m.totalResponses | number }}</strong>
-            <small>Total respuestas</small>
-            <em>Histórico completo</em>
+
+        <section class="inline-chart-card">
+          <div class="inline-card-head">
+            <div>
+              <span class="collect-label">Tendencia</span>
+              <h3>Últimos 14 días</h3>
+            </div>
           </div>
-          <div class="inline-metric-card success">
-            <span class="material-symbols-outlined">task_alt</span>
-            <strong>{{ m.completionRate }}%</strong>
-            <small>Tasa de completado</small>
-            <em>{{ m.completionRate >= 70 ? 'Buen estado' : 'Revisar fricción' }}</em>
+          <div class="inline-trend-chart">
+            @for (val of responseTrend().data; track $index) {
+            <div class="trend-col" [attr.data-picks]="val">
+              <span [style.height.%]="(val / maxTrendResponses()) * 100">
+                <em class="chart-value-tooltip trend-pick-tooltip">{{ val }} {{ val === 1 ? 'respuesta' : 'respuestas'
+                  }}</em>
+              </span>
+              <small>{{ responseTrend().labels[$index] }}</small>
+            </div>
+            }
           </div>
-          <div class="inline-metric-card blue">
-            <span class="material-symbols-outlined">timer</span>
-            <strong>{{ m.avgDurationFormatted }}</strong>
-            <small>Tiempo promedio</small>
-            <em>{{ m.avgDuration > 180 ? 'Algo largo' : 'Rápido' }}</em>
+        </section>
+      </div>
+
+      <section class="inline-analytics-questions">
+        @if (selectedAnalyticsQuestions().length > 0) {
+        <div class="inline-card-head">
+          <div>
+            <span class="collect-label">Análisis de respuestas</span>
+            <h3 class="truncate-title">{{ selectedAnalyticsQuestions().includes('all') ? 'Todas las preguntas' :
+              (selectedAnalyticsQuestions().length + ' preguntas seleccionadas') }}</h3>
           </div>
-          <div class="inline-metric-card orange">
-            <span class="material-symbols-outlined">bar_chart</span>
-            <strong>{{ m.npsScore > 0 ? '+' : '' }}{{ m.npsScore }}</strong>
-            <small>NPS score</small>
-            <em>{{ m.npsScore > 0 ? 'Positivo' : m.npsScore < 0 ? 'Negativo' : 'Neutral' }}</em>
+
+          <div class="inline-section-controls" style="display: flex; align-items: center; gap: 12px;">
+            <button class="selector-btn" (click)="openAnalyticsModal($event)"
+              style="display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: 500; color: #475569; cursor: pointer; font-size: 14px;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">filter_list</span> Seleccionar preguntas
+            </button>
           </div>
         </div>
         }
 
-        <div class="inline-charts-grid">
-          <section class="inline-chart-card">
-            <div class="inline-card-head">
-              <div>
-                <span class="collect-label">Últimos 7 días</span>
-                <h3>Respuestas por día</h3>
-              </div>
-            </div>
-            <div class="inline-area-chart-container">
-              <div class="inline-area-plot" style="position: relative; height: 100px;">
-                <svg viewBox="0 0 400 100" preserveAspectRatio="none" style="overflow: hidden; width: 100%; height: 100%;">
-                  <!-- Grid lines -->
-                  <g stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4,4">
-                    <line x1="0" y1="15" x2="400" y2="15" />
-                    <line x1="0" y1="50" x2="400" y2="50" />
-                    <line x1="0" y1="85" x2="400" y2="85" />
-                  </g>
-
-                  <defs>
-                    <linearGradient id="areaGradient1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#440789" stop-opacity="0.25" />
-                      <stop offset="100%" stop-color="#440789" stop-opacity="0.01" />
-                    </linearGradient>
-                  </defs>
-
-                  <path [attr.d]="dailyResponsesSvgData().area" fill="url(#areaGradient1)" />
-                  <path [attr.d]="dailyResponsesSvgData().line" fill="none" stroke="#440789" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-
-                <!-- HTML overlay for interactive points -->
-                <div class="chart-points-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;">
-                  @for (item of dailyResponses(); track item.label; let i = $index) {
-                    <div class="chart-point"
-                      style="position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); pointer-events: auto; cursor: crosshair;"
-                      [style.left.%]="((dailyResponsesSvgData().points[i]?.x ?? 0) / 400) * 100"
-                      [style.top.%]="dailyResponsesSvgData().points[i]?.y ?? 100"
-                      onmouseover="this.querySelector('.chart-point-dot').style.transform='scale(1.4)'; this.querySelector('.chart-value-tooltip').style.opacity='1'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(1)';"
-                      onmouseout="this.querySelector('.chart-point-dot').style.transform='scale(1)'; this.querySelector('.chart-value-tooltip').style.opacity='0'; this.querySelector('.chart-value-tooltip').style.transform='translate(-50%, -8px) scale(0.95)';">
-                      <div class="chart-point-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #ffffff; border: 2.5px solid #440789; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
-                      <div class="chart-value-tooltip chart-point-label" style="position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -8px) scale(0.95); opacity: 0; background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; pointer-events: none; z-index: 10;">{{ item.count }} {{ item.count === 1 ? 'respuesta' : 'respuestas' }}</div>
-                    </div>
-                  }
-                </div>
-              </div>
-              
-              <div class="inline-chart-x-axis">
-                @for (item of dailyResponses(); track item.label) {
-                  <div class="x-axis-label">
-                    <span>{{ item.count }}</span>
-                    <small>{{ item.label }}</small>
-                  </div>
-                }
-              </div>
-            </div>
-          </section>
-
-          <section class="inline-chart-card">
-            <div class="inline-card-head">
-              <div>
-                <span class="collect-label">Tendencia</span>
-                <h3>Últimos 14 días</h3>
-              </div>
-            </div>
-            <div class="inline-trend-chart">
-              @for (val of responseTrend().data; track $index) {
-              <div class="trend-col" [attr.data-picks]="val">
-                <span [style.height.%]="(val / maxTrendResponses()) * 100">
-                  <em class="chart-value-tooltip trend-pick-tooltip">{{ val }} {{ val === 1 ? 'respuesta' : 'respuestas' }}</em>
-                </span>
-                <small>{{ responseTrend().labels[$index] }}</small>
+        @if (selectedAnalyticsQuestions().length === 0) {
+        <div class="inline-empty-analytics single-focus-card"
+          style="text-align: center; padding: 80px 20px; border-style: dashed; border-width: 2px; border-color: #e2e8f0;">
+          <div
+            style="background: #f1f5f9; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px;">
+            <span class="material-symbols-outlined" style="font-size: 32px; color: #6d28d9;">query_stats</span>
+          </div>
+          <h2 style="font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Vamos a analizar tu
+            encuesta</h2>
+          <p
+            style="color: #64748b; font-size: 15px; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Haz clic en el botón de abajo para seleccionar una o varias preguntas y comenzar a visualizar los datos de
+            tus respuestas.
+          </p>
+          <button (click)="openAnalyticsModal($event)"
+            style="background: #440789; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+            Comenzar a Analizar
+          </button>
+        </div>
+        } @else {
+        <div class="analytics-feed analytics-feed-grid">
+          @for (item of getSelectedQuestionsAnalytics(); track item.question.id) {
+          <div class="inline-distribution-card single-focus-card">
+            <div class="inline-card-header-with-toggle"
+              style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+              <h4 style="margin: 0;">{{ item.question.text || 'Pregunta sin título' }}</h4>
+              @if (!item.isText) {
+              <div class="chart-type-toggle">
+                <button [class.active]="getQuestionChartView(item.question.id) === 'bars'"
+                  (click)="setQuestionChartView(item.question.id, 'bars')" title="Barras">
+                  <span class="material-symbols-outlined">bar_chart</span>
+                </button>
+                <button [class.active]="getQuestionChartView(item.question.id) === 'donut'"
+                  (click)="setQuestionChartView(item.question.id, 'donut')" title="Donas">
+                  <span class="material-symbols-outlined">donut_large</span>
+                </button>
+                <button type="button" [class.active]="getQuestionChartView(item.question.id) === 'pie'"
+                  (click)="setQuestionChartView(item.question.id, 'pie'); $event.stopPropagation()" title="Pastel">
+                  <span class="material-symbols-outlined">pie_chart</span>
+                </button>
+                <button type="button" [class.active]="getQuestionChartView(item.question.id) === 'table'"
+                  (click)="setQuestionChartView(item.question.id, 'table'); $event.stopPropagation()" title="Tabla">
+                  <span class="material-symbols-outlined">table_chart</span>
+                </button>
+                <div class="toggle-divider" style="width: 1px; height: 16px; background: #e2e8f0; margin: 0 4px;"></div>
+                <button type="button" (click)="openExpandedAnalytics(item); $event.stopPropagation()"
+                  title="Ver detalle expandido" style="color: #440789;">
+                  <span class="material-symbols-outlined">open_in_full</span>
+                </button>
               </div>
               }
             </div>
-          </section>
-        </div>
 
-                <section class="inline-analytics-questions">
-          @if (selectedAnalyticsQuestions().length > 0) {
-          <div class="inline-card-head">
-            <div>
-              <span class="collect-label">Análisis de respuestas</span>
-              <h3 class="truncate-title">{{ selectedAnalyticsQuestions().includes('all') ? 'Todas las preguntas' : (selectedAnalyticsQuestions().length + ' preguntas seleccionadas') }}</h3>
+            @if (item.isText) {
+            @if (item.textResponses.length > 0) {
+            <div class="inline-text-responses">
+              <div class="inline-text-head">
+                <p>{{ item.textResponses.length }} respuestas de texto</p>
+              </div>
+              <div style="max-height: 250px; overflow-y: auto;">
+                @for (text of item.textResponses; track $index) {
+                <article>{{ text }}</article>
+                }
+              </div>
             </div>
-
-            <div class="inline-section-controls" style="display: flex; align-items: center; gap: 12px;">
-              <button class="selector-btn" (click)="openAnalyticsModal($event)" style="display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: 500; color: #475569; cursor: pointer; font-size: 14px;">
-                <span class="material-symbols-outlined" style="font-size: 18px;">filter_list</span> Seleccionar preguntas
-              </button>
+            } @else {
+            <div class="inline-empty-analytics">
+              <span class="material-symbols-outlined">insights</span>
+              <strong>Sin datos</strong>
             </div>
-          </div>
-          }
-
-          @if (selectedAnalyticsQuestions().length === 0) {
-          <div class="inline-empty-analytics single-focus-card" style="text-align: center; padding: 80px 20px; border-style: dashed; border-width: 2px; border-color: #e2e8f0;">
-            <div style="background: #f1f5f9; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px;">
-              <span class="material-symbols-outlined" style="font-size: 32px; color: #6d28d9;">query_stats</span>
-            </div>
-            <h2 style="font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Vamos a analizar tu encuesta</h2>
-            <p style="color: #64748b; font-size: 15px; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">
-              Haz clic en el botón de abajo para seleccionar una o varias preguntas y comenzar a visualizar los datos de tus respuestas.
-            </p>
-            <button (click)="openAnalyticsModal($event)" style="background: #440789; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-              Comenzar a Analizar
-            </button>
-          </div>
-          } @else {
-          <div class="analytics-feed analytics-feed-grid">
-            @for (item of getSelectedQuestionsAnalytics(); track item.question.id) {
-              <div class="inline-distribution-card single-focus-card">
-                <div class="inline-card-header-with-toggle" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
-                  <h4 style="margin: 0;">{{ item.question.text || 'Pregunta sin título' }}</h4>
-                  @if (!item.isText) {
-                    <div class="chart-type-toggle">
-                      <button [class.active]="getQuestionChartView(item.question.id) === 'bars'" (click)="setQuestionChartView(item.question.id, 'bars')" title="Barras">
-                        <span class="material-symbols-outlined">bar_chart</span>
-                      </button>
-                      <button [class.active]="getQuestionChartView(item.question.id) === 'donut'" (click)="setQuestionChartView(item.question.id, 'donut')" title="Donas">
-                        <span class="material-symbols-outlined">donut_large</span>
-                      </button>
-                      <button [class.active]="getQuestionChartView(item.question.id) === 'pie'" (click)="setQuestionChartView(item.question.id, 'pie')" title="Pastel">
-                        <span class="material-symbols-outlined">pie_chart</span>
-                      </button>
+            }
+            } @else {
+            @if (item.distribution.length > 0) {
+            <div class="panel-recharts-view">
+              @if (getQuestionChartView(item.question.id) === 'bars') {
+              <div class="recharts-bars">
+                @for (dist of item.distribution; track dist.label; let i = $index) {
+                <div class="recharts-row">
+                  <div class="recharts-y-axis">
+                    <span [title]="dist.label">{{ dist.label }}</span>
+                  </div>
+                  <div class="recharts-bar-area">
+                    <div class="recharts-row-highlight"></div>
+                    <div class="recharts-bar-fill color-{{ i % 6 }}"
+                      [style.width.%]="(dist.count / (item.maxDist || 1)) * 100" [style.animation-delay.ms]="i * 80">
+                      <div class="recharts-tooltip">
+                        <strong>{{ dist.count }} respuesta(s)</strong>
+                        <span>{{ dist.percentage }}%</span>
+                      </div>
                     </div>
-                  }
+                  </div>
                 </div>
-                
-                @if (item.isText) {
-                  @if (item.textResponses.length > 0) {
-                  <div class="inline-text-responses">
-                    <div class="inline-text-head">
-                      <p>{{ item.textResponses.length }} respuestas de texto</p>
-                    </div>
-                    <div style="max-height: 250px; overflow-y: auto;">
-                      @for (text of item.textResponses; track $index) {
-                      <article>{{ text }}</article>
+                }
+              </div>
+              } @else if (getQuestionChartView(item.question.id) === 'table') {
+              <div class="analytics-table-container">
+                <table class="analytics-data-table">
+                  <thead>
+                    <tr>
+                      <th>Opción</th>
+                      <th style="text-align: right;">Respuestas</th>
+                      <th style="text-align: right;">Porcentaje</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (dist of item.distribution; track dist.label) {
+                    <tr>
+                      <td>{{ dist.label }}</td>
+                      <td style="text-align: right; font-weight: 500;">{{ dist.count }}</td>
+                      <td style="text-align: right; color: #64748b;">{{ dist.percentage }}%</td>
+                    </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td style="text-align: right;"><strong>{{ getTotalDistributionCount(item.distribution) }}</strong>
+                      </td>
+                      <td style="text-align: right;"><strong>100%</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              } @else {
+              <div class="pie-chart-view">
+                <div class="pie-chart-wrapper" (mouseleave)="hoveredSlice.set(null)">
+                  <div class="pie-chart" style="background: none; box-shadow: none;">
+                    <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; overflow: visible;">
+                      @for (slice of getPieChartSlices(item.distribution); track slice.label; let i = $index) {
+                      @if (slice.isFull) {
+                      <circle cx="50" cy="50" r="50" [attr.fill]="slice.color" class="pie-slice"
+                        [style.animation-delay.ms]="i * 80" (mouseenter)="hoveredSlice.set(slice)"
+                        (mouseleave)="hoveredSlice.set(null)">
+                      </circle>
+                      } @else {
+                      <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice"
+                        [style.animation-delay.ms]="i * 80" (mouseenter)="hoveredSlice.set(slice)"
+                        (mouseleave)="hoveredSlice.set(null)">
+                      </path>
+                      }
+                      }
+                    </svg>
+                    @if (getQuestionChartView(item.question.id) === 'donut') {
+                    <div class="donut-hole" style="z-index: 10; pointer-events: none;">
+                      @if (hoveredSlice()) {
+                      <span class="donut-total" style="font-size: 20px;">{{ hoveredSlice()!.percentage | number:'1.0-1'
+                        }}%</span>
+                      <span class="donut-label"
+                        style="font-size: 10px; margin-top: 2px; text-align: center; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{
+                        hoveredSlice()!.label }}</span>
+                      } @else {
+                      <span class="donut-total">{{ getTotalDistributionCount(item.distribution) }}</span>
+                      <span class="donut-label">Total</span>
                       }
                     </div>
-                  </div>
-                  } @else {
-                  <div class="inline-empty-analytics">
-                    <span class="material-symbols-outlined">insights</span>
-                    <strong>Sin datos</strong>
-                  </div>
-                  }
-                } @else {
-                  @if (item.distribution.length > 0) {
-                  <div class="panel-recharts-view">
-                    @if (getQuestionChartView(item.question.id) === 'bars') {
-                    <div class="recharts-bars">
-                      @for (dist of item.distribution; track dist.label; let i = $index) {
-                        <div class="recharts-row">
-                          <div class="recharts-y-axis">
-                            <span [title]="dist.label">{{ dist.label }}</span>
-                          </div>
-                          <div class="recharts-bar-area">
-                            <div class="recharts-row-highlight"></div>
-                            <div class="recharts-bar-fill color-{{ i % 6 }}" [style.width.%]="(dist.count / (item.maxDist || 1)) * 100" [style.animation-delay.ms]="i * 80">
-                              <div class="recharts-tooltip">
-                                <strong>{{ dist.count }} respuesta(s)</strong>
-                                <span>{{ dist.percentage }}%</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                    } @else {
-                    <div class="pie-chart-view">
-                      <div class="pie-chart-wrapper" (mouseleave)="hoveredSlice.set(null)">
-                        <div class="pie-chart" style="background: none; box-shadow: none;">
-                          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; overflow: visible;">
-                            @for (slice of getPieChartSlices(item.distribution); track slice.label; let i = $index) {
-                              @if (slice.isFull) {
-                                <circle cx="50" cy="50" r="50" [attr.fill]="slice.color" class="pie-slice"
-                                  [style.animation-delay.ms]="i * 80"
-                                  (mouseenter)="hoveredSlice.set(slice)"
-                                  (mouseleave)="hoveredSlice.set(null)">
-                                </circle>
-                              } @else {
-                                <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice"
-                                  [style.animation-delay.ms]="i * 80"
-                                  (mouseenter)="hoveredSlice.set(slice)"
-                                  (mouseleave)="hoveredSlice.set(null)">
-                                </path>
-                              }
-                            }
-                          </svg>
-                          @if (getQuestionChartView(item.question.id) === 'donut') {
-                            <div class="donut-hole" style="z-index: 10; pointer-events: none;">
-                              @if (hoveredSlice()) {
-                                <span class="donut-total" style="font-size: 20px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}%</span>
-                                <span class="donut-label" style="font-size: 10px; margin-top: 2px; text-align: center; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ hoveredSlice()!.label }}</span>
-                              } @else {
-                                <span class="donut-total">{{ getTotalDistributionCount(item.distribution) }}</span>
-                                <span class="donut-label">Total</span>
-                              }
-                            </div>
-                          }
-                          @if (getQuestionChartView(item.question.id) === 'pie' && hoveredSlice()) {
-                            <div class="pie-hover-badge" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; animation: animScaleIn 0.15s ease-out; white-space: nowrap;">
-                              <strong style="font-weight: 600;">{{ hoveredSlice()!.label }}</strong>
-                              <span style="opacity: 0.8; font-size: 11px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}% ({{ hoveredSlice()!.count }})</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                      <div class="pie-legend">
-                        @for (dist of item.distribution; track dist.label; let i = $index) {
-                          <div class="legend-item">
-                            <span class="legend-color color-{{ i % 6 }}"></span>
-                            <span class="legend-label">{{ dist.label }}</span>
-                            <span class="legend-value">{{ dist.percentage }}%</span>
-                            <span class="legend-count">({{ dist.count }})</span>
-                          </div>
-                        }
-                      </div>
+                    }
+                    @if (getQuestionChartView(item.question.id) === 'pie' && hoveredSlice()) {
+                    <div class="pie-hover-badge"
+                      style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 2px; animation: animScaleIn 0.15s ease-out; white-space: nowrap;">
+                      <strong style="font-weight: 600;">{{ hoveredSlice()!.label }}</strong>
+                      <span style="opacity: 0.8; font-size: 11px;">{{ hoveredSlice()!.percentage | number:'1.0-1' }}%
+                        ({{ hoveredSlice()!.count }})</span>
                     </div>
                     }
                   </div>
-                  } @else {
-                  <div class="inline-empty-analytics">
-                    <span class="material-symbols-outlined">insights</span>
-                    <strong>Sin datos</strong>
+                </div>
+                <div class="pie-legend">
+                  @for (dist of item.distribution; track dist.label; let i = $index) {
+                  <div class="legend-item">
+                    <span class="legend-color color-{{ i % 6 }}"></span>
+                    <span class="legend-label">{{ dist.label }}</span>
+                    <span class="legend-value">{{ dist.percentage }}%</span>
+                    <span class="legend-count">({{ dist.count }})</span>
                   </div>
                   }
-                }
+                </div>
               </div>
+              }
+            </div>
+            } @else {
+            <div class="inline-empty-analytics">
+              <span class="material-symbols-outlined">insights</span>
+              <strong>Sin datos</strong>
+            </div>
+            }
             }
           </div>
           }
-        </section>
-        <section class="inline-responses-table">
+        </div>
+        }
+      </section>
+      <section class="inline-responses-table">
+        <div class="inline-card-head">
+          <div>
+            <span class="collect-label">Respuestas recientes</span>
+            <h3>Últimos envíos</h3>
+          </div>
+        </div>
+        <div class="inline-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Duración</th>
+                <th>Estado</th>
+                <th>Vista rápida</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (response of recentAnalyticsResponses(); track response.id) {
+              <tr>
+                <td>{{ response.completedAt | date:'short' }}</td>
+                <td>{{ responseParticipantValue(response, 'name') || 'Sin nombre' }}</td>
+                <td>{{ responseParticipantValue(response, 'email') || 'Sin email' }}</td>
+                <td>{{ response.duration }}s</td>
+                <td><span class="inline-status-pill">{{ responseCompletionLabel(response) }}</span></td>
+                <td>{{ responseAnswerPreview(response) }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+      }
+      } @else if (activeResultsSection() === 'responses') {
+      @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
+      <section class="inline-empty-premium">
+        <div class="inline-empty-visual">
+          <span class="material-symbols-outlined">fact_check</span>
+        </div>
+        <div>
+          <span class="collect-label">Respuestas individuales</span>
+          <h3>Aún no hay envíos para revisar</h3>
+          <p>Cuando una persona complete la encuesta, aquí podrás abrir su respuesta completa sin salir del editor.
+          </p>
+          <div class="inline-empty-actions">
+            <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
+            <button type="button" class="editor-action-btn" (click)="copyShareLink()"
+              [disabled]="s.status !== 'activo'">Copiar enlace</button>
+          </div>
+        </div>
+      </section>
+      } @else {
+      <section class="inline-response-workspace">
+        <aside class="inline-response-list">
           <div class="inline-card-head">
             <div>
-              <span class="collect-label">Respuestas recientes</span>
-              <h3>Últimos envíos</h3>
+              <span class="collect-label">Bandeja</span>
+              <h3>{{ analyticsResponsesList().length }} envíos</h3>
             </div>
           </div>
-          <div class="inline-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Duración</th>
-                  <th>Estado</th>
-                  <th>Vista rápida</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (response of recentAnalyticsResponses(); track response.id) {
-                <tr>
-                  <td>{{ response.completedAt | date:'short' }}</td>
-                  <td>{{ responseParticipantValue(response, 'name') || 'Sin nombre' }}</td>
-                  <td>{{ responseParticipantValue(response, 'email') || 'Sin email' }}</td>
-                  <td>{{ response.duration }}s</td>
-                  <td><span class="inline-status-pill">{{ responseCompletionLabel(response) }}</span></td>
-                  <td>{{ responseAnswerPreview(response) }}</td>
-                </tr>
-                }
-              </tbody>
-            </table>
+          <div class="inline-response-items">
+            @for (response of analyticsResponsesList(); track response.id; let i = $index) {
+            <button type="button" [class.active]="selectedIndividualResponse()?.id === response.id"
+              (click)="selectIndividualResponse(response.id)">
+              <span>#{{ i + 1 }}</span>
+              <strong>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</strong>
+              <small>{{ response.completedAt | date:'short' }} · {{ response.duration }}s</small>
+              <em>{{ responseCompletionLabel(response) }}</em>
+            </button>
+            }
           </div>
-        </section>
-        }
-        } @else if (activeResultsSection() === 'responses') {
-        @if ((filteredAnalyticsSurvey()?.responses?.length || 0) === 0) {
-        <section class="inline-empty-premium">
-          <div class="inline-empty-visual">
-            <span class="material-symbols-outlined">fact_check</span>
-          </div>
-          <div>
-            <span class="collect-label">Respuestas individuales</span>
-            <h3>Aún no hay envíos para revisar</h3>
-            <p>Cuando una persona complete la encuesta, aquí podrás abrir su respuesta completa sin salir del editor.
-            </p>
-            <div class="inline-empty-actions">
-              <button type="button" class="editor-publish-btn" (click)="goToShareFromResults()">Ir a Compartir</button>
-              <button type="button" class="editor-action-btn" (click)="copyShareLink()"
-                [disabled]="s.status !== 'activo'">Copiar enlace</button>
-            </div>
-          </div>
-        </section>
-        } @else {
-        <section class="inline-response-workspace">
-          <aside class="inline-response-list">
-            <div class="inline-card-head">
-              <div>
-                <span class="collect-label">Bandeja</span>
-                <h3>{{ analyticsResponsesList().length }} envíos</h3>
-              </div>
-            </div>
-            <div class="inline-response-items">
-              @for (response of analyticsResponsesList(); track response.id; let i = $index) {
-              <button type="button" [class.active]="selectedIndividualResponse()?.id === response.id"
-                (click)="selectIndividualResponse(response.id)">
-                <span>#{{ i + 1 }}</span>
-                <strong>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</strong>
-                <small>{{ response.completedAt | date:'short' }} · {{ response.duration }}s</small>
-                <em>{{ responseCompletionLabel(response) }}</em>
-              </button>
-              }
-            </div>
-          </aside>
+        </aside>
 
-          @if (selectedIndividualResponse(); as response) {
-          <article class="inline-response-detail">
-            <div class="inline-response-detail-head">
-              <div>
-                <span class="collect-label">Respuesta #{{ selectedIndividualResponseIndex() }}</span>
-                <h3>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</h3>
-                <p>{{ responseParticipantValue(response, 'email') || 'Sin email' }} · {{ response.completedAt |
-                  date:'medium' }}</p>
-              </div>
-              <div class="inline-response-score">
-                <strong>{{ individualResponseAnsweredCount(response) }}/{{ s.questions.length }}</strong>
-                <small>preguntas respondidas</small>
-              </div>
-            </div>
-
-            <div class="inline-response-meta-grid">
-              <div>
-                <span class="material-symbols-outlined">timer</span>
-                <small>Duración</small>
-                <strong>{{ response.duration }}s</strong>
-              </div>
-              <div>
-                <span class="material-symbols-outlined">task_alt</span>
-                <small>Estado</small>
-                <strong>{{ responseCompletionLabel(response) }}</strong>
-              </div>
-              <div>
-                <span class="material-symbols-outlined">schedule</span>
-                <small>Fecha</small>
-                <strong>{{ response.completedAt | date:'shortDate' }}</strong>
-              </div>
-            </div>
-
-            <div class="inline-answer-stack">
-              @for (answer of individualResponseAnswers(response); track answer.question.id) {
-              <section [class.missing]="!answer.answered">
-                <span>{{ answer.index }}</span>
-                <div>
-                  <h4>{{ answer.question.text || 'Pregunta ' + answer.index }}</h4>
-                  @if (answer.question.description) {
-                  <small>{{ answer.question.description }}</small>
-                  }
-                  <p>{{ answer.value }}</p>
-                </div>
-              </section>
-              }
-            </div>
-          </article>
-          }
-        </section>
-        }
-        } @else {
-        <section class="inline-report-preview">
-          <div class="inline-report-hero">
-            <span class="material-symbols-outlined">auto_awesome</span>
+        @if (selectedIndividualResponse(); as response) {
+        <article class="inline-response-detail">
+          <div class="inline-response-detail-head">
             <div>
-              <span class="collect-label">Próximamente</span>
-              <h3>Informe automático de resultados</h3>
-              <p>Este espacio quedará listo para generar un análisis narrativo de la encuesta, detectar patrones,
-                resumir hallazgos y preparar un informe descargable.</p>
+              <span class="collect-label">Respuesta #{{ selectedIndividualResponseIndex() }}</span>
+              <h3>{{ responseParticipantValue(response, 'name') || 'Respuesta anónima' }}</h3>
+              <p>{{ responseParticipantValue(response, 'email') || 'Sin email' }} · {{ response.completedAt |
+                date:'medium' }}</p>
+            </div>
+            <div class="inline-response-score">
+              <strong>{{ individualResponseAnsweredCount(response) }}/{{ s.questions.length }}</strong>
+              <small>preguntas respondidas</small>
             </div>
           </div>
-          <div class="inline-report-grid">
-            <article>
-              <span class="material-symbols-outlined">psychology</span>
-              <strong>Análisis asistido</strong>
-              <p>Resumen de tendencias, alertas y oportunidades a partir de las respuestas.</p>
-            </article>
-            <article>
-              <span class="material-symbols-outlined">summarize</span>
-              <strong>Informe ejecutivo</strong>
-              <p>Documento listo para presentar con conclusiones, métricas y próximos pasos.</p>
-            </article>
-            <article>
-              <span class="material-symbols-outlined">manage_search</span>
-              <strong>Lectura por pregunta</strong>
-              <p>Interpretación automática de preguntas abiertas y cerradas.</p>
-            </article>
+
+          <div class="inline-response-meta-grid">
+            <div>
+              <span class="material-symbols-outlined">timer</span>
+              <small>Duración</small>
+              <strong>{{ response.duration }}s</strong>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">task_alt</span>
+              <small>Estado</small>
+              <strong>{{ responseCompletionLabel(response) }}</strong>
+            </div>
+            <div>
+              <span class="material-symbols-outlined">schedule</span>
+              <small>Fecha</small>
+              <strong>{{ response.completedAt | date:'shortDate' }}</strong>
+            </div>
           </div>
-        </section>
+
+          <div class="inline-answer-stack">
+            @for (answer of individualResponseAnswers(response); track answer.question.id) {
+            <section [class.missing]="!answer.answered">
+              <span>{{ answer.index }}</span>
+              <div>
+                <h4>{{ answer.question.text || 'Pregunta ' + answer.index }}</h4>
+                @if (answer.question.description) {
+                <small>{{ answer.question.description }}</small>
+                }
+                <p>{{ answer.value }}</p>
+              </div>
+            </section>
+            }
+          </div>
+        </article>
         }
-      </div>
+      </section>
+      }
+      } @else {
+      <section class="inline-report-preview">
+        <div class="inline-report-hero">
+          <span class="material-symbols-outlined">auto_awesome</span>
+          <div>
+            <span class="collect-label">Próximamente</span>
+            <h3>Informe automático de resultados</h3>
+            <p>Este espacio quedará listo para generar un análisis narrativo de la encuesta, detectar patrones,
+              resumir hallazgos y preparar un informe descargable.</p>
+          </div>
+        </div>
+        <div class="inline-report-grid">
+          <article>
+            <span class="material-symbols-outlined">psychology</span>
+            <strong>Análisis asistido</strong>
+            <p>Resumen de tendencias, alertas y oportunidades a partir de las respuestas.</p>
+          </article>
+          <article>
+            <span class="material-symbols-outlined">summarize</span>
+            <strong>Informe ejecutivo</strong>
+            <p>Documento listo para presentar con conclusiones, métricas y próximos pasos.</p>
+          </article>
+          <article>
+            <span class="material-symbols-outlined">manage_search</span>
+            <strong>Lectura por pregunta</strong>
+            <p>Interpretación automática de preguntas abiertas y cerradas.</p>
+          </article>
+        </div>
+      </section>
+      }
+    </div>
   </div>
   }
   }
@@ -1330,7 +1396,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
       </div>
     </header>
 
-    @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+    @if (isChoiceType(q.type)) {
     <div class="logic-table-head">
       <span>Respuesta</span>
       <span>Saltar a</span>
@@ -1471,7 +1537,7 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
 
       <div class="question-pro-answers">
         <div class="question-pro-label">Respuestas</div>
-        @if (q.type === 'multiple-choice' || q.type === 'multi-select') {
+        @if (isChoiceType(q.type)) {
         @for (option of q.options; track option.id; let oi = $index) {
         <div class="question-pro-option">
           <input type="text" [ngModel]="option.texto" (ngModelChange)="updateOption(editingQuestionIndex, oi, $event)"
@@ -1562,79 +1628,89 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
 </div>
 }
 
-  <!-- CUSTOM DIALOG MODAL (Replacing browser prompt/confirm) -->
-  @if (dialogModal(); as modal) {
-  <div class="custom-dialog-backdrop" (click)="closeDialogModal()">
-    <div class="custom-dialog-container" (click)="$event.stopPropagation()">
-      <div class="custom-dialog-header">
-        <h3>{{ modal.title }}</h3>
-        <button class="custom-dialog-close-btn" type="button" aria-label="Cerrar" (click)="closeDialogModal()">
-          <span class="material-symbols-outlined">close</span>
+<!-- CUSTOM DIALOG MODAL (Replacing browser prompt/confirm) -->
+@if (dialogModal(); as modal) {
+<div class="custom-dialog-backdrop" (click)="closeDialogModal()">
+  <div class="custom-dialog-container" (click)="$event.stopPropagation()">
+    <div class="custom-dialog-header">
+      <h3>{{ modal.title }}</h3>
+      <button class="custom-dialog-close-btn" type="button" aria-label="Cerrar" (click)="closeDialogModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="custom-dialog-body">
+      @if (modal.type === 'prompt') {
+      <input type="text" class="custom-dialog-input" [placeholder]="modal.placeholder || 'Escribe aquí...'"
+        [(ngModel)]="dialogInputValue" (keyup.enter)="confirmDialogModal()" autofocus />
+      } @else {
+      <p class="custom-dialog-message">{{ modal.message }}</p>
+      }
+    </div>
+    <div class="custom-dialog-footer">
+      <button class="custom-dialog-btn-secondary" type="button" (click)="closeDialogModal()">Cancelar</button>
+      <button class="custom-dialog-btn-primary" type="button" (click)="confirmDialogModal()">Aceptar</button>
+    </div>
+  </div>
+</div>
+}
+
+@if (showAnalyticsModal()) {
+<div class="shadcn-dialog-overlay" (click)="closeAnalyticsModal($event)">
+  <div class="shadcn-dialog-content" style="max-width: 900px;" (click)="$event.stopPropagation()">
+    <div class="shadcn-dialog-header">
+      <h2>¿Qué deseas analizar?</h2>
+      <p>Selecciona una o varias preguntas para mostrar en tu análisis.</p>
+      <button class="shadcn-dialog-close" (click)="closeAnalyticsModal($event)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="shadcn-dialog-body">
+      <button class="shadcn-menu-item primary" [class.active]="selectedAnalyticsQuestions().includes('all')"
+        (click)="toggleAnalyticsQuestion('all')">
+        <span class="material-symbols-outlined">view_stream</span>
+        <div>
+          <strong>Todas las preguntas</strong>
+          <small>Vista de feed continuo</small>
+        </div>
+        <span class="checklist-indicator material-symbols-outlined"
+          *ngIf="selectedAnalyticsQuestions().includes('all')">check_circle</span>
+      </button>
+
+      <div class="shadcn-dialog-separator"></div>
+
+      <div class="analytics-selection-grid">
+        @for (q of survey()?.questions || []; track q.id; let i = $index) {
+        <button class="shadcn-menu-item"
+          [class.active]="selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')"
+          (click)="toggleAnalyticsQuestion(q.id)" [disabled]="selectedAnalyticsQuestions().includes('all')">
+          <span class="material-symbols-outlined">{{ q.type === 'text' || q.type === 'long-text' ? 'short_text' :
+            'pie_chart' }}</span>
+          <div>
+            <strong>{{ i + 1 }}. {{ q.text || 'Pregunta sin título' }}</strong>
+            <small>{{ q.type === 'text' || q.type === 'long-text' ? 'Respuestas de texto' : 'Opción múltiple' }}</small>
+          </div>
+          @if (selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')) {
+          <span class="checklist-indicator material-symbols-outlined"
+            style="margin-left: auto; color: #6d28d9;">check_circle</span>
+          }
         </button>
-      </div>
-      <div class="custom-dialog-body">
-        @if (modal.type === 'prompt') {
-        <input type="text" class="custom-dialog-input" [placeholder]="modal.placeholder || 'Escribe aquí...'"
-          [(ngModel)]="dialogInputValue" (keyup.enter)="confirmDialogModal()" autofocus />
-        } @else {
-        <p class="custom-dialog-message">{{ modal.message }}</p>
         }
       </div>
-      <div class="custom-dialog-footer">
-        <button class="custom-dialog-btn-secondary" type="button" (click)="closeDialogModal()">Cancelar</button>
-        <button class="custom-dialog-btn-primary" type="button" (click)="confirmDialogModal()">Aceptar</button>
-      </div>
+    </div>
+
+    <div class="shadcn-dialog-footer"
+      style="padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+      <button (click)="closeAnalyticsModal($event)"
+        style="background: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; color: #475569;">Cancelar</button>
+      <button (click)="closeAnalyticsModal($event)"
+        style="background: #440789; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar
+        Selección</button>
     </div>
   </div>
-  }
+</div>
+}
 
-  @if (showAnalyticsModal()) {
-  <div class="shadcn-dialog-overlay" (click)="closeAnalyticsModal($event)">
-    <div class="shadcn-dialog-content" style="max-width: 900px;" (click)="$event.stopPropagation()">
-      <div class="shadcn-dialog-header">
-        <h2>¿Qué deseas analizar?</h2>
-        <p>Selecciona una o varias preguntas para mostrar en tu análisis.</p>
-        <button class="shadcn-dialog-close" (click)="closeAnalyticsModal($event)">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      
-      <div class="shadcn-dialog-body">
-        <button class="shadcn-menu-item primary" [class.active]="selectedAnalyticsQuestions().includes('all')" (click)="toggleAnalyticsQuestion('all')">
-          <span class="material-symbols-outlined">view_stream</span>
-          <div>
-            <strong>Todas las preguntas</strong>
-            <small>Vista de feed continuo</small>
-          </div>
-          <span class="checklist-indicator material-symbols-outlined" *ngIf="selectedAnalyticsQuestions().includes('all')">check_circle</span>
-        </button>
-
-        <div class="shadcn-dialog-separator"></div>
-
-        <div class="analytics-selection-grid">
-          @for (q of survey()?.questions || []; track q.id; let i = $index) {
-          <button class="shadcn-menu-item" [class.active]="selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')" (click)="toggleAnalyticsQuestion(q.id)" [disabled]="selectedAnalyticsQuestions().includes('all')">
-            <span class="material-symbols-outlined">{{ q.type === 'text' || q.type === 'long-text' ? 'short_text' : 'pie_chart' }}</span>
-            <div>
-              <strong>{{ i + 1 }}. {{ q.text || 'Pregunta sin título' }}</strong>
-              <small>{{ q.type === 'text' || q.type === 'long-text' ? 'Respuestas de texto' : 'Opción múltiple' }}</small>
-            </div>
-            @if (selectedAnalyticsQuestions().includes(q.id) && !selectedAnalyticsQuestions().includes('all')) {
-            <span class="checklist-indicator material-symbols-outlined" style="margin-left: auto; color: #6d28d9;">check_circle</span>
-            }
-          </button>
-          }
-        </div>
-      </div>
-      
-      <div class="shadcn-dialog-footer" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-        <button (click)="closeAnalyticsModal($event)" style="background: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; color: #475569;">Cancelar</button>
-        <button (click)="closeAnalyticsModal($event)" style="background: #440789; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar Selección</button>
-      </div>
-    </div>
-  </div>
-  }
-  
 @if (showTemplateModal) {
 <div class="template-modal-backdrop" (click)="showTemplateModal = false"></div>
 <div class="template-modal design-center-modal">
@@ -1861,8 +1937,87 @@ Participa aquí: {{ s.status === 'activo' ? getShareLink() : 'http://localhost:4
     </section>
     }
   </main>
-
-  <!-- Removed pieTooltip -->
-
 </div>
 }
+
+@if (expandedAnalyticsQuestion(); as item) {
+<div style="position: fixed; inset: 0; z-index: 999999; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;"
+  (click)="closeExpandedAnalytics($event)">
+  <div style="background: #fff; border-radius: 24px; width: 96%; max-width: 1100px; min-height: 600px; box-shadow: 0 32px 100px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column;"
+    (click)="$event.stopPropagation()">
+
+    <!-- Topbar -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 24px 32px 0; flex-shrink: 0;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #9333ea; text-transform: uppercase; margin: 0 0 4px;">Análisis de pregunta</p>
+        <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0;">{{ item.question.text || 'Pregunta sin título' }}</h2>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <!-- Toggle buttons -->
+        <div style="display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; gap: 2px;">
+          <button type="button"
+            (click)="setQuestionChartView(item.question.id, 'table')"
+            [style.background]="getQuestionChartView(item.question.id) === 'table' ? '#fff' : 'transparent'"
+            [style.box-shadow]="getQuestionChartView(item.question.id) === 'table' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none'"
+            style="border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #334155; transition: all 0.15s;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">how_to_vote</span>
+            Respuestas
+          </button>
+          <button type="button"
+            (click)="setQuestionChartView(item.question.id, 'bars')"
+            [style.background]="getQuestionChartView(item.question.id) === 'bars' ? '#fff' : 'transparent'"
+            [style.box-shadow]="getQuestionChartView(item.question.id) === 'bars' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none'"
+            style="border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #334155; transition: all 0.15s;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">bar_chart</span>
+            Gráfica
+          </button>
+        </div>
+        <!-- Close -->
+        <button type="button" (click)="closeExpandedAnalytics($event)"
+          style="background: #f1f5f9; border: none; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b;">
+          <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px;">
+
+      @if (getQuestionChartView(item.question.id) === 'table') {
+      <!-- VOTES VIEW -->
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; width: 100%; text-align: center;">
+        <p style="font-size: 14px; font-weight: 700; letter-spacing: 0.18em; color: #334155; text-transform: uppercase; margin: 0;">RESPUESTAS REGISTRADAS</p>
+        <span style="font-size: 140px; font-weight: 900; color: #0f172a; line-height: 1; letter-spacing: -4px;">{{ getTotalDistributionCount(item.distribution) }}</span>
+
+      </div>
+
+      } @else {
+      <!-- BAR CHART VIEW -->
+      <div style="display: flex; flex-direction: column; gap: 18px; width: 100%;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px;">
+          <span style="font-size: 52px; font-weight: 900; color: #0f172a; line-height: 1;">{{ getTotalDistributionCount(item.distribution) }}</span>
+          <span style="font-size: 14px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em;">votos totales</span>
+        </div>
+        @for (dist of item.distribution; track dist.label; let i = $index) {
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 14px; font-weight: 600; color: #334155; width: 130px; text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [title]="dist.label">{{ dist.label }}</span>
+            <div style="flex: 1; background: #f1f5f9; border-radius: 10px; height: 52px; overflow: hidden;">
+              <div class="recharts-bar-fill color-{{ i % 6 }}"
+                [style.width.%]="(dist.count / (item.maxDist || 1)) * 100"
+                [style.animation-delay.ms]="i * 80"
+                style="height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; min-width: 52px; transition: width 0.5s ease;">
+                <span style="font-size: 15px; font-weight: 800; color: #fff;">{{ dist.percentage }}%</span>
+              </div>
+            </div>
+            <span style="font-size: 14px; font-weight: 700; color: #475569; min-width: 36px; text-align: right; flex-shrink: 0;">{{ dist.count }}</span>
+          </div>
+        }
+      </div>
+      }
+
+    </div>
+  </div>
+</div>
+}
+
+  <!-- Removed pieTooltip -->

@@ -6,6 +6,7 @@ import { SurveyNavigationButtonsComponent } from './components/survey-navigation
 import { SurveyQuestionCardComponent } from './components/survey-question-card';
 import { SurveyThankYouScreenComponent } from './components/survey-thank-you-screen';
 import { SurveyWelcomeScreenComponent } from './components/survey-welcome-screen';
+import fpPromise from '@fingerprintjs/fingerprintjs';
 
 interface PublicThemePreset {
   name: string;
@@ -40,6 +41,8 @@ export class SurveyResponsePage implements OnInit {
   isSubmitting = signal(false);
   validationError = signal('');
   submitError = signal('');
+  alreadyCompleted = signal(false);
+  visitorId = signal<string | undefined>(undefined);
   private readonly partialStoragePrefix = 'dataencuesta-partial-response';
 
   readonly publicThemePresets: PublicThemePreset[] = [
@@ -121,9 +124,48 @@ export class SurveyResponsePage implements OnInit {
       return;
     }
 
+    if (loadedSurvey.metadata?.closesAt && new Date() >= new Date(loadedSurvey.metadata.closesAt)) {
+      this.notFound.set(true);
+      return;
+    }
+
+    if (loadedSurvey.metadata?.maxResponses && loadedSurvey.responses_count !== undefined) {
+      if (loadedSurvey.responses_count >= loadedSurvey.metadata.maxResponses) {
+        this.notFound.set(true);
+        return;
+      }
+    }
+
+    if (loadedSurvey.metadata?.responsePolicy === 'once-per-browser') {
+      const cookieName = `dataencuesta_completed_${id}`;
+      if (document.cookie.includes(`${cookieName}=true`)) {
+        this.alreadyCompleted.set(true);
+        return;
+      }
+
+      try {
+        const fp = await fpPromise.load();
+        const result = await fp.get();
+        this.visitorId.set(result.visitorId);
+
+        const hasSubmitted = await this.surveyService.hasResponseWithFingerprint(id, result.visitorId);
+        if (hasSubmitted) {
+          document.cookie = `${cookieName}=true; max-age=31536000; path=/`;
+          this.alreadyCompleted.set(true);
+          return;
+        }
+      } catch (e) {
+        console.warn('Could not generate fingerprint', e);
+      }
+    }
+
     this.survey.set(this.prepareSurveyForResponse(loadedSurvey));
     this.restorePartialResponse(loadedSurvey.id);
     this.startTime = Date.now();
+
+    if (loadedSurvey.metadata?.skipWelcomePage && !this.alreadyCompleted()) {
+      this.startSurvey();
+    }
   }
 
   startSurvey(): void {
@@ -334,9 +376,14 @@ export class SurveyResponsePage implements OnInit {
         value
       }));
 
-      await this.surveyService.addResponse(s.id, answersArray, duration);
+      await this.surveyService.addResponse(s.id, answersArray, duration, this.visitorId());
       this.completed.set(true);
       this.clearPartialResponse();
+
+      if (s.metadata?.responsePolicy === 'once-per-browser') {
+        const cookieName = `dataencuesta_completed_${s.id}`;
+        document.cookie = `${cookieName}=true; max-age=31536000; path=/`;
+      }
     } catch (error) {
       console.error('Error submitting survey:', error);
       this.submitError.set('No pudimos enviar la encuesta. Revisa tu conexion e intenta de nuevo.');

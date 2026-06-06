@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Question, Survey, SurveyMetadata, SurveyService } from '../../services/survey.service';
 import { AdminDataService } from '../../services/admin-data.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 type DashboardFilter = 'all' | 'activo' | 'borrador' | 'cerrado' | 'withResponses' | 'withoutResponses';
 type DashboardSort = 'updated' | 'responses' | 'created' | 'status';
@@ -24,7 +25,7 @@ interface DashboardFolder {
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
   surveys = signal<Survey[]>([]);
   folders = signal<DashboardFolder[]>([]);
   surveyFolders = signal<Record<string, string>>({});
@@ -186,7 +187,8 @@ export class DashboardPage implements OnInit {
     public auth: AuthService,
     private surveyService: SurveyService,
     public router: Router,
-    public adminData: AdminDataService
+    public adminData: AdminDataService,
+    private supabaseService: SupabaseService
   ) {}
 
   ngOnInit(): void {
@@ -197,6 +199,26 @@ export class DashboardPage implements OnInit {
     this.loadDashboardState();
     this.loadSurveys();
     this.loadUserPreferences();
+    this.setupRealtimeSubscription();
+  }
+
+  private realtimeChannel: any;
+
+  private setupRealtimeSubscription(): void {
+    const client = this.supabaseService.client;
+    if (!client) return;
+
+    this.realtimeChannel = client.channel('dashboard-responses')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'envios' }, () => {
+        void this.loadSurveys();
+      })
+      .subscribe();
+  }
+
+  ngOnDestroy(): void {
+    if (this.realtimeChannel && this.supabaseService.client) {
+      void this.supabaseService.client.removeChannel(this.realtimeChannel);
+    }
   }
 
   async loadSurveys(): Promise<void> {

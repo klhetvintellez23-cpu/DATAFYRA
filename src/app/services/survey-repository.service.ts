@@ -12,7 +12,8 @@ export type QuestionType =
   | 'email'
   | 'phone'
   | 'date'
-  | 'time';
+  | 'time'
+  | 'visual-choice';
 export type SurveyStatus = 'borrador' | 'activo' | 'cerrado';
 export type AnswerValue = string | string[] | number | boolean | Record<string, unknown> | null;
 type SurveyQuestionDbType = 'calificacion' | 'seleccion_multiple' | 'texto' | 'texto_largo' | 'escala';
@@ -308,7 +309,7 @@ export class SurveyRepositoryService {
 
       savedQuestionIds.push(questionId);
 
-      if (question.type !== 'multiple-choice' && question.type !== 'multi-select') {
+      if (question.type !== 'multiple-choice' && question.type !== 'multi-select' && question.type !== 'visual-choice') {
         const { error } = await this.supabase
           .from('opciones_pregunta')
           .delete()
@@ -407,17 +408,22 @@ export class SurveyRepositoryService {
     return this.getSurvey(input.id);
   }
 
-  async createSurveyResponse(surveyId: string, duration: number): Promise<{ id: string }> {
+  async createSurveyResponse(surveyId: string, duration: number, fingerprint?: string): Promise<{ id: string }> {
     if (!this.supabase) {
       throw new Error('Falta configurar Supabase en public/env.js.');
     }
 
+    const payload: any = {
+      encuesta_id: surveyId,
+      duracion: duration
+    };
+    if (fingerprint) {
+      payload.fingerprint = fingerprint;
+    }
+
     const { data, error } = await this.supabase
       .from('envios')
-      .insert({
-        encuesta_id: surveyId,
-        duracion: duration
-      })
+      .insert(payload)
       .select()
       .single();
 
@@ -426,6 +432,21 @@ export class SurveyRepositoryService {
     }
 
     return data as { id: string };
+  }
+
+  async hasResponseWithFingerprint(surveyId: string, fingerprint: string): Promise<boolean> {
+    if (!this.supabase) return false;
+    const { count, error } = await this.supabase
+      .from('envios')
+      .select('*', { count: 'exact', head: true })
+      .eq('encuesta_id', surveyId)
+      .eq('fingerprint', fingerprint);
+      
+    if (error) {
+      console.error('Error checking fingerprint:', error);
+      return false;
+    }
+    return (count ?? 0) > 0;
   }
 
   async insertAnswers(
@@ -463,6 +484,7 @@ export class SurveyRepositoryService {
         return 'texto_largo';
       case 'multiple-choice':
       case 'multi-select':
+      case 'visual-choice':
         return 'seleccion_multiple';
       case 'rating':
         return 'calificacion';

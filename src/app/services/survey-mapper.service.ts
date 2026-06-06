@@ -89,7 +89,8 @@ export class SurveyMapperService {
       'email',
       'phone',
       'date',
-      'time'
+      'time',
+      'visual-choice'
     ].includes(type ?? '');
   }
 

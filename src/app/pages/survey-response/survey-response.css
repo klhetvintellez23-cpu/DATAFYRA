@@ -14,10 +14,7 @@
   container-type: inline-size;
   color: var(--response-heading, #111827);
   font-family: var(--response-body-font, Inter, "Segoe UI", sans-serif);
-  background:
-    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--response-secondary, #06b6d4) 18%, transparent) 0%, transparent 32%),
-    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--response-primary, #440789) 18%, transparent) 0%, transparent 30%),
-    linear-gradient(135deg, var(--response-bg, #f5f3ff), color-mix(in srgb, var(--response-bg, #f5f3ff) 78%, white));
+  background: var(--response-bg, #f5f3ff);
   background-size: auto;
   background-position: center;
 }

@@ -7424,3 +7424,32 @@
   .section-tabs { overflow-x: auto; }
 }
 
+.analytics-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.analytics-data-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+}
+.analytics-data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+.analytics-data-table tr:last-child td {
+  border-bottom: none;
+}
+.analytics-table-container {
+  overflow-x: auto;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+

@@ -10,6 +10,7 @@ type PublicQuestionType =
   | 'long-text'
   | 'multiple-choice'
   | 'multi-select'
+  | 'visual-choice'
   | 'scale'
   | 'rating'
   | 'nps'
@@ -78,6 +79,20 @@ type TransformMode = 'move' | 'resize' | 'stretch';
                   [selected]="stringAnswer"
                   (valueChange)="answerChange.emit($event)">
                 </app-survey-option-input>
+              }
+              @case ('visual-choice') {
+                <div class="visual-choice-grid">
+                  @for (option of safeOptions; track option.id) {
+                    <button
+                      type="button"
+                      class="visual-card"
+                      [class.selected]="stringAnswer === option.texto"
+                      [disabled]="designMode"
+                      (click)="answerChange.emit(option.texto)">
+                      <span class="visual-card-text">{{ option.texto }}</span>
+                    </button>
+                  }
+                </div>
               }
               @case ('multi-select') {
                 <app-survey-option-input
@@ -391,6 +406,43 @@ type TransformMode = 'move' | 'resize' | 'stretch';
       font-weight: 750;
     }
 
+    .visual-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .visual-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+      padding: 24px;
+      border: 2px solid var(--response-border, #e2e8f0);
+      border-radius: var(--response-button-radius, 16px);
+      background: var(--response-answer-bg, #ffffff);
+      color: var(--response-heading, #111827);
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    .visual-card:hover:not(:disabled) {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      border-color: color-mix(in srgb, var(--response-primary, #440789) 40%, #e2e8f0);
+    }
+    .visual-card.selected {
+      border-color: var(--response-primary, #440789);
+      background: color-mix(in srgb, var(--response-primary, #440789) 8%, #ffffff);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--response-primary, #440789) 15%, transparent);
+    }
+    .visual-card:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
     @keyframes card-in {
       from {
         opacity: 0;
@@ -627,6 +679,7 @@ export class SurveyQuestionCardComponent {
   get helperText(): string {
     if (this.question.description?.trim()) return this.question.description.trim();
     if (this.questionType === 'multiple-choice') return 'Selecciona una opcion para continuar.';
+    if (this.questionType === 'visual-choice') return 'Toca o haz clic en una de las tarjetas para seleccionar.';
     if (this.questionType === 'multi-select') return 'Puedes seleccionar una o varias opciones.';
     if (this.questionType === 'rating') return 'Elige una calificacion de 1 a 5 estrellas.';
     if (this.questionType === 'scale') return 'Selecciona el numero que mejor represente tu respuesta.';

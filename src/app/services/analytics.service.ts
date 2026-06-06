@@ -102,7 +102,7 @@ export class AnalyticsService {
       .map(r => r.answers.find(a => a.questionId === questionId))
       .filter(a => a !== undefined);
 
-    if (question.type === 'multiple-choice' || question.type === 'multi-select') {
+    if (question.type === 'multiple-choice' || question.type === 'multi-select' || question.type === 'visual-choice') {
       const counts: Record<string, number> = {};
       question.options.forEach(o => counts[o.texto] = 0);
       answers.forEach(a => {
